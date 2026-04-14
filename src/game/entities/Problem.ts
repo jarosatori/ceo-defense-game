@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import * as Phaser from "phaser";
 import type { Category } from "../types";
 import { PROBLEM_CONFIGS } from "../constants";
 

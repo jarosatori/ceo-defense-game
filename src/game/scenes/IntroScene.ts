@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import * as Phaser from "phaser";
 import { COLORS } from "../constants";
 
 export class IntroScene extends Phaser.Scene {

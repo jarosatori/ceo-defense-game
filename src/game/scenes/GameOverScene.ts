@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import * as Phaser from "phaser";
 import type { GameState } from "../types";
 import { calculateProfile } from "../utils/profileCalculator";
 

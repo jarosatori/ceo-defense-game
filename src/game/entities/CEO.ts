@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import * as Phaser from "phaser";
 import { COLORS, CEO_CATCH_RADIUS } from "../constants";
 
 export class CEO extends Phaser.GameObjects.Container {

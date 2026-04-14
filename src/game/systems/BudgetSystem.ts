@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import * as Phaser from "phaser";
 import { BUDGET_PER_CATCH, CSS_COLORS } from "../constants";
 
 export class BudgetSystem {

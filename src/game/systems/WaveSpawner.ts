@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import * as Phaser from "phaser";
 import type { Category, WaveConfig } from "../types";
 import { Problem } from "../entities/Problem";
 

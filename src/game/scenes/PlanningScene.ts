@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import * as Phaser from "phaser";
 import type { GameState, Role, Category } from "../types";
 import { COLORS, CSS_COLORS, ROLE_CONFIGS, PLANNING_DURATION } from "../constants";
 

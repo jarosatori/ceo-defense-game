@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import * as Phaser from "phaser";
 import type { Role, Level, Category } from "../types";
 import { ROLE_CONFIGS, SENIOR_MULTIPLIER } from "../constants";
 

@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import * as Phaser from "phaser";
 import type { GameState, Category } from "../types";
 import { COLORS, CSS_COLORS, BUDGET_PER_CATCH, STARTING_BUDGET } from "../constants";
 import { WAVES } from "../data/waves";

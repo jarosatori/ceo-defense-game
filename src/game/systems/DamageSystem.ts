@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import * as Phaser from "phaser";
 import { DAMAGE_PER_MISS, COLORS } from "../constants";
 
 export class DamageSystem {

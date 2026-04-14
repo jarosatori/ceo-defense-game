@@ -5,9 +5,11 @@ import { useEffect, useRef } from "react";
 export default function PhaserGame() {
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
+  const initRef = useRef(false);
 
   useEffect(() => {
-    if (gameRef.current || !gameContainerRef.current) return;
+    if (initRef.current || !gameContainerRef.current) return;
+    initRef.current = true;
 
     const initPhaser = async () => {
       const Phaser = (await import("phaser")).default;

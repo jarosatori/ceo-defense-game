@@ -10,13 +10,15 @@ export class BudgetSystem {
     const { width } = scene.scale;
 
     this.label = scene.add
-      .text(width - 20, 12, `€${this.budget}`, {
-        fontSize: "16px",
-        fontFamily: "Inter, sans-serif",
+      .text(width - 20, 8, `€${this.budget}`, {
+        fontSize: "14px",
+        fontFamily: "'Inter', system-ui, sans-serif",
         color: CSS_COLORS.general,
-        fontStyle: "bold",
+        fontStyle: "800",
+        resolution: 2,
       })
-      .setOrigin(1, 0);
+      .setOrigin(1, 0)
+      .setDepth(16);
 
     this.updateLabel();
   }

@@ -1,5 +1,5 @@
 import * as Phaser from "phaser";
-import { COLORS } from "../constants";
+import { COLORS, CSS_COLORS } from "../constants";
 
 export class IntroScene extends Phaser.Scene {
   constructor() {
@@ -11,39 +11,91 @@ export class IntroScene extends Phaser.Scene {
     const centerX = width / 2;
     const centerY = height / 2;
 
+    // Gradient background
+    const bg = this.add.graphics();
+    bg.fillStyle(0x0a0a0a, 1);
+    bg.fillRect(0, 0, width, height);
+    for (let i = 0; i < 6; i++) {
+      bg.fillStyle(0x1a1a2e, 0.05 + i * 0.025);
+      bg.fillCircle(centerX, centerY, Math.max(width, height) * (1 - i * 0.14));
+    }
+
+    // Subtle dots
+    const dots = this.add.graphics();
+    dots.fillStyle(0xffffff, 0.04);
+    for (let x = 40; x < width; x += 40) {
+      for (let y = 40; y < height; y += 40) {
+        dots.fillCircle(x, y, 1);
+      }
+    }
+
     // Title
     const title = this.add
-      .text(centerX, centerY - 60, "CEO DEFENSE", {
-        fontSize: "36px",
-        fontFamily: "Inter, sans-serif",
+      .text(centerX, centerY - 100, "CEO DEFENSE", {
+        fontSize: "44px",
+        fontFamily: "'Inter', system-ui, sans-serif",
         color: "#ffffff",
-        fontStyle: "bold",
+        fontStyle: "900",
+        resolution: 2,
       })
       .setOrigin(0.5)
+      .setAlpha(0);
+
+    // Accent line under title
+    const accent = this.add
+      .rectangle(centerX, centerY - 60, 60, 3, 0xeab308)
       .setAlpha(0);
 
     // Subtitle
     const subtitle = this.add
-      .text(centerX, centerY, "Dokážeš vybudovať firmu,\nktorá funguje bez teba?", {
-        fontSize: "18px",
-        fontFamily: "Inter, sans-serif",
-        color: "#e5e5e5",
-        align: "center",
-        lineSpacing: 8,
+      .text(
+        centerX,
+        centerY - 20,
+        "Dokážeš vybudovať firmu,\nktorá funguje bez teba?",
+        {
+          fontSize: "17px",
+          fontFamily: "'Inter', system-ui, sans-serif",
+          color: "#e5e5e5",
+          align: "center",
+          lineSpacing: 6,
+          resolution: 2,
+        }
+      )
+      .setOrigin(0.5)
+      .setAlpha(0);
+
+    // CEO preview (with glow)
+    const ceoGlow = this.add.circle(centerX, centerY + 60, 32, COLORS.ceo, 0.12).setAlpha(0);
+    const ceoCircle = this.add.circle(centerX, centerY + 60, 18, COLORS.ceo).setAlpha(0);
+    const ceoLabel = this.add
+      .text(centerX, centerY + 60, "CEO", {
+        fontSize: "10px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: "#0a0a0a",
+        fontStyle: "800",
+        resolution: 2,
       })
       .setOrigin(0.5)
       .setAlpha(0);
 
-    // CEO circle preview
-    const ceoCircle = this.add
-      .circle(centerX, centerY + 80, 20, COLORS.ceo)
+    // Start hint
+    const startHint = this.add
+      .text(centerX, centerY + 120, "Ty si CEO. Všetko ide cez teba.", {
+        fontSize: "13px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: "#a3a3a3",
+        fontStyle: "500",
+        resolution: 2,
+      })
+      .setOrigin(0.5)
       .setAlpha(0);
 
-    const startHint = this.add
-      .text(centerX, centerY + 130, "Ty si CEO. Všetko ide cez teba.", {
-        fontSize: "14px",
-        fontFamily: "Inter, sans-serif",
-        color: "#a3a3a3",
+    const loadingLabel = this.add
+      .text(centerX, height - 40, "Pripravuje sa vlna 1...", {
+        fontSize: "11px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: "#555",
+        resolution: 2,
       })
       .setOrigin(0.5)
       .setAlpha(0);
@@ -52,37 +104,68 @@ export class IntroScene extends Phaser.Scene {
     this.tweens.add({
       targets: title,
       alpha: 1,
-      y: centerY - 80,
+      y: centerY - 120,
       duration: 800,
       ease: "Power2",
+    });
+
+    this.tweens.add({
+      targets: accent,
+      alpha: 1,
+      scaleX: { from: 0, to: 1 },
+      duration: 500,
+      delay: 500,
+      ease: "Back.easeOut",
     });
 
     this.tweens.add({
       targets: subtitle,
       alpha: 1,
-      duration: 800,
-      delay: 600,
-      ease: "Power2",
+      duration: 700,
+      delay: 900,
     });
 
     this.tweens.add({
-      targets: ceoCircle,
-      alpha: 1,
-      duration: 600,
-      delay: 1200,
-      ease: "Power2",
+      targets: [ceoGlow, ceoCircle, ceoLabel],
+      alpha: { from: 0, to: 1 },
+      duration: 500,
+      delay: 1400,
+      ease: "Back.easeOut",
     });
 
     this.tweens.add({
       targets: startHint,
       alpha: 1,
-      duration: 600,
-      delay: 1600,
-      ease: "Power2",
+      duration: 500,
+      delay: 1800,
+    });
+
+    this.tweens.add({
+      targets: loadingLabel,
+      alpha: 1,
+      duration: 400,
+      delay: 2400,
+    });
+
+    // Pulsing CEO glow
+    this.tweens.add({
+      targets: ceoGlow,
+      scale: { from: 1, to: 1.3 },
+      alpha: { from: 0.12, to: 0.25 },
+      duration: 1200,
+      delay: 1400,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.easeInOut",
+    });
+
+    // Skip on click
+    this.input.once("pointerdown", () => {
+      this.scene.start("ActionScene");
     });
 
     // Transition to ActionScene after intro
-    this.time.delayedCall(4000, () => {
+    this.time.delayedCall(3500, () => {
       this.scene.start("ActionScene");
     });
   }

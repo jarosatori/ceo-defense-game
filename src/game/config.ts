@@ -24,8 +24,13 @@ export function createGameConfig(
       },
     },
     scale: {
-      mode: Phaser.Scale.FIT,
+      mode: Phaser.Scale.RESIZE,
       autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
+    render: {
+      antialias: true,
+      pixelArt: false,
+      roundPixels: false,
     },
   };
 }

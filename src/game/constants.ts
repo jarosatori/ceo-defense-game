@@ -35,51 +35,59 @@ export const ROLE_CONFIGS: Record<string, RoleConfig> = {
     label: "Virtuálna asistentka",
     color: CSS_COLORS.general,
     catchCategories: ["marketing", "finance", "operations", "general"],
-    catchSpeed: 1200,
-    catchRadius: 60,
+    catchSpeed: 900,
+    catchRadius: 90,
     cost: 50,
-    upgradeCost: 75,
+    upgradeCost: 70,
   },
   marketing: {
     role: "marketing",
     label: "Marketingák",
     color: CSS_COLORS.marketing,
     catchCategories: ["marketing"],
-    catchSpeed: 600,
-    catchRadius: 70,
-    cost: 100,
-    upgradeCost: 150,
+    catchSpeed: 450,
+    catchRadius: 110,
+    cost: 80,
+    upgradeCost: 120,
   },
   finance: {
     role: "finance",
     label: "Finančník",
     color: CSS_COLORS.finance,
     catchCategories: ["finance"],
-    catchSpeed: 600,
-    catchRadius: 70,
-    cost: 100,
-    upgradeCost: 150,
+    catchSpeed: 450,
+    catchRadius: 110,
+    cost: 80,
+    upgradeCost: 120,
   },
   operations: {
     role: "operations",
     label: "Operations Manager",
     color: CSS_COLORS.operations,
     catchCategories: ["operations"],
-    catchSpeed: 600,
-    catchRadius: 90,
-    cost: 150,
-    upgradeCost: 225,
+    catchSpeed: 450,
+    catchRadius: 130,
+    cost: 100,
+    upgradeCost: 150,
   },
 };
 
 export const SENIOR_MULTIPLIER = {
-  speedFactor: 0.7,
-  radiusFactor: 1.3,
+  speedFactor: 0.65,
+  radiusFactor: 1.4,
 };
 
-export const DAMAGE_PER_MISS = 4;
-export const BUDGET_PER_CATCH = 3;
-export const CEO_CATCH_RADIUS = 50;
+export const DAMAGE_PER_MISS = 6;
+export const BUDGET_PER_CATCH = 5;
+export const CEO_CATCH_RADIUS = 80;
 export const CEO_CATCH_SPEED = 400;
-export const PLANNING_DURATION = 15;
-export const STARTING_BUDGET = 0;
+export const PLANNING_DURATION = 12;
+export const STARTING_BUDGET = 60;
+
+// Team orbit config (much closer, more visible)
+export const TEAM_ORBIT_RADIUS = 55;
+export const TEAM_ORBIT_SPEED = 0.15;
+
+// Combo system
+export const COMBO_WINDOW_MS = 1500;
+export const COMBO_BONUS_MULTIPLIER = 0.5; // +50% per combo tier

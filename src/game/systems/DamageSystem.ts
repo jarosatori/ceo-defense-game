@@ -14,16 +14,20 @@ export class DamageSystem {
     const { width } = scene.scale;
     this.barWidth = width - 40;
     this.barX = 20;
-    this.barY = 36;
+    this.barY = 38;
 
     this.bar = scene.add.graphics();
+    this.bar.setDepth(16);
     this.label = scene.add
-      .text(width - 20, this.barY + this.barHeight / 2, "0%", {
+      .text(width - 20, this.barY + this.barHeight / 2 + 12, "0%", {
         fontSize: "10px",
-        fontFamily: "Inter, sans-serif",
+        fontFamily: "'Inter', system-ui, sans-serif",
         color: "#e5e5e5",
+        fontStyle: "600",
+        resolution: 2,
       })
-      .setOrigin(1, 0.5);
+      .setOrigin(1, 0.5)
+      .setDepth(16);
 
     this.draw();
   }

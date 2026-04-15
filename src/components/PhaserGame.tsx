@@ -16,8 +16,9 @@ export default function PhaserGame() {
       const { createGameConfig } = await import("@/game/config");
 
       const container = gameContainerRef.current!;
-      const width = Math.min(container.clientWidth, 800);
-      const height = Math.min(container.clientHeight, 600);
+      // Use full container dimensions, capped sensibly
+      const width = Math.min(container.clientWidth, 900);
+      const height = Math.min(container.clientHeight, 900);
 
       const config = createGameConfig("phaser-game", width, height);
       gameRef.current = new Phaser.Game(config);
@@ -36,9 +37,9 @@ export default function PhaserGame() {
   return (
     <div
       ref={gameContainerRef}
-      className="w-full h-screen bg-[#0a0a0a] flex items-center justify-center"
+      className="w-full h-[100dvh] bg-[#0a0a0a] flex items-center justify-center overflow-hidden"
     >
-      <div id="phaser-game" />
+      <div id="phaser-game" className="w-full h-full max-w-[900px] max-h-[900px]" />
     </div>
   );
 }

@@ -13,8 +13,8 @@ export function calculateProfile(state: GameState): CEOProfile {
   const seniorCount = team.filter((m) => m.level === "senior").length;
   const manualRatio = problemsCaught > 0 ? manualClicks / problemsCaught : 1;
 
-  // Strategist: survived wave 5, has upgraded specialists, low manual ratio
-  if (wave >= 5 && damage < 100 && seniorCount >= 2 && manualRatio < 0.25) {
+  // Strategist: survived wave 8+, has upgraded specialists, low manual ratio
+  if (wave >= 8 && damage < 100 && seniorCount >= 2 && manualRatio < 0.25) {
     return "strategist";
   }
 

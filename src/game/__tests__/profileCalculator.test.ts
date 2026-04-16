@@ -9,6 +9,8 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
     budget: 0,
     damage: 50,
     revenue: 15,
+    profit: 0,
+    monthlyCosts: 0,
     team: [],
     problemsCaught: 100,
     problemsMissed: 20,
@@ -36,7 +38,7 @@ describe("calculateProfile", () => {
 
   it("returns micromanager when team exists but manual clicks are high", () => {
     const state = makeState({
-      team: [makeMember("marketing"), makeMember("finance")],
+      team: [makeMember("marketing"), makeMember("accountant")],
       manualClicks: 80,
       problemsCaught: 100,
     });
@@ -54,20 +56,20 @@ describe("calculateProfile", () => {
 
   it("returns delegator when specialists match wave patterns", () => {
     const state = makeState({
-      team: [makeMember("marketing"), makeMember("finance"), makeMember("operations")],
+      team: [makeMember("marketing"), makeMember("accountant"), makeMember("operations")],
       manualClicks: 20,
       problemsCaught: 100,
     });
     expect(calculateProfile(state)).toBe("delegator");
   });
 
-  it("returns strategist when survived wave 5 with upgraded specialists", () => {
+  it("returns strategist when survived wave 8+ with upgraded specialists", () => {
     const state = makeState({
-      wave: 5,
+      wave: 8,
       damage: 40,
       team: [
         makeMember("marketing", "senior"),
-        makeMember("finance", "senior"),
+        makeMember("cfo", "senior"),
         makeMember("operations"),
       ],
       manualClicks: 15,

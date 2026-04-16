@@ -1,18 +1,20 @@
 import * as Phaser from "phaser";
 import type { GameState } from "../types";
 import { calculateProfile } from "../utils/profileCalculator";
-import { formatRevenue } from "../utils/revenueCalculator";
+import { formatRevenue, formatProfit } from "../utils/revenueCalculator";
 import { playChord, playTone } from "../utils/audio";
 
 export class GameOverScene extends Phaser.Scene {
   private gameState!: GameState;
+  private cashCrunch: boolean = false;
 
   constructor() {
     super({ key: "GameOverScene" });
   }
 
-  init(data: { gameState: GameState }): void {
+  init(data: { gameState: GameState; cashCrunch?: boolean }): void {
     this.gameState = data.gameState;
+    this.cashCrunch = data.cashCrunch ?? false;
   }
 
   create(): void {
@@ -29,7 +31,7 @@ export class GameOverScene extends Phaser.Scene {
       bg.fillCircle(centerX, centerY, Math.max(width, height) * (1 - i * 0.14));
     }
 
-    const survived = this.gameState.damage < 100;
+    const survived = this.gameState.damage < 100 && !this.cashCrunch;
     const profile = calculateProfile(this.gameState);
 
     // Sound
@@ -41,11 +43,18 @@ export class GameOverScene extends Phaser.Scene {
     }
 
     // Splash text
-    const splashText = survived ? "PREŽIL SI" : "FIRMA SA ZRÚTILA";
+    let splashText: string;
+    if (survived) {
+      splashText = "PREZIL SI";
+    } else if (this.cashCrunch) {
+      splashText = "FIRMA JE V STRATE";
+    } else {
+      splashText = "FIRMA SA ZRUTILA";
+    }
     const splashColor = survived ? "#22c55e" : "#ef4444";
 
     const splash = this.add
-      .text(centerX, centerY - 30, splashText, {
+      .text(centerX, centerY - 40, splashText, {
         fontSize: "36px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: splashColor,
@@ -64,11 +73,27 @@ export class GameOverScene extends Phaser.Scene {
       ease: "Back.easeOut",
     });
 
+    // Cash crunch sub-message
+    if (this.cashCrunch) {
+      this.add
+        .text(centerX, centerY + 5, "Nemas na vyplaty.", {
+          fontSize: "14px",
+          fontFamily: "'Inter', system-ui, sans-serif",
+          color: "#ef4444",
+          fontStyle: "500",
+          resolution: 2,
+        })
+        .setOrigin(0.5)
+        .setAlpha(0)
+        .setData("delayedShow", true);
+    }
+
     const subText = survived
-      ? `Vlna 5 zvládnutá • Skóre ${this.gameState.score}`
-      : `Vlna ${this.gameState.wave} • Skóre ${this.gameState.score}`;
+      ? `Vlna 10 zvladnuta • Score ${this.gameState.score}`
+      : `Vlna ${this.gameState.wave} • Score ${this.gameState.score}`;
 
     const revenueText = `Obrat: ${formatRevenue(this.gameState.revenue)}`;
+    const profitText = `Zisk: ${formatProfit(this.gameState.profit)}`;
 
     this.add
       .text(centerX, centerY + 45, revenueText, {
@@ -82,8 +107,21 @@ export class GameOverScene extends Phaser.Scene {
       .setAlpha(0)
       .setData("delayedShow", true);
 
+    const profitColor = this.gameState.profit >= 0 ? "#22c55e" : "#ef4444";
     this.add
-      .text(centerX, centerY + 15, subText, {
+      .text(centerX, centerY + 70, profitText, {
+        fontSize: "16px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: profitColor,
+        fontStyle: "700",
+        resolution: 2,
+      })
+      .setOrigin(0.5)
+      .setAlpha(0)
+      .setData("delayedShow", true);
+
+    this.add
+      .text(centerX, centerY + 20, subText, {
         fontSize: "16px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#a3a3a3",
@@ -95,7 +133,7 @@ export class GameOverScene extends Phaser.Scene {
       .setData("delayedShow", true);
 
     this.add
-      .text(centerX, centerY + 72, "Načítavam výsledky...", {
+      .text(centerX, centerY + 100, "Nacitavam vysledky...", {
         fontSize: "11px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#555",
@@ -122,9 +160,10 @@ export class GameOverScene extends Phaser.Scene {
 
     const params = new URLSearchParams({
       profile,
-      waves: String(survived ? 5 : this.gameState.wave),
+      waves: String(survived ? 10 : this.gameState.wave),
       score: String(this.gameState.score),
       revenue: String(this.gameState.revenue),
+      profit: String(this.gameState.profit),
       team: teamString,
       caught: String(this.gameState.problemsCaught),
       missed: String(this.gameState.problemsMissed),
@@ -144,7 +183,7 @@ export class GameOverScene extends Phaser.Scene {
           body: JSON.stringify({
             email,
             profile,
-            waves: survived ? 5 : this.gameState.wave,
+            waves: survived ? 10 : this.gameState.wave,
             score: this.gameState.score,
           }),
         }).catch(() => {});

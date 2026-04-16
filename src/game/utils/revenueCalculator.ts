@@ -6,19 +6,16 @@ import {
 } from "../constants";
 
 /**
- * Calculate revenue earned after completing a wave.
+ * Calculate revenue and profit earned after completing a wave.
  *
- * Revenue = baseRevenue × teamMultiplier × focusMultiplier × performanceMultiplier
- *
- * - teamMultiplier: sum of role revenueBoost (seniors × 1.5)
- * - focusMultiplier: from chosen focus activity
- * - performanceMultiplier: based on % problems caught (missed problems = lost revenue)
+ * Revenue = baseRevenue x teamMultiplier x focusMultiplier x performanceMultiplier
+ * Profit = revenue - monthly team costs
  */
-export function calculateWaveRevenue(
+export function calculateWaveFinancials(
   state: GameState,
   waveConfig: WaveConfig,
   focus: FocusActivity | null
-): number {
+): { revenueGain: number; profitGain: number; monthlyCosts: number } {
   const base = waveConfig.baseRevenue;
 
   // Team multiplier: 1.0 + sum of all team members' revenue boosts
@@ -48,15 +45,35 @@ export function calculateWaveRevenue(
   const catchRate = totalProblems > 0 ? state.problemsCaught / totalProblems : 0.5;
   const performanceMultiplier = Math.max(0.2, catchRate);
 
-  const revenue = Math.round(
+  const revenueGain = Math.round(
     base * teamMultiplier * focusMultiplier * performanceMultiplier
   );
 
-  return revenue;
+  // Monthly costs = sum of all team member monthlyCosts
+  const monthlyCosts = state.team.reduce((sum, m) => {
+    const cfg = ROLE_CONFIGS[m.role];
+    return sum + cfg.monthlyCost;
+  }, 0);
+
+  const profitGain = revenueGain - monthlyCosts;
+
+  return { revenueGain, profitGain, monthlyCosts };
 }
 
 /**
- * Get a human-readable revenue label (€15k → "€15 000", €1.2M → "€1,2M")
+ * Legacy wrapper — returns just the revenue gain number.
+ * Used where only revenue is needed.
+ */
+export function calculateWaveRevenue(
+  state: GameState,
+  waveConfig: WaveConfig,
+  focus: FocusActivity | null
+): number {
+  return calculateWaveFinancials(state, waveConfig, focus).revenueGain;
+}
+
+/**
+ * Get a human-readable revenue label (€15k -> "€15 000", €1.2M -> "€1,2M")
  */
 export function formatRevenue(revenueK: number): string {
   if (revenueK >= 1000) {
@@ -67,13 +84,27 @@ export function formatRevenue(revenueK: number): string {
 }
 
 /**
+ * Format profit — same as revenue but can show negative in red-compatible format
+ */
+export function formatProfit(profitK: number): string {
+  const prefix = profitK < 0 ? "-" : "+";
+  const abs = Math.abs(profitK);
+  if (abs >= 1000) {
+    const millions = abs / 1000;
+    return `${prefix}€${millions.toFixed(millions >= 10 ? 0 : 1).replace(".", ",")}M`;
+  }
+  return `${prefix}€${abs.toLocaleString("sk-SK")}k`;
+}
+
+/**
  * Get revenue milestone label for results
  */
 export function getRevenueMilestone(revenueK: number): string {
-  if (revenueK >= 1000) return "Milionár! 🏆";
-  if (revenueK >= 500) return "Na ceste k miliónu";
-  if (revenueK >= 200) return "Rastúci biznis";
-  if (revenueK >= 100) return "Stabilná firma";
-  if (revenueK >= 50) return "Začínajúci podnikateľ";
+  if (revenueK >= 3000) return "Exit ready";
+  if (revenueK >= 1500) return "Milionár";
+  if (revenueK >= 800) return "Na ceste k miliónu";
+  if (revenueK >= 400) return "Stredná firma";
+  if (revenueK >= 150) return "Rastúci biznis";
+  if (revenueK >= 50) return "Malý podnikateľ";
   return "Živnostník";
 }

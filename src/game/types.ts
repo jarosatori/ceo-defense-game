@@ -1,6 +1,6 @@
 export type Category = "marketing" | "finance" | "operations" | "general";
 
-export type Role = "va" | "marketing" | "finance" | "operations";
+export type Role = "va" | "sales" | "marketing" | "product" | "support" | "accountant" | "cfo" | "hr" | "operations" | "coo";
 
 export type Level = "junior" | "senior";
 
@@ -32,6 +32,8 @@ export interface RoleConfig {
   catchRadius: number;
   cost: number;
   upgradeCost: number;
+  /** Monthly salary cost (reduces profit each wave) */
+  monthlyCost: number;
   /** Revenue multiplier this role contributes (per wave) */
   revenueBoost: number;
 }
@@ -70,7 +72,9 @@ export interface GameState {
   score: number;
   budget: number;
   damage: number;
-  revenue: number; // cumulative revenue in €k
+  revenue: number;        // cumulative monthly revenue €k
+  profit: number;         // cumulative EBITDA €k (revenue - costs)
+  monthlyCosts: number;   // team salaries total per month
   team: TeamMember[];
   problemsCaught: number;
   problemsMissed: number;
@@ -78,7 +82,7 @@ export interface GameState {
   missedByCategory: Record<Category, number>;
   manualClicks: number;
   phase: Phase;
-  focusHistory: FocusActivity[]; // what player focused on each wave
+  focusHistory: FocusActivity[];
 }
 
 export interface GameResults {
@@ -86,6 +90,7 @@ export interface GameResults {
   wavesCompleted: number;
   score: number;
   revenue: number;
+  profit: number;
   team: TeamMember[];
   missedByCategory: Record<Category, number>;
   manualClicks: number;

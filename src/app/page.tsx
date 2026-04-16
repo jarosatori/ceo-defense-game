@@ -15,11 +15,11 @@ export default function Home() {
 
         <div className="space-y-2 text-[#e5e5e5] text-sm leading-relaxed">
           <p>
-            5 vĺn biznis problémov. Ty si CEO.
+            10 levelov biznis problemov. Ty si CEO.
             <br />
-            Najmi správnych ľudí — alebo ťa to prevalcuje.
+            Najmi spravnych ludi — alebo ta to prevalcuje.
           </p>
-          <p className="text-[#666]">Hra trvá 5-7 minút.</p>
+          <p className="text-[#666]">Hra trva 10-15 minut.</p>
         </div>
 
         <div className="flex justify-center gap-4 py-4">

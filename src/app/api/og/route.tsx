@@ -53,19 +53,19 @@ export async function GET(request: NextRequest) {
             marginBottom: "30px",
           }}
         >
-          {[1, 2, 3, 4, 5].map((w) => (
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((w) => (
             <div
               key={w}
               style={{
-                width: "60px",
-                height: "60px",
+                width: "48px",
+                height: "48px",
                 borderRadius: "8px",
                 backgroundColor: w <= parseInt(waves) ? "#22c55e" : "#1a1a1a",
                 color: w <= parseInt(waves) ? "#0a0a0a" : "#444",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "24px",
+                fontSize: "20px",
                 fontWeight: "bold",
               }}
             >

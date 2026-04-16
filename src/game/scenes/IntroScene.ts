@@ -91,7 +91,7 @@ export class IntroScene extends Phaser.Scene {
       .setAlpha(0);
 
     const loadingLabel = this.add
-      .text(centerX, height - 40, "Pripravuje sa vlna 1...", {
+      .text(centerX, height - 40, "10 levelov biznis problemov...", {
         fontSize: "11px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#555",

@@ -111,16 +111,17 @@ export class TeamMemberEntity extends Phaser.GameObjects.Container {
 
   private getLabelText(role: Role): string {
     switch (role) {
-      case "va":
-        return "VA";
-      case "marketing":
-        return "MKT";
-      case "finance":
-        return "FIN";
-      case "operations":
-        return "OPS";
-      default:
-        return "";
+      case "va": return "VA";
+      case "sales": return "SAL";
+      case "marketing": return "MKT";
+      case "product": return "PRD";
+      case "support": return "SUP";
+      case "accountant": return "ACC";
+      case "cfo": return "CFO";
+      case "hr": return "HR";
+      case "operations": return "OPS";
+      case "coo": return "COO";
+      default: return "";
     }
   }
 

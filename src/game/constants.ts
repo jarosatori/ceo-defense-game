@@ -45,46 +45,128 @@ export const ROLE_CONFIGS: Record<string, RoleConfig> = {
     color: CSS_COLORS.general,
     catchCategories: ["marketing", "finance", "operations", "general"],
     catchSpeed: 900,
-    catchRadius: 90,
-    cost: 50,
-    upgradeCost: 70,
-    revenueBoost: 0.05,
+    catchRadius: 80,
+    cost: 60,        // monthlyCost * 2
+    upgradeCost: 90, // monthlyCost * 3
+    monthlyCost: 30,
+    revenueBoost: 0.02,
+  },
+  sales: {
+    role: "sales",
+    label: "Obchodník",
+    description: "Uzatvára dealy, prináša tržby. Silný v marketingu aj general.",
+    color: CSS_COLORS.marketing,
+    catchCategories: ["marketing", "general"],
+    catchSpeed: 550,
+    catchRadius: 95,
+    cost: 120,
+    upgradeCost: 180,
+    monthlyCost: 60,
+    revenueBoost: 0.12,
   },
   marketing: {
     role: "marketing",
-    label: "Produkt & Marketing",
-    description: "Buduje značku, prináša zákazníkov, vylepšuje produkt. Ťahúň rastu obratu.",
+    label: "Marketingový špecialista",
+    description: "Buduje značku, prináša zákazníkov. Ťahúň rastu obratu.",
     color: CSS_COLORS.marketing,
     catchCategories: ["marketing"],
-    catchSpeed: 450,
+    catchSpeed: 400,
     catchRadius: 110,
+    cost: 140,
+    upgradeCost: 210,
+    monthlyCost: 70,
+    revenueBoost: 0.18,
+  },
+  product: {
+    role: "product",
+    label: "Produktový manažér",
+    description: "Vylepšuje produkt, riadi roadmapu. Chytá marketing aj operácie.",
+    color: CSS_COLORS.marketing,
+    catchCategories: ["marketing", "operations"],
+    catchSpeed: 500,
+    catchRadius: 100,
+    cost: 180,
+    upgradeCost: 270,
+    monthlyCost: 90,
+    revenueBoost: 0.15,
+  },
+  support: {
+    role: "support",
+    label: "Customer Support",
+    description: "Rieši zákaznícke problémy a operatívu. Lacný a spoľahlivý.",
+    color: CSS_COLORS.operations,
+    catchCategories: ["general", "operations"],
+    catchSpeed: 600,
+    catchRadius: 90,
     cost: 80,
     upgradeCost: 120,
-    revenueBoost: 0.20,
+    monthlyCost: 40,
+    revenueBoost: 0.04,
   },
-  finance: {
-    role: "finance",
-    label: "Finančník",
-    description: "Kontroluje cashflow, optimalizuje náklady, sleduje ziskovosť. Chráni peniaze.",
+  accountant: {
+    role: "accountant",
+    label: "Účtovník",
+    description: "Kontroluje faktúry, dane, cashflow. Chráni tvoje peniaze.",
     color: CSS_COLORS.finance,
     catchCategories: ["finance"],
-    catchSpeed: 450,
-    catchRadius: 110,
-    cost: 80,
-    upgradeCost: 120,
-    revenueBoost: 0.10,
+    catchSpeed: 500,
+    catchRadius: 100,
+    cost: 100,
+    upgradeCost: 150,
+    monthlyCost: 50,
+    revenueBoost: 0.06,
+  },
+  cfo: {
+    role: "cfo",
+    label: "Finančný kontrolór",
+    description: "Strategické financie — optimalizuje ziskovosť a investície.",
+    color: CSS_COLORS.finance,
+    catchCategories: ["finance"],
+    catchSpeed: 350,
+    catchRadius: 120,
+    cost: 200,
+    upgradeCost: 300,
+    monthlyCost: 100,
+    revenueBoost: 0.12,
+  },
+  hr: {
+    role: "hr",
+    label: "HR Generalista",
+    description: "Nábor, onboarding, kultúra. Rieši ľudské problémy.",
+    color: CSS_COLORS.general,
+    catchCategories: ["general"],
+    catchSpeed: 400,
+    catchRadius: 100,
+    cost: 120,
+    upgradeCost: 180,
+    monthlyCost: 60,
+    revenueBoost: 0.05,
   },
   operations: {
     role: "operations",
     label: "Operations Manager",
-    description: "Nastavuje procesy, rieši logistiku, zabezpečuje kvalitu. Škáluje kapacitu.",
+    description: "Nastavuje procesy, rieši logistiku, zabezpečuje kvalitu.",
     color: CSS_COLORS.operations,
     catchCategories: ["operations"],
+    catchSpeed: 400,
+    catchRadius: 120,
+    cost: 160,
+    upgradeCost: 240,
+    monthlyCost: 80,
+    revenueBoost: 0.10,
+  },
+  coo: {
+    role: "coo",
+    label: "COO (Pravá ruka)",
+    description: "Pravá ruka CEO — operácie aj financie, škáluje kapacitu.",
+    color: CSS_COLORS.operations,
+    catchCategories: ["operations", "finance"],
     catchSpeed: 450,
     catchRadius: 130,
-    cost: 100,
-    upgradeCost: 150,
-    revenueBoost: 0.15,
+    cost: 300,
+    upgradeCost: 450,
+    monthlyCost: 150,
+    revenueBoost: 0.18,
   },
 };
 
@@ -134,9 +216,9 @@ export const DAMAGE_PER_MISS = 6;
 export const BUDGET_PER_CATCH = 5;
 export const CEO_CATCH_RADIUS = 80;
 export const CEO_CATCH_SPEED = 400;
-export const PLANNING_DURATION = 20; // more time for strategic decisions
-export const STARTING_BUDGET = 60;
-export const STARTING_REVENUE = 15; // €15k starting annual revenue
+export const PLANNING_DURATION = 25; // more time for strategic decisions
+export const STARTING_BUDGET = 80;
+export const STARTING_REVENUE = 8; // €8k starting monthly revenue
 
 // Team orbit config
 export const TEAM_ORBIT_RADIUS = 55;
@@ -145,3 +227,6 @@ export const TEAM_ORBIT_SPEED = 0.15;
 // Combo system
 export const COMBO_WINDOW_MS = 1500;
 export const COMBO_BONUS_MULTIPLIER = 0.5;
+
+// Profit game-over threshold
+export const PROFIT_GAMEOVER_THRESHOLD = -100; // €-100k = cash crunch

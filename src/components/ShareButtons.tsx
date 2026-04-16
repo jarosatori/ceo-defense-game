@@ -12,7 +12,7 @@ export default function ShareButtons({
   score,
 }: ShareButtonsProps) {
   const url = typeof window !== "undefined" ? window.location.origin : "";
-  const text = `Prežil som ${waves}/5 vĺn v CEO Defense. Som ${profile.toUpperCase()}. Score: ${score}. A ty?`;
+  const text = `Prezil som ${waves}/10 vln v CEO Defense. Som ${profile.toUpperCase()}. Score: ${score}. A ty?`;
   const shareUrl = `${url}?ref=share`;
 
   const handleCopyLink = async () => {

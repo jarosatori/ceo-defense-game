@@ -8,8 +8,9 @@ import {
   STARTING_REVENUE,
   COMBO_WINDOW_MS,
   COMBO_BONUS_MULTIPLIER,
+  PROFIT_GAMEOVER_THRESHOLD,
 } from "../constants";
-import { calculateWaveRevenue, formatRevenue } from "../utils/revenueCalculator";
+import { calculateWaveFinancials, formatRevenue, formatProfit } from "../utils/revenueCalculator";
 import { WAVES } from "../data/waves";
 import { CEO } from "../entities/CEO";
 import { TeamMemberEntity } from "../entities/TeamMember";
@@ -32,6 +33,7 @@ export class ActionScene extends Phaser.Scene {
   private waveLabel!: Phaser.GameObjects.Text;
   private scoreLabel!: Phaser.GameObjects.Text;
   private revenueLabel!: Phaser.GameObjects.Text;
+  private profitLabel!: Phaser.GameObjects.Text;
   private comboLabel!: Phaser.GameObjects.Text;
   private waveNameLabel!: Phaser.GameObjects.Text;
   private waveNameSubLabel!: Phaser.GameObjects.Text;
@@ -56,6 +58,8 @@ export class ActionScene extends Phaser.Scene {
         budget: STARTING_BUDGET,
         damage: 0,
         revenue: STARTING_REVENUE,
+        profit: 0,
+        monthlyCosts: 0,
         team: [],
         problemsCaught: 0,
         problemsMissed: 0,
@@ -238,7 +242,7 @@ export class ActionScene extends Phaser.Scene {
       .setDepth(16);
 
     this.scoreLabel = this.add
-      .text(width / 2, 8, "", {
+      .text(width * 0.3, 8, "", {
         fontSize: "13px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: CSS_COLORS.uiText,
@@ -249,10 +253,21 @@ export class ActionScene extends Phaser.Scene {
       .setDepth(16);
 
     this.revenueLabel = this.add
-      .text(width - 16, 8, "", {
+      .text(width * 0.65, 8, "", {
         fontSize: "13px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: CSS_COLORS.general,
+        fontStyle: "700",
+        resolution: 2,
+      })
+      .setOrigin(0.5, 0)
+      .setDepth(16);
+
+    this.profitLabel = this.add
+      .text(width - 16, 8, "", {
+        fontSize: "13px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: CSS_COLORS.operations,
         fontStyle: "700",
         resolution: 2,
       })
@@ -264,9 +279,10 @@ export class ActionScene extends Phaser.Scene {
     const waveConfig = WAVES[this.gameState.wave - 1];
     if (!waveConfig) return;
 
-    this.waveLabel.setText(`VLNA ${waveConfig.wave}/5`);
+    this.waveLabel.setText(`VLNA ${waveConfig.wave}/10`);
     this.scoreLabel.setText(`Skóre: ${this.gameState.score}`);
     this.revenueLabel.setText(formatRevenue(this.gameState.revenue));
+    this.updateProfitLabel();
 
     // Wave name splash animation
     this.waveNameLabel.setText(waveConfig.name.toUpperCase());
@@ -295,6 +311,13 @@ export class ActionScene extends Phaser.Scene {
     });
   }
 
+  private updateProfitLabel(): void {
+    const profitText = formatProfit(this.gameState.profit);
+    const profitColor = this.gameState.profit >= 0 ? CSS_COLORS.operations : CSS_COLORS.finance;
+    this.profitLabel.setText(profitText);
+    this.profitLabel.setColor(profitColor);
+  }
+
   update(_time: number, delta: number): void {
     // Always update team orbit (even during wave name splash)
     for (const member of this.teamEntities) {
@@ -304,9 +327,10 @@ export class ActionScene extends Phaser.Scene {
 
     if (!this.waveStarted) return;
 
-    // Update score + revenue labels
+    // Update score + revenue + profit labels
     this.scoreLabel.setText(`Skóre: ${this.gameState.score}`);
     this.revenueLabel.setText(formatRevenue(this.gameState.revenue));
+    this.updateProfitLabel();
 
     // Update active problems
     const activeProblems = this.spawner.getActiveProblems();
@@ -329,9 +353,15 @@ export class ActionScene extends Phaser.Scene {
       this.resetCombo();
     }
 
-    // Check game over
+    // Check game over (damage)
     if (this.damageSystem.isGameOver()) {
       this.endGame(false);
+      return;
+    }
+
+    // Check game over (profit cash crunch)
+    if (this.gameState.profit < PROFIT_GAMEOVER_THRESHOLD) {
+      this.endGame(false, true);
       return;
     }
 
@@ -339,20 +369,22 @@ export class ActionScene extends Phaser.Scene {
     if (this.spawner.isWaveComplete()) {
       this.waveStarted = false;
 
-      // Calculate and add wave revenue
+      // Calculate and add wave revenue + profit
       const waveConfig = WAVES[this.gameState.wave - 1];
       if (waveConfig) {
         const currentFocus =
           this.gameState.focusHistory[this.gameState.wave - 1] ?? null;
-        const earned = calculateWaveRevenue(
+        const { revenueGain, profitGain, monthlyCosts } = calculateWaveFinancials(
           this.gameState,
           waveConfig,
           currentFocus
         );
-        this.gameState.revenue += earned;
+        this.gameState.revenue += revenueGain;
+        this.gameState.profit += profitGain;
+        this.gameState.monthlyCosts = monthlyCosts;
       }
 
-      if (this.gameState.wave >= 5) {
+      if (this.gameState.wave >= 10) {
         this.endGame(true);
       } else {
         this.goToPlanning();
@@ -500,7 +532,7 @@ export class ActionScene extends Phaser.Scene {
     this.scene.start("PlanningScene", { gameState: this.gameState });
   }
 
-  private endGame(survived: boolean): void {
+  private endGame(survived: boolean, cashCrunch: boolean = false): void {
     this.gameState.budget = this.budgetSystem.budget;
     this.gameState.damage = this.damageSystem.damage;
     if (!survived) {
@@ -509,7 +541,7 @@ export class ActionScene extends Phaser.Scene {
       this.gameState.phase = "results";
     }
     this.cleanup();
-    this.scene.start("GameOverScene", { gameState: this.gameState });
+    this.scene.start("GameOverScene", { gameState: this.gameState, cashCrunch });
   }
 
   private cleanup(): void {

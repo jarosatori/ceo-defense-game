@@ -9,16 +9,14 @@ export class BudgetSystem {
     this.budget = initialBudget;
     const { width } = scene.scale;
 
+    // Budget label hidden — shown in ActionScene top bar instead
     this.label = scene.add
-      .text(width - 20, 8, `€${this.budget}`, {
-        fontSize: "14px",
+      .text(-100, -100, `€${this.budget}`, {
+        fontSize: "1px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: CSS_COLORS.general,
-        fontStyle: "800",
-        resolution: 2,
       })
-      .setOrigin(1, 0)
-      .setDepth(16);
+      .setAlpha(0);
 
     this.updateLabel();
   }

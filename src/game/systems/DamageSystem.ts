@@ -12,21 +12,21 @@ export class DamageSystem {
 
   constructor(scene: Phaser.Scene) {
     const { width } = scene.scale;
-    this.barWidth = width - 40;
-    this.barX = 20;
-    this.barY = 38;
+    this.barWidth = width - 80;
+    this.barX = 16;
+    this.barY = 34;
 
     this.bar = scene.add.graphics();
     this.bar.setDepth(16);
     this.label = scene.add
-      .text(width - 20, this.barY + this.barHeight / 2 + 12, "0%", {
-        fontSize: "10px",
+      .text(this.barX + this.barWidth + 8, this.barY + this.barHeight / 2, "0%", {
+        fontSize: "9px",
         fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#e5e5e5",
+        color: "#888",
         fontStyle: "600",
         resolution: 2,
       })
-      .setOrigin(1, 0.5)
+      .setOrigin(0, 0.5)
       .setDepth(16);
 
     this.draw();

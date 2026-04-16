@@ -1,6 +1,7 @@
 import * as Phaser from "phaser";
 import type { GameState } from "../types";
 import { calculateProfile } from "../utils/profileCalculator";
+import { formatRevenue } from "../utils/revenueCalculator";
 import { playChord, playTone } from "../utils/audio";
 
 export class GameOverScene extends Phaser.Scene {
@@ -67,8 +68,22 @@ export class GameOverScene extends Phaser.Scene {
       ? `Vlna 5 zvládnutá • Skóre ${this.gameState.score}`
       : `Vlna ${this.gameState.wave} • Skóre ${this.gameState.score}`;
 
+    const revenueText = `Obrat: ${formatRevenue(this.gameState.revenue)}`;
+
     this.add
-      .text(centerX, centerY + 20, subText, {
+      .text(centerX, centerY + 45, revenueText, {
+        fontSize: "18px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: "#eab308",
+        fontStyle: "700",
+        resolution: 2,
+      })
+      .setOrigin(0.5)
+      .setAlpha(0)
+      .setData("delayedShow", true);
+
+    this.add
+      .text(centerX, centerY + 15, subText, {
         fontSize: "16px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#a3a3a3",
@@ -80,7 +95,7 @@ export class GameOverScene extends Phaser.Scene {
       .setData("delayedShow", true);
 
     this.add
-      .text(centerX, centerY + 60, "Načítavam výsledky...", {
+      .text(centerX, centerY + 72, "Načítavam výsledky...", {
         fontSize: "11px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#555",
@@ -109,6 +124,7 @@ export class GameOverScene extends Phaser.Scene {
       profile,
       waves: String(survived ? 5 : this.gameState.wave),
       score: String(this.gameState.score),
+      revenue: String(this.gameState.revenue),
       team: teamString,
       caught: String(this.gameState.problemsCaught),
       missed: String(this.gameState.problemsMissed),

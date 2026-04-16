@@ -8,6 +8,7 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
     score: 1000,
     budget: 0,
     damage: 50,
+    revenue: 15,
     team: [],
     problemsCaught: 100,
     problemsMissed: 20,
@@ -15,6 +16,7 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
     missedByCategory: { marketing: 5, finance: 5, operations: 5, general: 5 },
     manualClicks: 50,
     phase: "results",
+    focusHistory: [],
     ...overrides,
   };
 }

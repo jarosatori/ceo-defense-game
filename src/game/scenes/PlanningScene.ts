@@ -1,11 +1,14 @@
 import * as Phaser from "phaser";
-import type { GameState, Role, Category } from "../types";
+import type { GameState, Role, Category, FocusActivity } from "../types";
 import {
   COLORS,
   CSS_COLORS,
   ROLE_CONFIGS,
   PLANNING_DURATION,
+  FOCUS_CONFIGS,
 } from "../constants";
+import { WAVES } from "../data/waves";
+import { formatRevenue, calculateWaveRevenue } from "../utils/revenueCalculator";
 import { playTone } from "../utils/audio";
 
 export class PlanningScene extends Phaser.Scene {
@@ -14,6 +17,8 @@ export class PlanningScene extends Phaser.Scene {
   private countdownLabel!: Phaser.GameObjects.Text;
   private countdownTimer!: Phaser.Time.TimerEvent;
   private budgetLabel!: Phaser.GameObjects.Text;
+  private selectedFocus: FocusActivity | null = null;
+  private projectionLabel!: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: "PlanningScene" });
@@ -23,6 +28,8 @@ export class PlanningScene extends Phaser.Scene {
     this.gameState = data.gameState;
     this.gameState.phase = "planning";
     this.countdown = PLANNING_DURATION;
+    // Preserve focus selection across scene restarts (hire/upgrade)
+    this.selectedFocus = (data as { selectedFocus?: FocusActivity }).selectedFocus ?? null;
   }
 
   create(): void {
@@ -100,7 +107,42 @@ export class PlanningScene extends Phaser.Scene {
       })
       .setOrigin(1, 0);
 
-    y += 56;
+    // Revenue display
+    this.add
+      .text(centerX, y, formatRevenue(this.gameState.revenue), {
+        fontSize: "22px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: CSS_COLORS.general,
+        fontStyle: "800",
+        resolution: 2,
+      })
+      .setOrigin(0.5, 0);
+    y += 26;
+
+    this.add
+      .text(centerX, y, "Tvoj obrat", {
+        fontSize: "10px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: "#666",
+        resolution: 2,
+      })
+      .setOrigin(0.5, 0);
+    y += 18;
+
+    // Revenue projection
+    this.projectionLabel = this.add
+      .text(centerX, y, "", {
+        fontSize: "11px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: "#888",
+        fontStyle: "600",
+        resolution: 2,
+      })
+      .setOrigin(0.5, 0);
+    this.updateProjection();
+    y += 24;
+
+    y += 8;
 
     // "Čo ťa zabilo" — bar chart
     this.add
@@ -177,6 +219,66 @@ export class PlanningScene extends Phaser.Scene {
 
     y += 8;
 
+    // Focus activity selection
+    this.add
+      .text(contentX, y, "ČO BUDEŠ RIEŠIŤ", {
+        fontSize: "10px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: "#666",
+        fontStyle: "700",
+        resolution: 2,
+      })
+      .setOrigin(0, 0);
+    y += 18;
+
+    for (const focusCfg of FOCUS_CONFIGS) {
+      const isSelected = this.selectedFocus === focusCfg.id;
+      const focusY = y;
+
+      const focusBg = this.add.graphics();
+      this.drawFocusOption(focusBg, contentX, focusY, contentWidth, focusCfg.color, isSelected);
+
+      // Radio circle
+      const radioColor = Phaser.Display.Color.HexStringToColor(focusCfg.color).color;
+      const outerCircle = this.add.circle(contentX + 16, focusY + 16, 7, 0x000000, 0);
+      outerCircle.setStrokeStyle(2, isSelected ? radioColor : 0x555555);
+      const innerCircle = this.add.circle(contentX + 16, focusY + 16, 4, radioColor, isSelected ? 1 : 0);
+
+      this.add
+        .text(contentX + 30, focusY + 8, focusCfg.label, {
+          fontSize: "11px",
+          fontFamily: "'Inter', system-ui, sans-serif",
+          color: isSelected ? "#fff" : "#ccc",
+          fontStyle: "600",
+          resolution: 2,
+        })
+        .setOrigin(0, 0);
+
+      this.add
+        .text(contentX + 30, focusY + 22, focusCfg.description, {
+          fontSize: "9px",
+          fontFamily: "'Inter', system-ui, sans-serif",
+          color: isSelected ? "#aaa" : "#555",
+          resolution: 2,
+        })
+        .setOrigin(0, 0);
+
+      const focusHit = this.add
+        .rectangle(contentX + contentWidth / 2, focusY + 16, contentWidth, 32, 0, 0)
+        .setInteractive({ useHandCursor: true });
+
+      focusHit.on("pointerdown", () => {
+        playTone(440, 0.06, "sine", 0.04);
+        this.selectedFocus = focusCfg.id;
+        this.countdownTimer.destroy();
+        this.scene.restart({ gameState: this.gameState, selectedFocus: this.selectedFocus });
+      });
+
+      y += 36;
+    }
+
+    y += 8;
+
     // Hire cards
     this.add
       .text(contentX, y, "NAJMI DO TÍMU", {
@@ -192,7 +294,7 @@ export class PlanningScene extends Phaser.Scene {
     const hireRoles: Role[] = ["va", "marketing", "finance", "operations"];
     const cardGap = 8;
     const cardWidth = (contentWidth - cardGap) / 2;
-    const cardHeight = 64;
+    const cardHeight = 78;
 
     hireRoles.forEach((role, index) => {
       const config = ROLE_CONFIGS[role];
@@ -415,9 +517,20 @@ export class PlanningScene extends Phaser.Scene {
       })
       .setAlpha(alpha);
 
+    // Description
+    this.add
+      .text(x + 40, y + 28, config.description, {
+        fontSize: "8px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: "#777",
+        resolution: 2,
+        wordWrap: { width: w - 52 },
+      })
+      .setAlpha(alpha);
+
     // Cost
     this.add
-      .text(x + 40, y + 32, `€${config.cost}`, {
+      .text(x + 40, y + 46, `€${config.cost}`, {
         fontSize: "14px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: canAfford ? CSS_COLORS.general : "#555",
@@ -524,7 +637,7 @@ export class PlanningScene extends Phaser.Scene {
     });
 
     this.countdownTimer.destroy();
-    this.scene.restart({ gameState: this.gameState });
+    this.scene.restart({ gameState: this.gameState, selectedFocus: this.selectedFocus });
   }
 
   private upgrade(memberId: string): void {
@@ -538,12 +651,44 @@ export class PlanningScene extends Phaser.Scene {
     member.level = "senior";
 
     this.countdownTimer.destroy();
-    this.scene.restart({ gameState: this.gameState });
+    this.scene.restart({ gameState: this.gameState, selectedFocus: this.selectedFocus });
   }
 
   private startNextWave(): void {
     this.countdownTimer.destroy();
+    if (this.selectedFocus) {
+      this.gameState.focusHistory.push(this.selectedFocus);
+    }
     this.gameState.wave++;
     this.scene.start("ActionScene", { gameState: this.gameState });
+  }
+
+  private drawFocusOption(
+    gfx: Phaser.GameObjects.Graphics,
+    x: number,
+    y: number,
+    w: number,
+    color: string,
+    selected: boolean
+  ): void {
+    const colorHex = Phaser.Display.Color.HexStringToColor(color).color;
+    gfx.fillStyle(selected ? 0x1a1a1a : 0x111111, 1);
+    gfx.fillRoundedRect(x, y, w, 32, 6);
+    gfx.lineStyle(1, selected ? colorHex : 0x222222, selected ? 0.6 : 0.3);
+    gfx.strokeRoundedRect(x, y, w, 32, 6);
+  }
+
+  private updateProjection(): void {
+    const nextWaveConfig = WAVES[this.gameState.wave]; // wave is 0-indexed after current
+    if (!nextWaveConfig) {
+      this.projectionLabel.setText("");
+      return;
+    }
+    const projected = calculateWaveRevenue(
+      this.gameState,
+      nextWaveConfig,
+      this.selectedFocus
+    );
+    this.projectionLabel.setText(`Potenciál ďalšej vlny: +${formatRevenue(projected)}`);
   }
 }

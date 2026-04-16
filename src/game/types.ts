@@ -13,6 +13,9 @@ export type CEOProfile =
   | "delegator"
   | "strategist";
 
+/** Activity the player chooses to focus on during planning */
+export type FocusActivity = "product" | "sales" | "optimize" | "cashflow";
+
 export interface TeamMember {
   role: Role;
   level: Level;
@@ -22,12 +25,15 @@ export interface TeamMember {
 export interface RoleConfig {
   role: Role;
   label: string;
+  description: string;
   color: string;
   catchCategories: Category[];
   catchSpeed: number;
   catchRadius: number;
   cost: number;
   upgradeCost: number;
+  /** Revenue multiplier this role contributes (per wave) */
+  revenueBoost: number;
 }
 
 export interface WaveConfig {
@@ -39,6 +45,8 @@ export interface WaveConfig {
   distribution: Record<Category, number>;
   burstEnabled: boolean;
   burstSize: number;
+  /** Base revenue potential for this wave (€k) */
+  baseRevenue: number;
 }
 
 export interface ProblemConfig {
@@ -47,11 +55,22 @@ export interface ProblemConfig {
   shape: "triangle" | "diamond" | "square" | "circle";
 }
 
+export interface FocusConfig {
+  id: FocusActivity;
+  label: string;
+  description: string;
+  color: string;
+  revenueMultiplier: number;
+  /** Which category of problems this focus reduces */
+  reduces: Category;
+}
+
 export interface GameState {
   wave: number;
   score: number;
   budget: number;
   damage: number;
+  revenue: number; // cumulative revenue in €k
   team: TeamMember[];
   problemsCaught: number;
   problemsMissed: number;
@@ -59,12 +78,14 @@ export interface GameState {
   missedByCategory: Record<Category, number>;
   manualClicks: number;
   phase: Phase;
+  focusHistory: FocusActivity[]; // what player focused on each wave
 }
 
 export interface GameResults {
   profile: CEOProfile;
   wavesCompleted: number;
   score: number;
+  revenue: number;
   team: TeamMember[];
   missedByCategory: Record<Category, number>;
   manualClicks: number;

@@ -8,6 +8,7 @@ interface ResultsPageProps {
     profile?: string;
     waves?: string;
     score?: string;
+    revenue?: string;
     team?: string;
   }>;
 }
@@ -44,11 +45,12 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const profile = (params.profile || "lone-wolf") as CEOProfile;
   const waves = parseInt(params.waves || "1", 10);
   const score = parseInt(params.score || "0", 10);
+  const revenue = parseInt(params.revenue || "0", 10);
   const team = params.team || "";
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center px-6 py-12 gap-8">
-      <ResultsCard profile={profile} waves={waves} score={score} team={team} />
+      <ResultsCard profile={profile} waves={waves} score={score} revenue={revenue} team={team} />
 
       <ShareButtons profile={profile} waves={waves} score={score} />
 
@@ -69,6 +71,13 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
           Zisti viac
         </a>
       </div>
+
+      <a
+        href="/game"
+        className="inline-block px-8 py-3 border border-[#444] hover:border-[#666] text-[#e5e5e5] font-semibold rounded-lg transition-colors text-sm"
+      >
+        Hrať znova
+      </a>
     </main>
   );
 }

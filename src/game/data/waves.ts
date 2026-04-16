@@ -1,7 +1,7 @@
 import type { WaveConfig } from "../types";
 
 // problemSpeed = SECONDS for problem to cross screen (higher = slower = easier)
-// Count is TOTAL spawned over duration
+// baseRevenue = potential revenue growth this wave (€k) — modified by team + focus
 export const WAVES: WaveConfig[] = [
   {
     wave: 1,
@@ -12,6 +12,7 @@ export const WAVES: WaveConfig[] = [
     distribution: { marketing: 0.7, finance: 0.1, operations: 0.2, general: 0 },
     burstEnabled: false,
     burstSize: 0,
+    baseRevenue: 20, // €20k potential growth
   },
   {
     wave: 2,
@@ -22,6 +23,7 @@ export const WAVES: WaveConfig[] = [
     distribution: { marketing: 0.5, finance: 0.15, operations: 0.35, general: 0 },
     burstEnabled: false,
     burstSize: 0,
+    baseRevenue: 40,
   },
   {
     wave: 3,
@@ -32,6 +34,7 @@ export const WAVES: WaveConfig[] = [
     distribution: { marketing: 0.25, finance: 0.5, operations: 0.25, general: 0 },
     burstEnabled: true,
     burstSize: 3,
+    baseRevenue: 80,
   },
   {
     wave: 4,
@@ -42,6 +45,7 @@ export const WAVES: WaveConfig[] = [
     distribution: { marketing: 0.15, finance: 0.2, operations: 0.65, general: 0 },
     burstEnabled: true,
     burstSize: 4,
+    baseRevenue: 150,
   },
   {
     wave: 5,
@@ -52,5 +56,6 @@ export const WAVES: WaveConfig[] = [
     distribution: { marketing: 0.25, finance: 0.25, operations: 0.25, general: 0.25 },
     burstEnabled: true,
     burstSize: 5,
+    baseRevenue: 300,
   },
 ];

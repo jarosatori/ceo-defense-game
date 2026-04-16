@@ -1,5 +1,6 @@
 import type { CEOProfile } from "@/game/types";
 import { CSS_COLORS } from "@/game/constants";
+import { formatRevenue, getRevenueMilestone } from "@/game/utils/revenueCalculator";
 
 const PROFILE_DATA: Record<
   CEOProfile,
@@ -34,6 +35,7 @@ interface ResultsCardProps {
   profile: CEOProfile;
   waves: number;
   score: number;
+  revenue: number;
   team: string;
 }
 
@@ -41,6 +43,7 @@ export default function ResultsCard({
   profile,
   waves,
   score,
+  revenue,
   team,
 }: ResultsCardProps) {
   const data = PROFILE_DATA[profile] || PROFILE_DATA["lone-wolf"];
@@ -83,6 +86,13 @@ export default function ResultsCard({
         <p className="text-sm text-[#a3a3a3] leading-relaxed">
           {data.description}
         </p>
+      </div>
+
+      <div className="space-y-1">
+        <p className="text-2xl font-bold text-[#eab308]">
+          {formatRevenue(revenue)}
+        </p>
+        <p className="text-xs text-[#a3a3a3]">{getRevenueMilestone(revenue)}</p>
       </div>
 
       <p className="text-lg text-[#e5e5e5]">

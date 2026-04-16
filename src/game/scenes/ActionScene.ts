@@ -5,9 +5,11 @@ import {
   CSS_COLORS,
   BUDGET_PER_CATCH,
   STARTING_BUDGET,
+  STARTING_REVENUE,
   COMBO_WINDOW_MS,
   COMBO_BONUS_MULTIPLIER,
 } from "../constants";
+import { calculateWaveRevenue, formatRevenue } from "../utils/revenueCalculator";
 import { WAVES } from "../data/waves";
 import { CEO } from "../entities/CEO";
 import { TeamMemberEntity } from "../entities/TeamMember";
@@ -29,6 +31,7 @@ export class ActionScene extends Phaser.Scene {
   private budgetSystem!: BudgetSystem;
   private waveLabel!: Phaser.GameObjects.Text;
   private scoreLabel!: Phaser.GameObjects.Text;
+  private revenueLabel!: Phaser.GameObjects.Text;
   private comboLabel!: Phaser.GameObjects.Text;
   private waveNameLabel!: Phaser.GameObjects.Text;
   private waveNameSubLabel!: Phaser.GameObjects.Text;
@@ -52,6 +55,7 @@ export class ActionScene extends Phaser.Scene {
         score: 0,
         budget: STARTING_BUDGET,
         damage: 0,
+        revenue: STARTING_REVENUE,
         team: [],
         problemsCaught: 0,
         problemsMissed: 0,
@@ -59,6 +63,7 @@ export class ActionScene extends Phaser.Scene {
         missedByCategory: { marketing: 0, finance: 0, operations: 0, general: 0 },
         manualClicks: 0,
         phase: "action",
+        focusHistory: [],
       };
     }
     this.gameState.phase = "action";
@@ -242,6 +247,17 @@ export class ActionScene extends Phaser.Scene {
       })
       .setOrigin(0.5, 0)
       .setDepth(16);
+
+    this.revenueLabel = this.add
+      .text(width - 16, 8, "", {
+        fontSize: "13px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: CSS_COLORS.general,
+        fontStyle: "700",
+        resolution: 2,
+      })
+      .setOrigin(1, 0)
+      .setDepth(16);
   }
 
   private startWave(): void {
@@ -250,6 +266,7 @@ export class ActionScene extends Phaser.Scene {
 
     this.waveLabel.setText(`VLNA ${waveConfig.wave}/5`);
     this.scoreLabel.setText(`Skóre: ${this.gameState.score}`);
+    this.revenueLabel.setText(formatRevenue(this.gameState.revenue));
 
     // Wave name splash animation
     this.waveNameLabel.setText(waveConfig.name.toUpperCase());
@@ -287,8 +304,9 @@ export class ActionScene extends Phaser.Scene {
 
     if (!this.waveStarted) return;
 
-    // Update score label
+    // Update score + revenue labels
     this.scoreLabel.setText(`Skóre: ${this.gameState.score}`);
+    this.revenueLabel.setText(formatRevenue(this.gameState.revenue));
 
     // Update active problems
     const activeProblems = this.spawner.getActiveProblems();
@@ -320,6 +338,20 @@ export class ActionScene extends Phaser.Scene {
     // Check wave complete
     if (this.spawner.isWaveComplete()) {
       this.waveStarted = false;
+
+      // Calculate and add wave revenue
+      const waveConfig = WAVES[this.gameState.wave - 1];
+      if (waveConfig) {
+        const currentFocus =
+          this.gameState.focusHistory[this.gameState.wave - 1] ?? null;
+        const earned = calculateWaveRevenue(
+          this.gameState,
+          waveConfig,
+          currentFocus
+        );
+        this.gameState.revenue += earned;
+      }
+
       if (this.gameState.wave >= 5) {
         this.endGame(true);
       } else {

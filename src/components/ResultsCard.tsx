@@ -84,138 +84,299 @@ export default function ResultsCard({
 }: ResultsCardProps) {
   const data = PROFILE_DATA[profile] || PROFILE_DATA["lone-wolf"];
   const teamMembers = team ? team.split(",") : [];
-
   const bizCfg = businessType ? BUSINESS_TYPE_CONFIGS[businessType] : null;
+  const positive = profit >= 0;
+  const sign = positive ? "+" : "-";
 
-  const profitCommentary =
-    profit >= 0
-      ? `Tvoja firma zarobila ${formatMoney(profit)} (${formatPercent(ebitdaRatio ?? 0)} EBITDA)`
-      : `Tvoja firma je v strate (${formatMoney(profit)})`;
+  const profitCommentary = positive
+    ? `EBITDA ${formatPercent(ebitdaRatio ?? 0)} · v pluse`
+    : "v strate";
 
   return (
-    <div className="bg-[#111] border border-[#333] rounded-2xl p-8 max-w-md w-full space-y-6">
-      <h2 className="text-2xl font-bold text-white tracking-tight">
-        CEO DEFENSE
-      </h2>
+    <div
+      style={{
+        background: "#531E38",
+        borderRadius: 22,
+        padding: "32px 30px",
+        maxWidth: 460,
+        width: "100%",
+        color: "#EFEDEB",
+        boxShadow: "0 20px 60px -24px rgba(83,30,56,.5)",
+      }}
+    >
+      <div
+        className="me-eyebrow"
+        style={{ color: "#FF9DC8", marginBottom: 10 }}
+      >
+        CEO Defense · výsledok
+      </div>
+
+      <div
+        className="me-display"
+        style={{ fontSize: 44, lineHeight: 0.95, marginBottom: 8 }}
+      >
+        {data.label}
+      </div>
+      <p
+        style={{
+          fontSize: 14,
+          color: "rgba(239,237,235,.8)",
+          lineHeight: 1.55,
+          marginBottom: 26,
+        }}
+      >
+        {data.description}
+      </p>
 
       {bizCfg && (
-        <p className="text-sm text-[#a3a3a3]">
-          <span className="text-lg">{bizCfg.emoji}</span> {bizCfg.label}
+        <p
+          style={{
+            fontSize: 13,
+            color: "rgba(239,237,235,.7)",
+            marginBottom: 18,
+          }}
+        >
+          <span style={{ fontSize: 16 }}>{bizCfg.emoji}</span> {bizCfg.label}
         </p>
       )}
 
-      <div className="space-y-1">
-        <p className="text-sm text-[#a3a3a3]">Prežil som</p>
-        <div className="flex gap-1.5 flex-wrap">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((w) => (
+      <div
+        className="me-label"
+        style={{ color: "rgba(239,237,235,.55)", marginBottom: 10 }}
+      >
+        Prežil som
+      </div>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((w) => {
+          const done = w < waves;
+          const cur = w === waves;
+          return (
             <div
               key={w}
-              className={`w-8 h-8 rounded flex items-center justify-center text-xs font-bold ${
-                w <= waves
-                  ? "bg-[#22c55e] text-[#0a0a0a]"
-                  : "bg-[#1a1a1a] text-[#444]"
-              }`}
+              className="me-display"
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 8,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 12,
+                fontWeight: 600,
+                background: done ? "#EFEDEB" : cur ? "#FF7404" : "transparent",
+                color: done ? "#531E38" : cur ? "#EFEDEB" : "rgba(239,237,235,.5)",
+                border: done || cur ? "none" : "1px solid rgba(239,237,235,.25)",
+              }}
             >
               {w}
             </div>
-          ))}
-        </div>
-        <p className="text-xs text-[#666]">{waves}/10 vĺn</p>
+          );
+        })}
+      </div>
+      <div
+        className="me-display"
+        style={{
+          fontSize: 13,
+          color: "rgba(239,237,235,.7)",
+          marginTop: 10,
+        }}
+      >
+        {waves} / 10 vĺn
       </div>
 
-      <div className="space-y-2">
-        <p className="text-3xl font-bold text-white">{data.label}</p>
-        <p className="text-sm text-[#a3a3a3] leading-relaxed">
-          {data.description}
-        </p>
-      </div>
-
-      {milestone && (
-        <div className="space-y-1">
-          <p className="text-2xl font-bold text-[#eab308]">{milestone}</p>
-          <p className="text-xs text-[#a3a3a3]">
-            Kumulatívny obrat: {formatMoney(revenue)}
-          </p>
-        </div>
-      )}
-
-      {!milestone && (
-        <div className="space-y-1">
-          <p className="text-2xl font-bold text-[#eab308]">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 18,
+          marginTop: 28,
+          paddingTop: 22,
+          borderTop: "1px solid rgba(239,237,235,.12)",
+        }}
+      >
+        <div>
+          <div
+            className="me-label"
+            style={{ color: "rgba(239,237,235,.55)" }}
+          >
+            Obrat
+          </div>
+          <div
+            className="me-display"
+            style={{ fontSize: 28, color: "#FF7404" }}
+          >
             {formatMoney(revenue)}
-          </p>
-          <p className="text-xs text-[#a3a3a3]">Kumulatívny obrat</p>
-        </div>
-      )}
-
-      <div className="space-y-1">
-        <p
-          className={`text-lg font-bold ${profit >= 0 ? "text-[#22c55e]" : "text-[#ef4444]"}`}
-        >
-          {formatMoney(profit)}
-        </p>
-        <p className="text-xs text-[#a3a3a3]">{profitCommentary}</p>
-      </div>
-
-      {(grossMargin !== undefined || ebitdaRatio !== undefined) && (
-        <div className="grid grid-cols-2 gap-3 text-center">
-          {grossMargin !== undefined && (
-            <div className="bg-[#1a1a1a] rounded-lg p-3">
-              <p className="text-xs text-[#a3a3a3]">Hrubá marža</p>
-              <p className="text-base font-bold text-[#22c55e]">
-                {formatPercent(grossMargin)}
-              </p>
-            </div>
-          )}
-          {ebitdaRatio !== undefined && (
-            <div className="bg-[#1a1a1a] rounded-lg p-3">
-              <p className="text-xs text-[#a3a3a3]">EBITDA %</p>
-              <p
-                className={`text-base font-bold ${ebitdaRatio >= 0 ? "text-[#22c55e]" : "text-[#ef4444]"}`}
-              >
-                {formatPercent(ebitdaRatio)}
-              </p>
+          </div>
+          {milestone && (
+            <div
+              style={{
+                fontSize: 12,
+                color: "rgba(239,237,235,.7)",
+                marginTop: 2,
+              }}
+            >
+              {milestone}
             </div>
           )}
         </div>
-      )}
-
-      <p className="text-lg text-[#e5e5e5]">
-        Score:{" "}
-        <span className="font-bold text-white">{score.toLocaleString()}</span>
-      </p>
-
-      {teamMembers.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-sm text-[#a3a3a3]">Tvoj tím:</p>
-          <div className="flex gap-2 flex-wrap">
-            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-              <span className="text-[8px] font-bold text-[#0a0a0a]">CEO</span>
-            </div>
-            {teamMembers.map((m, i) => {
-              const [role, level] = m.split(":");
-              const color = roleColorMap[role] || CSS_COLORS.general;
-              const label =
-                roleShortLabels[role] || role.substring(0, 3).toUpperCase();
-              return (
-                <div
-                  key={i}
-                  className="rounded-full flex items-center justify-center"
-                  style={{
-                    backgroundColor: color,
-                    width: level === "senior" ? 36 : 28,
-                    height: level === "senior" ? 36 : 28,
-                  }}
-                >
-                  <span className="text-[7px] font-bold text-[#0a0a0a]">
-                    {label}
-                  </span>
-                </div>
-              );
-            })}
+        <div>
+          <div
+            className="me-label"
+            style={{ color: "rgba(239,237,235,.55)" }}
+          >
+            Zisk (EBITDA)
+          </div>
+          <div
+            className="me-display"
+            style={{
+              fontSize: 28,
+              color: positive ? "#FF9DC8" : "#E81A1E",
+            }}
+          >
+            {sign}
+            {formatMoney(Math.abs(profit))}
+          </div>
+          <div
+            style={{
+              fontSize: 12,
+              color: "rgba(239,237,235,.7)",
+              marginTop: 2,
+            }}
+          >
+            {profitCommentary}
           </div>
         </div>
+      </div>
+
+      {grossMargin !== undefined && (
+        <div
+          style={{
+            marginTop: 22,
+            paddingTop: 18,
+            borderTop: "1px solid rgba(239,237,235,.12)",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 18,
+          }}
+        >
+          <div>
+            <div
+              className="me-label"
+              style={{ color: "rgba(239,237,235,.55)" }}
+            >
+              Hrubá marža
+            </div>
+            <div
+              className="me-display"
+              style={{ fontSize: 20, color: "#EFEDEB" }}
+            >
+              {formatPercent(grossMargin)}
+            </div>
+          </div>
+          {ebitdaRatio !== undefined && (
+            <div>
+              <div
+                className="me-label"
+                style={{ color: "rgba(239,237,235,.55)" }}
+              >
+                EBITDA %
+              </div>
+              <div
+                className="me-display"
+                style={{
+                  fontSize: 20,
+                  color: ebitdaRatio >= 0 ? "#FF9DC8" : "#E81A1E",
+                }}
+              >
+                {formatPercent(ebitdaRatio)}
+              </div>
+            </div>
+          )}
+        </div>
       )}
+
+      <div
+        style={{
+          marginTop: 22,
+          paddingTop: 18,
+          borderTop: "1px solid rgba(239,237,235,.12)",
+        }}
+      >
+        <div className="me-label" style={{ color: "rgba(239,237,235,.55)" }}>
+          Score
+        </div>
+        <div className="me-display" style={{ fontSize: 22 }}>
+          {score.toLocaleString()}
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: 22,
+          paddingTop: 18,
+          borderTop: "1px solid rgba(239,237,235,.12)",
+        }}
+      >
+        <div className="me-label" style={{ color: "rgba(239,237,235,.55)" }}>
+          Tvoj tím
+        </div>
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            flexWrap: "wrap",
+            marginTop: 8,
+            alignItems: "center",
+          }}
+        >
+          <div
+            className="me-display"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              background: "#EFEDEB",
+              color: "#531E38",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 11,
+              fontWeight: 600,
+              border: "2px solid #EFEDEB",
+            }}
+          >
+            CEO
+          </div>
+          {teamMembers.map((m, i) => {
+            const [role, level] = m.split(":");
+            const color = roleColorMap[role] || CSS_COLORS.general;
+            const label =
+              roleShortLabels[role] || role.substring(0, 3).toUpperCase();
+            const size = level === "senior" ? 40 : 32;
+            return (
+              <div
+                key={i}
+                className="me-display"
+                style={{
+                  width: size,
+                  height: size,
+                  borderRadius: "50%",
+                  background: color,
+                  color: "#EFEDEB",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 10,
+                  fontWeight: 600,
+                  letterSpacing: ".03em",
+                }}
+              >
+                {label}
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

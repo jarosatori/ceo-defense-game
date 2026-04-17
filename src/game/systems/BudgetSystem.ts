@@ -13,7 +13,7 @@ export class BudgetSystem {
     this.label = scene.add
       .text(-100, -100, `€${this.budget}`, {
         fontSize: "1px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: CSS_COLORS.general,
       })
       .setAlpha(0);

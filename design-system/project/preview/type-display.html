@@ -1,0 +1,122 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  :root{
+    --plum:#531E38; --magenta:#9F2D6D; --orange:#FF7404; --cream:#EFEDEB;
+    --ink:#1B1C1E; --stone:#A69E92; --red:#E81A1E; --mist:#D4D4D1;
+  }
+  body{margin:0;padding:0;background:var(--cream);color:var(--ink);font-family:'Inter Tight',system-ui,sans-serif}
+
+  .page{max-width:1100px;margin:0 auto;padding:56px 56px 72px}
+
+  .topbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:24px;border-bottom:1px solid var(--mist);margin-bottom:48px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand-mark{width:28px;height:28px;border-radius:8px;background:var(--plum);display:flex;align-items:center;justify-content:center}
+  .brand-mark span{width:10px;height:10px;border-radius:2px;background:var(--orange)}
+  .brand-name{font-family:'IBM Plex Mono';font-weight:600;font-size:13px;color:var(--ink);letter-spacing:-.01em}
+  .topbar .meta{font-family:'IBM Plex Mono';font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
+
+  .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 6px;background:#fff;border:1px solid var(--mist);border-radius:999px;margin-bottom:28px}
+  .hero-eyebrow .dot{width:16px;height:16px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center}
+  .hero-eyebrow .dot i{width:6px;height:6px;border-radius:50%;background:var(--cream);display:block}
+  .hero-eyebrow span{font-family:'IBM Plex Mono';font-weight:500;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--plum)}
+
+  .hero{font-family:'IBM Plex Mono';font-weight:600;font-size:118px;line-height:.88;letter-spacing:-.045em;color:var(--plum);margin:0 0 22px}
+  .hero .orange{color:var(--orange)}
+  .hero .mag{color:var(--magenta)}
+
+  .lead{font-family:'Inter Tight';font-weight:400;font-size:22px;line-height:1.45;color:var(--ink);max-width:620px;margin:0 0 56px}
+  .lead em{font-style:normal;color:var(--magenta);font-weight:600}
+
+  .scale{display:flex;flex-direction:column;gap:0}
+  .s-row{display:grid;grid-template-columns:180px 1fr 120px;gap:32px;align-items:baseline;padding:22px 0;border-top:1px solid var(--mist)}
+  .s-row:last-child{border-bottom:1px solid var(--mist)}
+  .s-tag{font-family:'IBM Plex Mono';font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
+  .s-tag b{display:block;color:var(--plum);font-weight:600;font-size:12px;margin-top:4px;letter-spacing:.02em}
+  .s-sample{font-family:'IBM Plex Mono';font-weight:600;color:var(--ink);letter-spacing:-.03em;line-height:1}
+  .s-size{font-family:'IBM Plex Mono';font-weight:500;font-size:12px;color:var(--stone);text-align:right;letter-spacing:.04em}
+
+  .size-display{font-size:64px;color:var(--plum)}
+  .size-title{font-size:40px;color:var(--ink)}
+  .size-section{font-size:28px;color:var(--magenta)}
+  .size-numeric{font-size:38px;color:var(--orange);letter-spacing:-.04em}
+
+  .pair{margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .card{background:#fff;border:1px solid var(--mist);border-radius:18px;padding:28px 30px}
+  .card.plum{background:var(--plum);color:var(--cream);border-color:var(--plum)}
+  .card .ey{font-family:'IBM Plex Mono';font-weight:500;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);margin-bottom:12px}
+  .card.plum .ey{color:rgba(239,237,235,.55)}
+  .card h3{font-family:'IBM Plex Mono';font-weight:600;font-size:26px;letter-spacing:-.02em;margin:0 0 10px;color:var(--ink)}
+  .card.plum h3{color:var(--cream)}
+  .card p{font-family:'Inter Tight';font-weight:400;font-size:15px;line-height:1.55;color:#4a4a48;margin:0}
+  .card.plum p{color:rgba(239,237,235,.75)}
+  .card .stat{font-family:'IBM Plex Mono';font-weight:600;font-size:40px;color:var(--orange);letter-spacing:-.03em;margin-top:14px}
+
+  .palette{display:flex;gap:10px;margin-top:48px}
+  .sw{flex:1;height:56px;border-radius:10px;display:flex;align-items:flex-end;padding:8px 10px;font-family:'IBM Plex Mono';font-weight:500;font-size:10px;letter-spacing:.08em;color:var(--cream)}
+  .sw.l{color:var(--ink)}
+</style></head><body>
+  <div class="page">
+
+    <div class="topbar">
+      <div class="brand"><div class="brand-mark"><span></span></div><div class="brand-name">Miliónová Evolúcia / Type · Display</div></div>
+      <div class="meta">IBM Plex Mono · Inter Tight</div>
+    </div>
+
+    <div class="hero-eyebrow"><span class="dot"><i></i></span><span>Display · headline system</span></div>
+
+    <h1 class="hero">CEO<br/>DEFENSE<span class="orange">.</span></h1>
+
+    <p class="lead">Dokážeš vybudovať firmu, ktorá <em>funguje bez teba</em>? Typografický systém kombinuje mono-technický rytmus nadpisov s teplým, ľudským tónom textov.</p>
+
+    <div class="scale">
+      <div class="s-row">
+        <div class="s-tag">Display<b>Plex Mono · 600</b></div>
+        <div class="s-sample size-display">Plánovacia fáza</div>
+        <div class="s-size">64 / 0.88</div>
+      </div>
+      <div class="s-row">
+        <div class="s-tag">Title<b>Plex Mono · 600</b></div>
+        <div class="s-sample size-title">Čo ťa zabilo</div>
+        <div class="s-size">40 / 1.0</div>
+      </div>
+      <div class="s-row">
+        <div class="s-tag">Section<b>Plex Mono · 600</b></div>
+        <div class="s-sample size-section">Tvoj tím · Wave 04</div>
+        <div class="s-size">28 / 1.1</div>
+      </div>
+      <div class="s-row">
+        <div class="s-tag">Numeric<b>Plex Mono · 600</b></div>
+        <div class="s-sample size-numeric">€127k &nbsp;+€42k</div>
+        <div class="s-size">38 / 1.0</div>
+      </div>
+    </div>
+
+    <div class="pair">
+      <div class="card plum">
+        <div class="ey">Display · on plum</div>
+        <h3>Stratég.</h3>
+        <p>Postavil si systém, ktorý funguje bez teba. Toto je škálovateľný biznis.</p>
+        <div class="stat">€1,2M</div>
+      </div>
+      <div class="card">
+        <div class="ey">Display · on cream</div>
+        <h3>Delegátor.</h3>
+        <p>Rozpoznal si, čo ťa brzdí, a najal si správnych ľudí. Tvoja firma rastie.</p>
+        <div class="stat" style="color:var(--magenta)">+€42k<span style="color:var(--stone);font-size:16px;letter-spacing:0;font-weight:500"> /mes</span></div>
+      </div>
+    </div>
+
+    <div class="palette">
+      <div class="sw" style="background:#531E38">#531E38</div>
+      <div class="sw" style="background:#9F2D6D">#9F2D6D</div>
+      <div class="sw" style="background:#FF7404">#FF7404</div>
+      <div class="sw l" style="background:#EFEDEB;border:1px solid var(--mist)">#EFEDEB</div>
+      <div class="sw" style="background:#1B1C1E">#1B1C1E</div>
+      <div class="sw l" style="background:#A69E92">#A69E92</div>
+      <div class="sw" style="background:#E81A1E">#E81A1E</div>
+      <div class="sw l" style="background:#D4D4D1">#D4D4D1</div>
+    </div>
+
+  </div>
+</body></html>

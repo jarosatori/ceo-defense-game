@@ -1,0 +1,125 @@
+/* ==========================================================================
+   CEO Defense — Colors & Type (Miliónová Evolúcia brand)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Inter+Tight:wght@400;500;600;700&display=swap');
+
+:root {
+  /* --- PRIMARY --- */
+  --me-plum:        #531E38;  /* Deep plum  — primary surface / brand anchor */
+  --me-magenta:     #9F2D6D;  /* Magenta    — accent / data / highlight */
+  --me-orange:      #FF7404;  /* Vivid orange — CTA / focus / alert */
+  --me-cream:       #EFEDEB;  /* Warm white — page / text-on-dark */
+
+  /* --- SECONDARY --- */
+  --me-ink:         #1B1C1E;  /* Near-black — deepest surface, text-on-cream */
+  --me-stone:       #A69E92;  /* Warm grey  — muted text, borders */
+
+  /* --- SUPPORTING --- */
+  --me-red:         #E81A1E;  /* Error / danger */
+  --me-mist:        #D4D4D1;  /* Light grey — subtle dividers, disabled */
+
+  /* --- CATEGORY MAP (four game categories -> brand palette) --- */
+  --me-cat-marketing:  var(--me-magenta);
+  --me-cat-finance:    var(--me-red);
+  --me-cat-operations: var(--me-orange);
+  --me-cat-general:    var(--me-stone);
+
+  /* --- SEMANTIC --- */
+  --me-bg:          var(--me-cream);      /* page bg, light theme primary */
+  --me-fg:          var(--me-ink);
+  --me-fg-muted:    var(--me-stone);
+  --me-fg-dim:      #6b635a;
+  --me-surface:     #ffffff;
+  --me-surface-alt: #F6F3F0;
+  --me-border:      var(--me-mist);
+  --me-border-strong: #bdb6ad;
+  --me-accent:      var(--me-orange);
+  --me-accent-hover:#e06800;
+  --me-danger:      var(--me-red);
+  --me-success:     #3a8463;  /* tuned green that harmonises with plum */
+
+  /* Dark surfaces (planning scene / OG card) */
+  --me-dark:        var(--me-plum);
+  --me-dark-2:      #3e1629;
+  --me-dark-3:      #2b0f1d;
+  --me-dark-fg:     var(--me-cream);
+  --me-dark-fg-dim: #c9a9b9;
+
+  /* --- TYPE --- */
+  --me-font-display: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --me-font-body:    'Inter Tight', system-ui, -apple-system, sans-serif;
+
+  --me-fs-xs:  11px;
+  --me-fs-sm:  13px;
+  --me-fs-base:15px;
+  --me-fs-md:  17px;
+  --me-fs-lg:  20px;
+  --me-fs-xl:  26px;
+  --me-fs-2xl: 34px;
+  --me-fs-3xl: 46px;
+  --me-fs-4xl: 64px;
+
+  --me-fw-regular: 400;
+  --me-fw-medium:  500;
+  --me-fw-semi:    600;
+  --me-fw-bold:    700;
+
+  --me-tracking-tight: -0.02em;
+  --me-tracking-normal: 0;
+  --me-tracking-wide:   0.04em;
+  --me-tracking-wider:  0.14em;
+
+  /* --- SPACE / RADIUS --- */
+  --me-space-1: 4px;  --me-space-2: 8px;  --me-space-3: 12px;
+  --me-space-4: 16px; --me-space-5: 20px; --me-space-6: 24px;
+  --me-space-8: 32px; --me-space-10:40px; --me-space-12:56px;
+
+  --me-radius-sm: 4px;
+  --me-radius-md: 8px;
+  --me-radius-lg: 14px;
+  --me-radius-xl: 22px;
+
+  --me-shadow-sm: 0 1px 2px rgba(27,28,30,.06);
+  --me-shadow-md: 0 6px 24px -8px rgba(83,30,56,.25);
+}
+
+/* ---- Base ---- */
+html, body {
+  margin:0;
+  background: var(--me-bg);
+  color: var(--me-fg);
+  font-family: var(--me-font-body);
+  font-size: var(--me-fs-base);
+  font-weight: var(--me-fw-regular);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.55;
+}
+
+h1, h2, h3, h4, .me-display {
+  font-family: var(--me-font-display);
+  font-weight: var(--me-fw-semi);
+  letter-spacing: var(--me-tracking-tight);
+  line-height: 1.05;
+  margin: 0;
+  color: var(--me-fg);
+}
+
+h1 { font-size: var(--me-fs-4xl); }
+h2 { font-size: var(--me-fs-2xl); }
+h3 { font-size: var(--me-fs-lg); }
+
+p   { margin: 0; }
+
+.me-eyebrow {
+  font-family: var(--me-font-display);
+  font-weight: var(--me-fw-medium);
+  font-size: var(--me-fs-xs);
+  letter-spacing: var(--me-tracking-wider);
+  text-transform: uppercase;
+  color: var(--me-fg-muted);
+}
+
+.me-mono { font-family: var(--me-font-display); }

@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{padding:28px;background:var(--me-cream);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .btn{padding:13px 22px;border-radius:999px;font-family:var(--me-font-body);font-weight:600;font-size:14px;border:none;cursor:pointer;letter-spacing:.01em}
+  .primary{background:#FF7404;color:#EFEDEB}
+  .primary:hover{background:#e06800}
+  .secondary{background:#531E38;color:#EFEDEB}
+  .ghost{background:transparent;color:#531E38;border:1px solid #531E38}
+  .ghost:hover{background:rgba(83,30,56,.06)}
+  .danger{background:rgba(232,26,30,.08);color:#E81A1E;border:1px solid rgba(232,26,30,.3)}
+  .cta{padding:16px 28px;border-radius:14px;background:#FF7404;color:#EFEDEB;font-family:var(--me-font-body);font-weight:600;font-size:16px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:10px}
+  .cta svg{transition:transform .2s}
+  .cta:hover svg{transform:translateX(4px)}
+</style></head><body>
+  <button class="btn primary">Hrať →</button>
+  <button class="btn secondary">Pokračovať</button>
+  <button class="btn ghost">Hrať znova</button>
+  <button class="btn danger">Prepustiť</button>
+  <button class="cta">POKRAČOVAŤ <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+</body></html>

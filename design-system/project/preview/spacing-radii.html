@@ -1,0 +1,82 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+  :root{--plum:#531E38;--magenta:#9F2D6D;--orange:#FF7404;--cream:#EFEDEB;--ink:#1B1C1E;--stone:#A69E92;--red:#E81A1E;--mist:#D4D4D1}
+  body{margin:0;padding:48px 52px;background:var(--cream);font-family:'Inter Tight',system-ui,sans-serif;color:var(--ink)}
+  .wrap{max-width:960px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:22px;border-bottom:1px solid var(--mist);margin-bottom:36px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .mk{width:28px;height:28px;border-radius:8px;background:var(--plum);display:flex;align-items:center;justify-content:center}
+  .mk i{width:10px;height:10px;border-radius:2px;background:var(--orange)}
+  .bname{font-family:'IBM Plex Mono';font-weight:600;font-size:13px;letter-spacing:-.01em}
+  .meta{font-family:'IBM Plex Mono';font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
+
+  .hdr{font-family:'IBM Plex Mono';font-weight:600;font-size:44px;letter-spacing:-.03em;color:var(--plum);margin:0 0 8px;line-height:1}
+  .hdr .o{color:var(--orange)}
+  .sub{font-family:'Inter Tight';font-size:16px;color:#6b635a;max-width:540px;margin:0 0 42px;line-height:1.5}
+
+  .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:40px}
+  .t{background:#fff;border:1px solid var(--mist);padding:18px 14px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+  .t .shape{width:60px;height:60px;background:var(--plum);display:flex;align-items:center;justify-content:center;color:var(--cream);font-family:'IBM Plex Mono';font-weight:600;font-size:10px;letter-spacing:.08em}
+  .t .tag{font-family:'IBM Plex Mono';font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--plum)}
+  .t .val{font-family:'IBM Plex Mono';font-weight:500;font-size:12px;color:var(--stone)}
+  .t .role{font-family:'Inter Tight';font-size:12px;color:#6b635a;line-height:1.35}
+
+  .r0{border-radius:0}
+  .r6{border-radius:6px}
+  .r10{border-radius:10px}
+  .r14{border-radius:14px}
+  .r18{border-radius:18px}
+  .rfull{border-radius:999px}
+
+  .section-title{font-family:'IBM Plex Mono';font-weight:500;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--stone);margin:0 0 14px;display:flex;align-items:center;gap:10px}
+  .section-title::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--magenta)}
+
+  .applied{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .chip{background:#fff;border:1px solid var(--mist);padding:14px 16px;font-family:'IBM Plex Mono';font-weight:500;font-size:12px;color:var(--plum);text-align:center;letter-spacing:.02em}
+  .chip.plum{background:var(--plum);color:var(--cream);border-color:var(--plum)}
+  .chip.orange{background:var(--orange);color:var(--cream);border-color:var(--orange)}
+
+  .palette{display:flex;gap:10px;margin-top:44px}
+  .sw{flex:1;height:44px;border-radius:10px;display:flex;align-items:flex-end;padding:6px 10px;font-family:'IBM Plex Mono';font-weight:500;font-size:10px;letter-spacing:.08em;color:var(--cream)}
+  .sw.l{color:var(--ink)}
+</style></head><body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand"><div class="mk"><i></i></div><div class="bname">Miliónová Evolúcia / Spacing · Radii</div></div>
+      <div class="meta">6 levels · 0 → full</div>
+    </div>
+
+    <h1 class="hdr">Radii<span class="o">.</span></h1>
+    <p class="sub">Šesť úrovní zaoblenia. Ostré rohy pre dáta a chipy, mäkké pre karty a hero prvky, plné pre tokeny a CTA.</p>
+
+    <div class="grid">
+      <div class="t"><div class="shape r0">0</div><div><div class="tag">sharp</div><div class="val">0 px</div></div><div class="role">Chart bars · dividers</div></div>
+      <div class="t"><div class="shape r6">6</div><div><div class="tag">xs</div><div class="val">6 px</div></div><div class="role">Chips · tags · swatches</div></div>
+      <div class="t"><div class="shape r10">10</div><div><div class="tag">sm</div><div class="val">10 px</div></div><div class="role">Inputs · small buttons</div></div>
+      <div class="t"><div class="shape r14">14</div><div><div class="tag">md</div><div class="val">14 px</div></div><div class="role">Cards · rows · CTA</div></div>
+      <div class="t"><div class="shape r18">18</div><div><div class="tag">lg</div><div class="val">18 px</div></div><div class="role">Hero cards · containers</div></div>
+      <div class="t"><div class="shape rfull">∞</div><div><div class="tag">full</div><div class="val">999 px</div></div><div class="role">Pills · avatars · tokens</div></div>
+    </div>
+
+    <div class="section-title">Applied to components</div>
+    <div class="applied">
+      <div class="chip r6">Chip · 6px</div>
+      <div class="chip r10 plum">Input · 10px</div>
+      <div class="chip r14">Card · 14px</div>
+      <div class="chip r18 plum">Hero · 18px</div>
+      <div class="chip rfull orange">CTA · full</div>
+      <div class="chip rfull">Token · full</div>
+    </div>
+
+    <div class="palette">
+      <div class="sw" style="background:#531E38">#531E38</div>
+      <div class="sw" style="background:#9F2D6D">#9F2D6D</div>
+      <div class="sw" style="background:#FF7404">#FF7404</div>
+      <div class="sw l" style="background:#EFEDEB;border:1px solid var(--mist)">#EFEDEB</div>
+      <div class="sw" style="background:#1B1C1E">#1B1C1E</div>
+      <div class="sw l" style="background:#A69E92">#A69E92</div>
+      <div class="sw" style="background:#E81A1E">#E81A1E</div>
+      <div class="sw l" style="background:#D4D4D1">#D4D4D1</div>
+    </div>
+  </div>
+</body></html>

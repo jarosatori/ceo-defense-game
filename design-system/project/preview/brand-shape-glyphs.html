@@ -1,0 +1,140 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{padding:36px;background:var(--me-cream);font-family:'Inter Tight',system-ui,sans-serif}
+  .row{margin-bottom:28px}
+  .head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .swatch{width:14px;height:14px;border-radius:4px}
+  .cat{font-family:'IBM Plex Mono';font-weight:600;font-size:13px;letter-spacing:-.01em;color:#1B1C1E}
+  .meta{font-family:'IBM Plex Mono';font-weight:500;font-size:11px;color:#A69E92;letter-spacing:.04em;margin-left:auto}
+  .grid{display:grid;grid-template-columns:repeat(10,1fr);gap:10px}
+  .cell{aspect-ratio:1;background:#fff;border:1px solid #D4D4D1;border-radius:12px;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+  .cell:hover{transform:translateY(-2px);border-color:#A69E92}
+  svg{display:block}
+</style></head><body>
+
+<!-- MARKETING — magenta (the "brand / buzz / customer" tasks) -->
+<div class="row">
+  <div class="head">
+    <div class="swatch" style="background:#9F2D6D"></div>
+    <div class="cat">Marketing</div>
+    <div class="meta">10 variants · #9F2D6D</div>
+  </div>
+  <div class="grid">
+    <!-- megaphone -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#9F2D6D"><path d="M4 13v6l3 1v2l4 1 .5-3 14 4V8L11 12l-.5-3-4 1v2z"/></svg></div>
+    <!-- heart burst -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#9F2D6D"><path d="M16 27c-7-5-12-8-12-14a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 6-5 9-12 14z" stroke="#9F2D6D" stroke-width="2" fill="none"/><circle cx="16" cy="15" r="3"/></svg></div>
+    <!-- speech bubble -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#9F2D6D" stroke-width="2.5" stroke-linejoin="round"><path d="M5 8h22v14h-10l-5 5v-5H5z"/><circle cx="12" cy="15" r="1.3" fill="#9F2D6D" stroke="none"/><circle cx="16" cy="15" r="1.3" fill="#9F2D6D" stroke="none"/><circle cx="20" cy="15" r="1.3" fill="#9F2D6D" stroke="none"/></svg></div>
+    <!-- star -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#9F2D6D"><path d="M16 4l3.5 8 8.5.8-6.5 5.7 2 8.5L16 22.5 8.5 27l2-8.5L4 12.8 12.5 12z"/></svg></div>
+    <!-- eye (impressions) -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#9F2D6D" stroke-width="2.5"><path d="M3 16s5-8 13-8 13 8 13 8-5 8-13 8S3 16 3 16z"/><circle cx="16" cy="16" r="3.5" fill="#9F2D6D"/></svg></div>
+    <!-- hashtag -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#9F2D6D" stroke-width="3" stroke-linecap="round"><path d="M11 5l-2 22M23 5l-2 22M5 11h22M4 21h22"/></svg></div>
+    <!-- thumbs up circle -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#9F2D6D"><circle cx="16" cy="16" r="13"/><path d="M10 19v-5h2l3-6 1 1v4h5l-1 7h-7l-1-1z" fill="#EFEDEB"/></svg></div>
+    <!-- triangle flag -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#9F2D6D"><path d="M8 4v24" stroke="#9F2D6D" stroke-width="2.5"/><path d="M9 5h16l-6 6 6 6H9z"/></svg></div>
+    <!-- target -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#9F2D6D" stroke-width="2.5"><circle cx="16" cy="16" r="11"/><circle cx="16" cy="16" r="6"/><circle cx="16" cy="16" r="2" fill="#9F2D6D"/></svg></div>
+    <!-- sparkle -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#9F2D6D"><path d="M16 3l2 11 11 2-11 2-2 11-2-11L3 16l11-2z"/></svg></div>
+  </div>
+</div>
+
+<!-- FINANCE — red (money / risk / bills) -->
+<div class="row">
+  <div class="head">
+    <div class="swatch" style="background:#E81A1E"></div>
+    <div class="cat">Financie</div>
+    <div class="meta">10 variants · #E81A1E</div>
+  </div>
+  <div class="grid">
+    <!-- euro coin -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#E81A1E"><circle cx="16" cy="16" r="12"/><path d="M20 10a5 5 0 0 0-8 2h6M12 14h6M12 17h6M20 22a5 5 0 0 1-8-2" stroke="#EFEDEB" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
+    <!-- invoice -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#E81A1E" stroke-width="2.5" stroke-linejoin="round"><path d="M7 3h14v26l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M11 10h10M11 14h10M11 18h7" stroke-width="2"/></svg></div>
+    <!-- trending down -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#E81A1E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l9 9 4-4 11 11"/><path d="M20 26h8v-8"/></svg></div>
+    <!-- diamond bill -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#E81A1E"><rect x="8" y="8" width="16" height="16" transform="rotate(45 16 16)"/><text x="16" y="19" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" font-weight="700" fill="#EFEDEB">€</text></svg></div>
+    <!-- wallet -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#E81A1E" stroke-width="2.5"><path d="M5 9h18a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5z"/><path d="M5 9V7a2 2 0 0 1 2-2h14" /><circle cx="22" cy="18" r="2" fill="#E81A1E"/></svg></div>
+    <!-- calculator -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#E81A1E" stroke-width="2.5"><rect x="6" y="4" width="20" height="24" rx="2"/><path d="M10 9h12v4H10z" fill="#E81A1E"/><circle cx="11" cy="19" r="1" fill="#E81A1E"/><circle cx="16" cy="19" r="1" fill="#E81A1E"/><circle cx="21" cy="19" r="1" fill="#E81A1E"/><circle cx="11" cy="23" r="1" fill="#E81A1E"/><circle cx="16" cy="23" r="1" fill="#E81A1E"/><circle cx="21" cy="23" r="1" fill="#E81A1E"/></svg></div>
+    <!-- bank -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#E81A1E"><path d="M4 12l12-7 12 7v2H4z"/><rect x="7" y="15" width="3" height="10"/><rect x="14" y="15" width="3" height="10"/><rect x="21" y="15" width="3" height="10"/><rect x="4" y="26" width="24" height="2"/></svg></div>
+    <!-- alert triangle -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#E81A1E"><path d="M16 4l14 24H2z"/><rect x="15" y="13" width="2" height="7" fill="#EFEDEB"/><circle cx="16" cy="23" r="1.3" fill="#EFEDEB"/></svg></div>
+    <!-- credit card -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#E81A1E"><rect x="3" y="7" width="26" height="18" rx="3"/><rect x="3" y="12" width="26" height="3" fill="#EFEDEB"/><rect x="7" y="19" width="6" height="2" fill="#EFEDEB"/></svg></div>
+    <!-- percent -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#E81A1E" stroke-width="3" stroke-linecap="round"><path d="M8 24L24 8"/><circle cx="10" cy="10" r="3"/><circle cx="22" cy="22" r="3"/></svg></div>
+  </div>
+</div>
+
+<!-- OPERATIONS — orange (process / logistics / systems) -->
+<div class="row">
+  <div class="head">
+    <div class="swatch" style="background:#FF7404"></div>
+    <div class="cat">Operácie</div>
+    <div class="meta">10 variants · #FF7404</div>
+  </div>
+  <div class="grid">
+    <!-- gear -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#FF7404"><path d="M16 2l2 4 4-1 1 4 4 2-1 4 1 4-4 2-1 4-4-1-2 4-2-4-4 1-1-4-4-2 1-4-1-4 4-2 1-4 4 1z"/><circle cx="16" cy="16" r="4" fill="#EFEDEB"/></svg></div>
+    <!-- truck -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#FF7404"><path d="M2 10h16v12H2z"/><path d="M18 14h6l4 4v4h-10z"/><circle cx="8" cy="24" r="3" fill="#1B1C1E"/><circle cx="23" cy="24" r="3" fill="#1B1C1E"/></svg></div>
+    <!-- boxes -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#FF7404" stroke-width="2.5" stroke-linejoin="round"><path d="M4 10v14l8 4 8-4V10l-8-4z"/><path d="M4 10l8 4 8-4M12 14v14"/><path d="M20 18v10l8-4V14"/></svg></div>
+    <!-- square grid -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#FF7404"><rect x="4" y="4" width="10" height="10" rx="1.5"/><rect x="18" y="4" width="10" height="10" rx="1.5"/><rect x="4" y="18" width="10" height="10" rx="1.5"/><rect x="18" y="18" width="10" height="10" rx="1.5"/></svg></div>
+    <!-- clipboard -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#FF7404" stroke-width="2.5" stroke-linejoin="round"><rect x="7" y="5" width="18" height="24" rx="2"/><path d="M11 3h10v5H11z" fill="#FF7404"/><path d="M11 15l3 3 6-6" stroke-linecap="round"/><path d="M11 22h10" stroke-linecap="round"/></svg></div>
+    <!-- flow nodes -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#FF7404" stroke-width="2.5"><circle cx="7" cy="8" r="3" fill="#FF7404"/><circle cx="25" cy="8" r="3"/><circle cx="7" cy="24" r="3"/><circle cx="25" cy="24" r="3" fill="#FF7404"/><path d="M10 8h12M7 11v10M25 11v10M10 24h12"/></svg></div>
+    <!-- wrench -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#FF7404"><path d="M19 3a7 7 0 0 0-6 10L3 23l4 4 10-10a7 7 0 0 0 10-9l-4 4-3-1-1-3z"/></svg></div>
+    <!-- stopwatch -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#FF7404" stroke-width="2.5"><circle cx="16" cy="18" r="10"/><path d="M16 18V12M13 4h6M16 8V4" stroke-linecap="round"/><path d="M23 9l2-2" stroke-linecap="round"/></svg></div>
+    <!-- warehouse -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#FF7404"><path d="M4 12l12-6 12 6v16H4z"/><rect x="10" y="16" width="12" height="12" fill="#EFEDEB"/><path d="M10 20h12M10 24h12" stroke="#FF7404" stroke-width="1.5"/></svg></div>
+    <!-- chain link -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#FF7404" stroke-width="2.8" stroke-linecap="round"><path d="M13 9a5 5 0 0 0-5 5v4a5 5 0 0 0 10 0v-2"/><path d="M19 23a5 5 0 0 0 5-5v-4a5 5 0 0 0-10 0v2"/></svg></div>
+  </div>
+</div>
+
+<!-- GENERAL — stone (admin / misc / HR / support) -->
+<div class="row">
+  <div class="head">
+    <div class="swatch" style="background:#A69E92"></div>
+    <div class="cat">Ostatné</div>
+    <div class="meta">10 variants · #A69E92</div>
+  </div>
+  <div class="grid">
+    <!-- email -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#A69E92" stroke-width="2.5" stroke-linejoin="round"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 9l13 9 13-9"/></svg></div>
+    <!-- phone -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#A69E92"><path d="M7 3h6l2 7-3 2a16 16 0 0 0 8 8l2-3 7 2v6a3 3 0 0 1-3 3A22 22 0 0 1 4 6a3 3 0 0 1 3-3z"/></svg></div>
+    <!-- user -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#A69E92"><circle cx="16" cy="11" r="5"/><path d="M5 28c1-7 6-10 11-10s10 3 11 10z"/></svg></div>
+    <!-- calendar -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#A69E92" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="6" width="24" height="22" rx="2"/><path d="M4 12h24M10 3v6M22 3v6" stroke-linecap="round"/><circle cx="11" cy="18" r="1.5" fill="#A69E92"/><circle cx="16" cy="18" r="1.5" fill="#A69E92"/><circle cx="21" cy="18" r="1.5" fill="#A69E92"/></svg></div>
+    <!-- circle -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#A69E92"><circle cx="16" cy="16" r="11"/></svg></div>
+    <!-- sticky note -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#A69E92"><path d="M5 4h22v18l-6 6H5z"/><path d="M21 28v-6h6" fill="#EFEDEB"/><path d="M10 11h12M10 15h12M10 19h7" stroke="#EFEDEB" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    <!-- question -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#A69E92"><circle cx="16" cy="16" r="12"/><path d="M12 12a4 4 0 0 1 8 0c0 2-2 3-3 4s-1 2-1 3M16 22v2" stroke="#EFEDEB" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg></div>
+    <!-- coffee -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#A69E92" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h18v10a6 6 0 0 1-6 6h-6a6 6 0 0 1-6-6z"/><path d="M23 14h3a3 3 0 0 1 0 6h-3"/><path d="M10 4c0 3 2 2 2 5M16 4c0 3 2 2 2 5"/></svg></div>
+    <!-- folder -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="#A69E92"><path d="M4 8a2 2 0 0 1 2-2h7l2 3h11a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg></div>
+    <!-- paperclip -->
+    <div class="cell"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#A69E92" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 14l-9 9a5 5 0 0 1-7-7l11-11a3.5 3.5 0 0 1 5 5l-11 11a2 2 0 0 1-3-3l9-9"/></svg></div>
+  </div>
+</div>
+
+</body></html>

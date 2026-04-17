@@ -1,0 +1,40 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{padding:40px 36px;background:var(--me-cream);min-height:100vh;box-sizing:border-box}
+  .card{background:#fff;border:1px solid var(--me-mist);border-radius:14px;padding:28px 30px;max-width:560px}
+  .eyebrow{font-family:var(--me-font-display);font-weight:500;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--me-stone);margin-bottom:4px}
+  .title{font-family:var(--me-font-display);font-weight:600;font-size:22px;letter-spacing:-.02em;color:var(--me-ink);margin-bottom:22px}
+  .row{display:grid;grid-template-columns:110px 1fr auto;gap:16px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(212,212,209,.6)}
+  .row:last-child{border-bottom:none}
+  .label{font-family:var(--me-font-body);font-weight:500;font-size:14px;color:var(--me-ink)}
+  .track{position:relative;height:6px;background:#F2EEEA;border-radius:999px;overflow:hidden}
+  .fill{position:absolute;inset:0;width:var(--w);border-radius:999px}
+  .pct{font-family:var(--me-font-display);font-weight:600;font-size:13px;color:var(--me-ink);min-width:42px;text-align:right;letter-spacing:-.02em}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:10px;vertical-align:1px}
+</style></head><body>
+  <div class="card">
+    <div class="eyebrow">Breakdown</div>
+    <div class="title">Čo ťa zabilo</div>
+    <div class="row">
+      <div class="label"><span class="dot" style="background:#9F2D6D"></span>Marketing</div>
+      <div class="track"><div class="fill" style="--w:55%;background:#9F2D6D"></div></div>
+      <div class="pct">55%</div>
+    </div>
+    <div class="row">
+      <div class="label"><span class="dot" style="background:#E81A1E"></span>Financie</div>
+      <div class="track"><div class="fill" style="--w:20%;background:#E81A1E"></div></div>
+      <div class="pct">20%</div>
+    </div>
+    <div class="row">
+      <div class="label"><span class="dot" style="background:#FF7404"></span>Operácie</div>
+      <div class="track"><div class="fill" style="--w:15%;background:#FF7404"></div></div>
+      <div class="pct">15%</div>
+    </div>
+    <div class="row">
+      <div class="label"><span class="dot" style="background:#A69E92"></span>Ostatné</div>
+      <div class="track"><div class="fill" style="--w:10%;background:#A69E92"></div></div>
+      <div class="pct">10%</div>
+    </div>
+  </div>
+</body></html>

@@ -1,0 +1,134 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  :root{
+    --plum:#531E38;--magenta:#9F2D6D;--orange:#FF7404;--cream:#EFEDEB;
+    --ink:#1B1C1E;--stone:#A69E92;--red:#E81A1E;--mist:#D4D4D1;
+    --dim:#6b635a;
+  }
+  body{margin:0;padding:0;background:var(--cream);color:var(--ink);font-family:'Inter Tight',system-ui,sans-serif}
+  .page{max-width:1080px;margin:0 auto;padding:56px 56px 80px}
+
+  .topbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:24px;border-bottom:1px solid var(--mist);margin-bottom:44px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .mk{width:28px;height:28px;border-radius:8px;background:var(--plum);display:flex;align-items:center;justify-content:center}
+  .mk i{width:10px;height:10px;border-radius:2px;background:var(--orange)}
+  .bname{font-family:'IBM Plex Mono';font-weight:600;font-size:13px;color:var(--ink);letter-spacing:-.01em}
+  .meta{font-family:'IBM Plex Mono';font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
+
+  .hdr{font-family:'IBM Plex Mono';font-weight:600;font-size:52px;letter-spacing:-.03em;color:var(--plum);margin:0 0 10px;line-height:1}
+  .hdr .o{color:var(--orange)}
+  .sub{font-family:'Inter Tight';font-size:18px;color:var(--dim);max-width:620px;margin:0 0 52px;line-height:1.5}
+
+  .grid{display:grid;grid-template-columns:180px 1fr 120px;gap:32px;align-items:baseline;padding:22px 0;border-top:1px solid var(--mist)}
+  .grid:last-of-type{border-bottom:1px solid var(--mist)}
+  .tag{font-family:'IBM Plex Mono';font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
+  .tag b{display:block;color:var(--plum);font-weight:600;font-size:12px;margin-top:4px;letter-spacing:.02em}
+  .size{font-family:'IBM Plex Mono';font-weight:500;font-size:12px;color:var(--stone);text-align:right;letter-spacing:.04em}
+
+  .s{font-family:'Inter Tight';color:var(--ink)}
+  .s em{font-style:normal;color:var(--magenta);font-weight:600}
+  .s a{color:var(--orange);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px}
+  .s code{font-family:'IBM Plex Mono';font-weight:500;font-size:.85em;background:#fff;padding:2px 7px;border-radius:5px;border:1px solid var(--mist);color:var(--plum)}
+  .lead{font-size:22px;line-height:1.4;font-weight:400}
+  .body{font-size:16px;line-height:1.6;font-weight:400}
+  .small{font-size:14px;line-height:1.55;font-weight:400;color:var(--dim)}
+  .micro{font-size:12px;line-height:1.45;font-weight:500;color:var(--stone);letter-spacing:.01em}
+  .num{font-family:'IBM Plex Mono';font-weight:600;font-size:28px;letter-spacing:-.02em;color:var(--orange)}
+
+  .pair{margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .card{background:#fff;border:1px solid var(--mist);border-radius:20px;padding:30px 32px}
+  .card.plum{background:var(--plum);color:var(--cream);border-color:var(--plum)}
+  .card .ey{font-family:'IBM Plex Mono';font-weight:500;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+  .card .ey .d{width:6px;height:6px;border-radius:50%;background:var(--magenta)}
+  .card.plum .ey{color:rgba(239,237,235,.55)}
+  .card.plum .ey .d{background:var(--orange)}
+  .card h3{font-family:'IBM Plex Mono';font-weight:600;font-size:24px;letter-spacing:-.02em;margin:0 0 12px;color:var(--ink)}
+  .card.plum h3{color:var(--cream)}
+  .card p{font-family:'Inter Tight';font-size:15px;line-height:1.6;color:var(--dim);margin:0 0 10px}
+  .card.plum p{color:rgba(239,237,235,.78)}
+  .card p:last-child{margin-bottom:0}
+  .bullets{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-direction:column;gap:8px}
+  .bullets li{font-family:'Inter Tight';font-size:14px;color:var(--ink);padding-left:20px;position:relative;line-height:1.5}
+  .bullets li::before{content:"";position:absolute;left:0;top:8px;width:10px;height:2px;background:var(--orange);border-radius:2px}
+  .card.plum .bullets li{color:rgba(239,237,235,.88)}
+
+  .palette{display:flex;gap:10px;margin-top:48px}
+  .sw{flex:1;height:50px;border-radius:10px;display:flex;align-items:flex-end;padding:7px 10px;font-family:'IBM Plex Mono';font-weight:500;font-size:10px;letter-spacing:.08em;color:var(--cream)}
+  .sw.l{color:var(--ink)}
+</style></head><body>
+  <div class="page">
+    <div class="topbar">
+      <div class="brand"><div class="mk"><i></i></div><div class="bname">Miliónová Evolúcia / Type · Body</div></div>
+      <div class="meta">Inter Tight · 400/500/600</div>
+    </div>
+
+    <h1 class="hdr">Body &amp; text<span class="o">.</span></h1>
+    <p class="sub">Inter Tight je hlas hry — teplý, čitateľný, ľudský. Plex Mono drží autoritu nadpisov, Inter nesie príbeh.</p>
+
+    <div class="grid">
+      <div class="tag">Lead<b>Inter Tight · 400</b></div>
+      <div class="s lead">Dokážeš vybudovať firmu, ktorá <em>funguje bez teba</em>? Táto hra ťa prevedie desiatimi vlnami biznis reality.</div>
+      <div class="size">22 / 1.4</div>
+    </div>
+
+    <div class="grid">
+      <div class="tag">Body<b>Inter Tight · 400</b></div>
+      <div class="s body">Tvoja firma práve zarába <em>€127k mesačne</em>. Stratégia funguje — ale vieš, že ďalšia vlna prinesie nové problémy. Každý nový zákazník je príležitosť aj riziko. Najmi <a href="#">Operations Managera</a>, alebo použi <code>COO</code> na delegovanie procesov naraz.</div>
+      <div class="size">16 / 1.6</div>
+    </div>
+
+    <div class="grid">
+      <div class="tag">Small<b>Inter Tight · 400</b></div>
+      <div class="s small">Buduje značku, prináša zákazníkov. Ťahúň rastu obratu — bez neho sa tržby zastavia okolo €50k mesačne.</div>
+      <div class="size">14 / 1.55</div>
+    </div>
+
+    <div class="grid">
+      <div class="tag">Micro<b>Inter Tight · 500</b></div>
+      <div class="s micro">Vlna 04 · auto-start 24s · zostáva €280 z rozpočtu</div>
+      <div class="size">12 / 1.45</div>
+    </div>
+
+    <div class="grid">
+      <div class="tag">Numeric inline<b>Plex Mono · 600</b></div>
+      <div class="s"><span class="num">€127k</span> &nbsp; <span style="color:var(--stone);font-size:14px;font-family:'Inter Tight'">obrat · +€42k zisk · 3 ľudia v tíme</span></div>
+      <div class="size">28 / 1.0</div>
+    </div>
+
+    <div class="pair">
+      <div class="card">
+        <div class="ey"><span class="d"></span>Body · on cream</div>
+        <h3>Marketingový špecialista</h3>
+        <p>Senior-level profil, ktorý <em style="font-style:normal;color:var(--magenta);font-weight:600">buduje značku a prináša zákazníkov</em>. Je ťahúňom rastu tržieb — bez neho sa marketingové problémy začnú rýchlo kopiť.</p>
+        <ul class="bullets">
+          <li>+70k/mesiac na rast obratu</li>
+          <li>Znižuje marketingové problémy o 40%</li>
+          <li>Cena: €140 za najatie</li>
+        </ul>
+      </div>
+
+      <div class="card plum">
+        <div class="ey"><span class="d"></span>Body · on plum</div>
+        <h3>Delegátor.</h3>
+        <p>Rozpoznal si, čo ťa brzdí, a <em style="font-style:normal;color:#FF9DC8;font-weight:600">najal si správnych ľudí</em>. Tvoja firma rastie bez toho, aby si hasil každý požiar.</p>
+        <ul class="bullets">
+          <li>Prežil si 7 vĺn z 10</li>
+          <li>Obrat €1,2M — Na ceste k miliónu</li>
+          <li>Tím: 4 špecialisti + ty</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="palette">
+      <div class="sw" style="background:#531E38">#531E38</div>
+      <div class="sw" style="background:#9F2D6D">#9F2D6D</div>
+      <div class="sw" style="background:#FF7404">#FF7404</div>
+      <div class="sw l" style="background:#EFEDEB;border:1px solid var(--mist)">#EFEDEB</div>
+      <div class="sw" style="background:#1B1C1E">#1B1C1E</div>
+      <div class="sw l" style="background:#A69E92">#A69E92</div>
+      <div class="sw" style="background:#E81A1E">#E81A1E</div>
+      <div class="sw l" style="background:#D4D4D1">#D4D4D1</div>
+    </div>
+  </div>
+</body></html>

@@ -31,25 +31,35 @@ export default function ShareButtons({
   };
 
   return (
-    <div className="flex flex-col gap-3 w-full max-w-md">
-      <button
-        onClick={handleLinkedIn}
-        className="w-full py-3 bg-[#0a66c2] hover:bg-[#004182] text-white font-bold rounded-lg transition-colors"
-      >
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+        maxWidth: 460,
+        width: "100%",
+      }}
+    >
+      <button onClick={handleLinkedIn} className="me-btn me-btn--primary">
         Zdieľať na LinkedIn
       </button>
-      <button
-        onClick={handleCopyLink}
-        className="w-full py-3 bg-[#1a1a1a] hover:bg-[#222] text-[#e5e5e5] font-bold rounded-lg border border-[#333] transition-colors"
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 10,
+        }}
       >
-        Kopírovať odkaz
-      </button>
-      <button
-        onClick={handleDownloadImage}
-        className="w-full py-3 bg-[#1a1a1a] hover:bg-[#222] text-[#e5e5e5] font-bold rounded-lg border border-[#333] transition-colors"
-      >
-        Stiahnuť kartičku
-      </button>
+        <button onClick={handleCopyLink} className="me-btn me-btn--ghost">
+          Kopírovať odkaz
+        </button>
+        <button
+          onClick={handleDownloadImage}
+          className="me-btn me-btn--ghost"
+        >
+          Stiahnuť kartičku
+        </button>
+      </div>
     </div>
   );
 }

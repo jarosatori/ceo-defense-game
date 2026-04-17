@@ -66,14 +66,14 @@ export class GameOverScene extends Phaser.Scene {
     } else {
       splashText = "FIRMA SA ZRÚTILA";
     }
-    const splashColor = survived ? "#22c55e" : "#ef4444";
+    const splashColor = survived ? "#FF7404" : "#E81A1E";
 
     const splash = this.add
       .text(centerX, centerY - 80, splashText, {
         fontSize: "36px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
         color: splashColor,
-        fontStyle: "900",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(0.5)
@@ -92,8 +92,8 @@ export class GameOverScene extends Phaser.Scene {
       this.add
         .text(centerX, centerY - 40, "Nemáš na výplaty.", {
           fontSize: "14px",
-          fontFamily: "'Inter', system-ui, sans-serif",
-          color: "#ef4444",
+          fontFamily: "'Inter Tight', system-ui, sans-serif",
+          color: "#E81A1E",
           fontStyle: "500",
           resolution: 2,
         })
@@ -106,9 +106,9 @@ export class GameOverScene extends Phaser.Scene {
     this.add
       .text(centerX, centerY - 15, milestone.toUpperCase(), {
         fontSize: "20px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#eab308",
-        fontStyle: "800",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
+        color: "#FF7404",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(0.5)
@@ -119,8 +119,8 @@ export class GameOverScene extends Phaser.Scene {
     this.add
       .text(centerX, centerY + 10, `${bizCfg.emoji} ${bizCfg.label}`, {
         fontSize: "12px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#a3a3a3",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#A69E92",
         fontStyle: "500",
         resolution: 2,
       })
@@ -132,8 +132,8 @@ export class GameOverScene extends Phaser.Scene {
     this.add
       .text(centerX, centerY + 40, `Obrat: ${formatMoney(this.gameState.revenue)}`, {
         fontSize: "18px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#eab308",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#FF7404",
         fontStyle: "700",
         resolution: 2,
       })
@@ -142,7 +142,7 @@ export class GameOverScene extends Phaser.Scene {
       .setData("delayedShow", true);
 
     // Profit
-    const profitColor = this.gameState.profit >= 0 ? "#22c55e" : "#ef4444";
+    const profitColor = this.gameState.profit >= 0 ? "#FF7404" : "#E81A1E";
     this.add
       .text(
         centerX,
@@ -150,7 +150,7 @@ export class GameOverScene extends Phaser.Scene {
         `Zisk: ${formatMoney(this.gameState.profit)} (${formatPercent(ebitdaRatio)})`,
         {
           fontSize: "16px",
-          fontFamily: "'Inter', system-ui, sans-serif",
+          fontFamily: "'Inter Tight', system-ui, sans-serif",
           color: profitColor,
           fontStyle: "700",
           resolution: 2,
@@ -167,8 +167,8 @@ export class GameOverScene extends Phaser.Scene {
     this.add
       .text(centerX, centerY + 88, subText, {
         fontSize: "12px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#a3a3a3",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#A69E92",
         fontStyle: "500",
         resolution: 2,
       })
@@ -179,8 +179,8 @@ export class GameOverScene extends Phaser.Scene {
     this.add
       .text(centerX, centerY + 120, "Načítavam výsledky...", {
         fontSize: "11px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#555",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#7A736A",
         resolution: 2,
       })
       .setOrigin(0.5)

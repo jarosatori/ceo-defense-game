@@ -72,9 +72,9 @@ export class TeamMemberEntity extends Phaser.GameObjects.Container {
     const label = scene.add
       .text(0, 0, labelText, {
         fontSize: level === "senior" ? "9px" : "8px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#0a0a0a",
-        fontStyle: "800",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
+        color: "#EFEDEB",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(0.5);

@@ -6,30 +6,35 @@ import type {
   RoleConfig,
 } from "./types";
 
+// ──────────────────────────────────────────────────────────
+// Miliónová Evolúcia brand palette → game colors
+// plum background, cream CEO, category hex values
+// ──────────────────────────────────────────────────────────
+
 export const COLORS = {
-  background: 0x0a0a0a,
-  ceo: 0xffffff,
-  marketing: 0x3b82f6,
-  finance: 0xef4444,
-  operations: 0x22c55e,
-  general: 0xeab308,
-  uiText: 0xe5e5e5,
-  damageStart: 0x22c55e,
-  damageEnd: 0xef4444,
+  background: 0x531e38, // plum
+  ceo: 0xefedeb, // cream
+  marketing: 0x9f2d6d, // magenta
+  finance: 0xe81a1e, // red
+  operations: 0xff7404, // orange
+  general: 0xa69e92, // stone
+  uiText: 0xefedeb,
+  damageStart: 0xff7404, // orange (healthy)
+  damageEnd: 0xe81a1e, // red (critical)
 } as const;
 
 export const CSS_COLORS = {
-  background: "#0a0a0a",
-  ceo: "#ffffff",
-  marketing: "#3b82f6",
-  finance: "#ef4444",
-  operations: "#22c55e",
-  general: "#eab308",
-  uiText: "#e5e5e5",
-  success: "#22c55e",
-  warning: "#f59e0b",
-  danger: "#ef4444",
-  accent: "#eab308",
+  background: "#531E38",
+  ceo: "#EFEDEB",
+  marketing: "#9F2D6D",
+  finance: "#E81A1E",
+  operations: "#FF7404",
+  general: "#A69E92",
+  uiText: "#EFEDEB",
+  success: "#FF9DC8",
+  warning: "#FF7404",
+  danger: "#E81A1E",
+  accent: "#FF7404",
 } as const;
 
 export const CATEGORY_LABELS: Record<Category, string> = {
@@ -40,10 +45,10 @@ export const CATEGORY_LABELS: Record<Category, string> = {
 };
 
 export const PROBLEM_CONFIGS: Record<Category, ProblemConfig> = {
-  marketing: { category: "marketing", color: "#3b82f6", shape: "triangle" },
-  finance: { category: "finance", color: "#ef4444", shape: "diamond" },
-  operations: { category: "operations", color: "#22c55e", shape: "square" },
-  general: { category: "general", color: "#eab308", shape: "circle" },
+  marketing: { category: "marketing", color: "#9F2D6D", shape: "triangle" },
+  finance: { category: "finance", color: "#E81A1E", shape: "diamond" },
+  operations: { category: "operations", color: "#FF7404", shape: "square" },
+  general: { category: "general", color: "#A69E92", shape: "circle" },
 };
 
 // ──────────────────────────────────────────────────────────
@@ -61,7 +66,7 @@ export const BUSINESS_TYPE_CONFIGS: Record<"eshop" | "services", BusinessTypeCon
     startingMarketingRatio: 0.25, // 25% of revenue on ads
     maxGrossMargin: 0.65,
     minMarketingRatio: 0.08,
-    characterColor: "#3b82f6",
+    characterColor: "#9F2D6D",
     characterLabel: "E-SHOP",
   },
   services: {
@@ -74,7 +79,7 @@ export const BUSINESS_TYPE_CONFIGS: Record<"eshop" | "services", BusinessTypeCon
     startingMarketingRatio: 0.1, // 10% — mostly referrals
     maxGrossMargin: 0.85,
     minMarketingRatio: 0.05,
-    characterColor: "#22c55e",
+    characterColor: "#FF7404",
     characterLabel: "AGENTÚRA",
   },
 };

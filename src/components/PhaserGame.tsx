@@ -37,7 +37,7 @@ export default function PhaserGame() {
   return (
     <div
       ref={gameContainerRef}
-      className="w-full h-[100dvh] bg-[#0a0a0a] flex items-center justify-center overflow-hidden"
+      className="w-full h-[100dvh] bg-me-plum flex items-center justify-center overflow-hidden"
     >
       <div id="phaser-game" className="w-full h-full max-w-[900px] max-h-[900px]" />
     </div>

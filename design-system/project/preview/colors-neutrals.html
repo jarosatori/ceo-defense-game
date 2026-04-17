@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+  :root{--cream:#EFEDEB;--ink:#1B1C1E;--mist:#D4D4D1}
+  body{margin:0;padding:28px;background:var(--cream);font-family:'Inter Tight',system-ui,sans-serif;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .s{border-radius:14px;height:130px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;box-sizing:border-box}
+  .n{font-family:'Inter Tight';font-weight:600;font-size:15px;letter-spacing:-.01em}
+  .h{font-family:'IBM Plex Mono';font-weight:600;font-size:12px;letter-spacing:.02em}
+  .sub{font-family:'Inter Tight';font-size:11px;margin-top:3px}
+  .onDark{color:#EFEDEB}
+  .onDark .sub{color:rgba(239,237,235,.7)}
+  .onDark .h{color:#EFEDEB;opacity:.85}
+  .onLight{color:#1B1C1E}
+  .onLight .sub{color:rgba(27,28,30,.6)}
+  .onLight .h{color:#1B1C1E;opacity:.75}
+</style></head><body>
+  <div class="s onDark" style="background:#1B1C1E"><div><div class="n">Ink</div><div class="sub">Primary text</div></div><div class="h">#1B1C1E</div></div>
+  <div class="s onDark" style="background:#A69E92"><div><div class="n">Stone</div><div class="sub">Muted text / borders</div></div><div class="h">#A69E92</div></div>
+  <div class="s onDark" style="background:#E81A1E"><div><div class="n">Red</div><div class="sub">Error / danger</div></div><div class="h">#E81A1E</div></div>
+  <div class="s onLight" style="background:#D4D4D1"><div><div class="n">Mist</div><div class="sub">Dividers / fills</div></div><div class="h">#D4D4D1</div></div>
+</body></html>

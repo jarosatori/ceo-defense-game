@@ -1,1 +1,159 @@
 @import "tailwindcss";
+
+/* ==========================================================================
+   CEO Defense — Miliónová Evolúcia brand tokens
+   ========================================================================== */
+
+@theme {
+  /* Primary palette */
+  --color-me-plum: #531E38;
+  --color-me-magenta: #9F2D6D;
+  --color-me-orange: #FF7404;
+  --color-me-cream: #EFEDEB;
+
+  /* Secondary */
+  --color-me-ink: #1B1C1E;
+  --color-me-stone: #A69E92;
+
+  /* Supporting */
+  --color-me-red: #E81A1E;
+  --color-me-mist: #D4D4D1;
+
+  /* Accents & surface */
+  --color-me-pink: #FF9DC8;
+  --color-me-surface: #ffffff;
+  --color-me-surface-alt: #F6F3F0;
+  --color-me-plum-dark: #3e1629;
+  --color-me-plum-darker: #2b0f1d;
+  --color-me-fg-dim: #6b635a;
+
+  /* Category map (4 game categories → brand palette) */
+  --color-me-cat-marketing: var(--color-me-magenta);
+  --color-me-cat-finance: var(--color-me-red);
+  --color-me-cat-operations: var(--color-me-orange);
+  --color-me-cat-general: var(--color-me-stone);
+
+  /* Fonts */
+  --font-display: var(--font-display), "IBM Plex Mono", ui-monospace, monospace;
+  --font-body: var(--font-body), "Inter Tight", system-ui, sans-serif;
+}
+
+/* ---- Base ---- */
+html, body {
+  background: var(--color-me-cream);
+  color: var(--color-me-ink);
+  font-family: var(--font-body);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.55;
+}
+
+/* ---- Utility classes ---- */
+.me-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.me-eyebrow {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-me-stone);
+}
+
+.me-label {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-me-stone);
+}
+
+.me-mono {
+  font-family: var(--font-display);
+}
+
+/* ---- Buttons ---- */
+.me-btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  border-radius: 9999px;
+  padding: 13px 22px;
+  letter-spacing: 0.01em;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+.me-btn:active { transform: translateY(1px); }
+.me-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.me-btn--primary {
+  background: var(--color-me-orange);
+  color: var(--color-me-cream);
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.me-btn--primary:hover:not(:disabled) { background: #e06800; }
+
+.me-btn--ghost {
+  background: transparent;
+  color: var(--color-me-plum);
+  border: 1px solid var(--color-me-plum);
+}
+.me-btn--ghost:hover:not(:disabled) { background: rgba(83, 30, 56, 0.06); }
+
+.me-btn--plum {
+  background: var(--color-me-plum);
+  color: var(--color-me-cream);
+  border-radius: 14px;
+  padding: 14px 22px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.me-btn--plum:hover:not(:disabled) { background: var(--color-me-plum-dark); }
+
+/* ---- Inputs ---- */
+.me-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid var(--color-me-mist);
+  border-radius: 10px;
+  color: var(--color-me-ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.me-input::placeholder { color: var(--color-me-stone); }
+.me-input:focus {
+  border-color: var(--color-me-orange);
+  box-shadow: 0 0 0 3px rgba(255, 116, 4, 0.15);
+}
+
+/* ---- Animations ---- */
+@keyframes me-float {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+  50% { transform: translate(-50%, -50%) translateY(-8px); }
+}
+
+@keyframes me-pulse-ring {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.25; }
+  50% { transform: translate(-50%, -50%) scale(1.06); opacity: 0.4; }
+}
+
+@keyframes me-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}

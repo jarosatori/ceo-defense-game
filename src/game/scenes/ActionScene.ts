@@ -96,9 +96,9 @@ export class ActionScene extends Phaser.Scene {
     this.waveNameLabel = this.add
       .text(this.centerX, this.centerY - 110, "", {
         fontSize: "40px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
         color: "#ffffff",
-        fontStyle: "900",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(0.5)
@@ -108,8 +108,8 @@ export class ActionScene extends Phaser.Scene {
     this.waveNameSubLabel = this.add
       .text(this.centerX, this.centerY - 75, "", {
         fontSize: "14px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#a3a3a3",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#A69E92",
         fontStyle: "500",
         resolution: 2,
       })
@@ -121,9 +121,9 @@ export class ActionScene extends Phaser.Scene {
     this.comboLabel = this.add
       .text(this.centerX, this.centerY + 80, "", {
         fontSize: "18px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
         color: CSS_COLORS.general,
-        fontStyle: "800",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(0.5)
@@ -233,7 +233,7 @@ export class ActionScene extends Phaser.Scene {
     this.waveLabel = this.add
       .text(16, 8, "", {
         fontSize: "13px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: "#ffffff",
         fontStyle: "700",
         resolution: 2,
@@ -244,7 +244,7 @@ export class ActionScene extends Phaser.Scene {
     this.scoreLabel = this.add
       .text(width * 0.3, 8, "", {
         fontSize: "13px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: CSS_COLORS.uiText,
         fontStyle: "600",
         resolution: 2,
@@ -255,7 +255,7 @@ export class ActionScene extends Phaser.Scene {
     this.revenueLabel = this.add
       .text(width * 0.65, 8, "", {
         fontSize: "13px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: CSS_COLORS.general,
         fontStyle: "700",
         resolution: 2,
@@ -266,7 +266,7 @@ export class ActionScene extends Phaser.Scene {
     this.profitLabel = this.add
       .text(width - 16, 8, "", {
         fontSize: "13px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: CSS_COLORS.operations,
         fontStyle: "700",
         resolution: 2,
@@ -499,9 +499,9 @@ export class ActionScene extends Phaser.Scene {
     const popup = this.add
       .text(x, y - 10, text, {
         fontSize: "16px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
         color: cssColor,
-        fontStyle: "800",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(0.5)

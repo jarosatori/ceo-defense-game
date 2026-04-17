@@ -1,0 +1,105 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+  :root{--plum:#531E38;--magenta:#9F2D6D;--orange:#FF7404;--cream:#EFEDEB;--ink:#1B1C1E;--stone:#A69E92;--red:#E81A1E;--mist:#D4D4D1;--dim:#6b635a}
+  body{margin:0;padding:0;background:var(--cream);font-family:'Inter Tight',system-ui,sans-serif;color:var(--ink)}
+  .page{max-width:1080px;margin:0 auto;padding:48px 52px 72px}
+
+  .topbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:22px;border-bottom:1px solid var(--mist);margin-bottom:40px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .mk{width:28px;height:28px;border-radius:8px;background:var(--plum);display:flex;align-items:center;justify-content:center}
+  .mk i{width:10px;height:10px;border-radius:2px;background:var(--orange)}
+  .bname{font-family:'IBM Plex Mono';font-weight:600;font-size:13px;letter-spacing:-.01em}
+  .meta{font-family:'IBM Plex Mono';font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
+
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 6px;background:#fff;border:1px solid var(--mist);border-radius:999px;margin-bottom:22px}
+  .eyebrow .dot{width:16px;height:16px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center}
+  .eyebrow .dot i{width:6px;height:6px;border-radius:50%;background:var(--cream)}
+  .eyebrow span{font-family:'IBM Plex Mono';font-weight:500;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--plum)}
+
+  .hdr{font-family:'IBM Plex Mono';font-weight:600;font-size:88px;line-height:.9;letter-spacing:-.04em;color:var(--plum);margin:0 0 14px}
+  .hdr .o{color:var(--orange)}
+  .sub{font-family:'Inter Tight';font-size:20px;color:var(--dim);max-width:580px;margin:0 0 52px;line-height:1.45}
+
+  .cols{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:start}
+
+  .scale{display:flex;flex-direction:column}
+  .row{display:grid;grid-template-columns:90px 1fr 60px;gap:18px;align-items:center;padding:14px 0;border-top:1px solid var(--mist)}
+  .row:last-child{border-bottom:1px solid var(--mist)}
+  .tag{font-family:'IBM Plex Mono';font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--plum)}
+  .tag b{display:block;color:var(--stone);font-weight:500;font-size:10px;margin-top:3px;letter-spacing:.04em;text-transform:none}
+  .barWrap{height:22px;display:flex;align-items:center}
+  .bar{height:22px;background:var(--plum);border-radius:4px;position:relative;overflow:hidden}
+  .bar::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 7px,rgba(239,237,235,.18) 7px 8px)}
+  .bar.accent{background:var(--orange)}
+  .px{font-family:'IBM Plex Mono';font-weight:500;font-size:12px;color:var(--stone);text-align:right;letter-spacing:.04em}
+
+  .applied{background:#fff;border:1px solid var(--mist);border-radius:18px;padding:22px 22px;position:sticky;top:40px}
+  .applied .ey{font-family:'IBM Plex Mono';font-weight:500;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--stone);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+  .applied .ey::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--magenta)}
+
+  .demoCard{background:var(--plum);color:var(--cream);border-radius:14px;padding:24px;position:relative;overflow:hidden}
+  .demoCard .hd{font-family:'IBM Plex Mono';font-weight:600;font-size:13px;letter-spacing:-.01em;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+  .demoCard .hd span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(239,237,235,.6);font-weight:500}
+  .stack{display:flex;flex-direction:column;gap:8px}
+  .stack .row2{background:rgba(239,237,235,.08);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-family:'Inter Tight';font-size:13px}
+  .stack .row2 b{font-family:'IBM Plex Mono';font-weight:600;color:var(--orange);font-size:12px}
+
+  .ann{margin-top:16px;font-family:'IBM Plex Mono';font-weight:500;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--stone);display:flex;justify-content:space-between}
+  .ann b{color:var(--plum);font-weight:600}
+
+  .palette{display:flex;gap:10px;margin-top:56px}
+  .sw{flex:1;height:44px;border-radius:10px;display:flex;align-items:flex-end;padding:6px 10px;font-family:'IBM Plex Mono';font-weight:500;font-size:10px;letter-spacing:.08em;color:var(--cream)}
+  .sw.l{color:var(--ink)}
+</style></head><body>
+  <div class="page">
+    <div class="topbar">
+      <div class="brand"><div class="mk"><i></i></div><div class="bname">Miliónová Evolúcia / Spacing · Scale</div></div>
+      <div class="meta">4 px base · 8 steps</div>
+    </div>
+
+    <div class="eyebrow"><span class="dot"><i></i></span><span>Spacing system</span></div>
+    <h1 class="hdr">Rhythm<span class="o">.</span></h1>
+    <p class="sub">Osem krokov postavených na 4px mriežke. Tesné medzery pre dátové riadky, veľké pre hero sekcie a dýchanie obsahu.</p>
+
+    <div class="cols">
+      <div class="scale">
+        <div class="row"><div class="tag">2xs<b>hairline</b></div><div class="barWrap"><div class="bar" style="width:4px"></div></div><div class="px">4</div></div>
+        <div class="row"><div class="tag">xs<b>inline</b></div><div class="barWrap"><div class="bar" style="width:8px"></div></div><div class="px">8</div></div>
+        <div class="row"><div class="tag">sm<b>inset</b></div><div class="barWrap"><div class="bar" style="width:12px"></div></div><div class="px">12</div></div>
+        <div class="row"><div class="tag">md<b>row gap</b></div><div class="barWrap"><div class="bar" style="width:16px"></div></div><div class="px">16</div></div>
+        <div class="row"><div class="tag">lg<b>card pad</b></div><div class="barWrap"><div class="bar accent" style="width:24px"></div></div><div class="px">24</div></div>
+        <div class="row"><div class="tag">xl<b>section</b></div><div class="barWrap"><div class="bar" style="width:32px"></div></div><div class="px">32</div></div>
+        <div class="row"><div class="tag">2xl<b>block</b></div><div class="barWrap"><div class="bar" style="width:48px"></div></div><div class="px">48</div></div>
+        <div class="row"><div class="tag">3xl<b>hero</b></div><div class="barWrap"><div class="bar accent" style="width:72px"></div></div><div class="px">72</div></div>
+      </div>
+
+      <div class="applied">
+        <div class="ey">Applied · Wave 04 payroll</div>
+        <div class="demoCard">
+          <div class="hd">Tvoj tím<span>€680/mes</span></div>
+          <div class="stack">
+            <div class="row2">Marketingový špecialista<b>€140</b></div>
+            <div class="row2">Operations Manager<b>€220</b></div>
+            <div class="row2">Finančný riaditeľ<b>€320</b></div>
+          </div>
+        </div>
+        <div class="ann">
+          <span>gap · <b>8</b></span>
+          <span>pad · <b>24</b></span>
+          <span>row · <b>12/10</b></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="palette">
+      <div class="sw" style="background:#531E38">#531E38</div>
+      <div class="sw" style="background:#9F2D6D">#9F2D6D</div>
+      <div class="sw" style="background:#FF7404">#FF7404</div>
+      <div class="sw l" style="background:#EFEDEB;border:1px solid var(--mist)">#EFEDEB</div>
+      <div class="sw" style="background:#1B1C1E">#1B1C1E</div>
+      <div class="sw l" style="background:#A69E92">#A69E92</div>
+      <div class="sw" style="background:#E81A1E">#E81A1E</div>
+      <div class="sw l" style="background:#D4D4D1">#D4D4D1</div>
+    </div>
+  </div>
+</body></html>

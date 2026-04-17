@@ -31,8 +31,8 @@ export class CEO extends Phaser.GameObjects.Container {
     this.label = scene.add
       .text(0, 0, "CEO", {
         fontSize: "11px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#0a0a0a",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#EFEDEB",
         fontStyle: "700",
         resolution: 2,
       })

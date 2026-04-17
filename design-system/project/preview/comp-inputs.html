@@ -1,0 +1,13 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{padding:32px;background:var(--me-cream);display:flex;flex-direction:column;gap:12px;max-width:420px}
+  .field label{font-family:'IBM Plex Mono';font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#A69E92;display:block;margin-bottom:6px}
+  input{width:100%;padding:14px 16px;background:#fff;border:1px solid #D4D4D1;border-radius:10px;color:#1B1C1E;font-family:'Inter Tight';font-size:15px;box-sizing:border-box;outline:none;transition:border-color .15s}
+  input::placeholder{color:#A69E92}
+  input:focus{border-color:#FF7404;box-shadow:0 0 0 3px rgba(255,116,4,.15)}
+  .f{border-color:#FF7404;box-shadow:0 0 0 3px rgba(255,116,4,.15)}
+</style></head><body>
+  <div class="field"><label>Meno</label><input placeholder="Nepovinné"></div>
+  <div class="field"><label>Email</label><input type="email" value="jaro@milionovaevolucia.sk" class="f"></div>
+  <div class="field"><label>Zamknuté</label><input disabled placeholder="Disabled" style="opacity:.5;background:#F6F3F0"></div>
+</body></html>

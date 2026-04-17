@@ -78,7 +78,7 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(centerX, y, `VLNA ${this.gameState.wave} PREŽITÁ`, {
         fontSize: "13px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: CSS_COLORS.operations,
         fontStyle: "700",
         resolution: 2,
@@ -89,9 +89,9 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(centerX, y, "Plánovacia fáza", {
         fontSize: "26px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
         color: "#ffffff",
-        fontStyle: "900",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(0.5, 0);
@@ -108,9 +108,9 @@ export class PlanningScene extends Phaser.Scene {
     this.budgetLabel = this.add
       .text(contentX, y, formatMoney(this.gameState.budget), {
         fontSize: "22px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
         color: CSS_COLORS.general,
-        fontStyle: "800",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(0, 0);
@@ -118,8 +118,8 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(contentX, y + 26, "Budget", {
         fontSize: "10px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#666",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#A69E92",
         resolution: 2,
       })
       .setOrigin(0, 0);
@@ -127,7 +127,7 @@ export class PlanningScene extends Phaser.Scene {
     this.countdownLabel = this.add
       .text(contentX + contentWidth, y, `${this.countdown}s`, {
         fontSize: "22px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: CSS_COLORS.uiText,
         fontStyle: "700",
         resolution: 2,
@@ -137,8 +137,8 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(contentX + contentWidth, y + 26, "Auto-štart", {
         fontSize: "10px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#666",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#A69E92",
         resolution: 2,
       })
       .setOrigin(1, 0);
@@ -149,8 +149,8 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(contentX, y, "PRIORITA TOHTO MESIACA (povinná)", {
         fontSize: "10px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#666",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#A69E92",
         fontStyle: "700",
         resolution: 2,
       })
@@ -181,7 +181,7 @@ export class PlanningScene extends Phaser.Scene {
       this.add
         .text(contentX + 30, priorityY + 8, priorityCfg.label, {
           fontSize: "11px",
-          fontFamily: "'Inter', system-ui, sans-serif",
+          fontFamily: "'Inter Tight', system-ui, sans-serif",
           color: isSelected ? "#fff" : "#ccc",
           fontStyle: "600",
           resolution: 2,
@@ -191,8 +191,8 @@ export class PlanningScene extends Phaser.Scene {
       this.add
         .text(contentX + 30, priorityY + 22, priorityCfg.description, {
           fontSize: "9px",
-          fontFamily: "'Inter', system-ui, sans-serif",
-          color: isSelected ? "#aaa" : "#555",
+          fontFamily: "'Inter Tight', system-ui, sans-serif",
+          color: isSelected ? "#D4D4D1" : "#7A736A",
           resolution: 2,
           wordWrap: { width: contentWidth - 44 },
         })
@@ -233,8 +233,8 @@ export class PlanningScene extends Phaser.Scene {
           `TVOJ TÍM (${this.gameState.team.length} ľudí, ${formatMoney(totalSalary)}/mes)`,
           {
             fontSize: "10px",
-            fontFamily: "'Inter', system-ui, sans-serif",
-            color: "#666",
+            fontFamily: "'Inter Tight', system-ui, sans-serif",
+            color: "#A69E92",
             fontStyle: "700",
             resolution: 2,
           },
@@ -260,9 +260,9 @@ export class PlanningScene extends Phaser.Scene {
         this.add
           .text(contentX + 22, y + 21, labelShort, {
             fontSize: "7px",
-            fontFamily: "'Inter', system-ui, sans-serif",
-            color: "#0a0a0a",
-            fontStyle: "800",
+            fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
+            color: "#EFEDEB",
+            fontStyle: "600",
             resolution: 2,
           })
           .setOrigin(0.5);
@@ -271,7 +271,7 @@ export class PlanningScene extends Phaser.Scene {
         this.add
           .text(contentX + 38, y + 10, config.label + levelBadge, {
             fontSize: "10px",
-            fontFamily: "'Inter', system-ui, sans-serif",
+            fontFamily: "'Inter Tight', system-ui, sans-serif",
             color: "#fff",
             fontStyle: "600",
             resolution: 2,
@@ -285,7 +285,7 @@ export class PlanningScene extends Phaser.Scene {
         this.add
           .text(contentX + 38, y + 24, `${formatMoney(monthlyCost)}/mes`, {
             fontSize: "9px",
-            fontFamily: "'Inter', system-ui, sans-serif",
+            fontFamily: "'Inter Tight', system-ui, sans-serif",
             color: "#888",
             resolution: 2,
           })
@@ -310,8 +310,8 @@ export class PlanningScene extends Phaser.Scene {
               `Upgrade ${formatMoney(config.upgradeCost)}`,
               {
                 fontSize: "8px",
-                fontFamily: "'Inter', system-ui, sans-serif",
-                color: canUpgrade ? CSS_COLORS.general : "#555",
+                fontFamily: "'Inter Tight', system-ui, sans-serif",
+                color: canUpgrade ? CSS_COLORS.general : "#7A736A",
                 fontStyle: "700",
                 resolution: 2,
               },
@@ -342,7 +342,7 @@ export class PlanningScene extends Phaser.Scene {
         this.add
           .text(fireBtnX + fireBtnW / 2, fireBtnY + fireBtnH / 2, "Prepustiť", {
             fontSize: "8px",
-            fontFamily: "'Inter', system-ui, sans-serif",
+            fontFamily: "'Inter Tight', system-ui, sans-serif",
             color: CSS_COLORS.finance,
             fontStyle: "700",
             resolution: 2,
@@ -367,8 +367,8 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(contentX, y, "NAJMI DO TÍMU", {
         fontSize: "10px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#666",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#A69E92",
         fontStyle: "700",
         resolution: 2,
       })
@@ -401,9 +401,9 @@ export class PlanningScene extends Phaser.Scene {
     this.continueBtnText = this.add
       .text(centerX, btnY + btnH / 2, "POKRAČOVAŤ →", {
         fontSize: "16px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#0a0a0a",
-        fontStyle: "900",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
+        color: "#EFEDEB",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(0.5);
@@ -476,7 +476,7 @@ export class PlanningScene extends Phaser.Scene {
       10,
     );
 
-    this.continueBtnText.setColor(enabled ? "#0a0a0a" : "#666");
+    this.continueBtnText.setColor(enabled ? "#EFEDEB" : "#A69E92");
     this.continueBtnText.setText(
       enabled ? "POKRAČOVAŤ →" : "VYBER PRIORITU",
     );
@@ -546,8 +546,8 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(x + padding, ly, "P&L MINULÝ MESIAC", {
         fontSize: "10px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#666",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#A69E92",
         fontStyle: "700",
         resolution: 2,
       })
@@ -565,7 +565,7 @@ export class PlanningScene extends Phaser.Scene {
       w - padding * 2,
       "COGS",
       `-${formatMoney(pnl.cogs)}`,
-      "#aaa",
+      "#D4D4D1",
     );
     ly += lineH;
 
@@ -618,7 +618,7 @@ export class PlanningScene extends Phaser.Scene {
       w - padding * 2,
       "Mzdy",
       `-${formatMoney(pnl.salaries)}`,
-      "#aaa",
+      "#D4D4D1",
     );
     ly += lineH;
 
@@ -641,7 +641,7 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(x + padding, ly, "Kumulatívny zisk:", {
         fontSize: "10px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: "#888",
         resolution: 2,
       })
@@ -649,9 +649,9 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(x + w - padding, ly, formatMoney(this.gameState.profit), {
         fontSize: "11px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
         color: cumColor,
-        fontStyle: "800",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(1, 0);
@@ -671,7 +671,7 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(x, y, label, {
         fontSize: "10px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: "#bbb",
         fontStyle: bold ? "700" : "400",
         resolution: 2,
@@ -681,7 +681,7 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(x + w, y, value, {
         fontSize: "11px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: valueColor,
         fontStyle: bold ? "800" : "600",
         resolution: 2,
@@ -737,9 +737,9 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(x + 22, y + h / 2, labelShort, {
         fontSize: "7px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#0a0a0a",
-        fontStyle: "800",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
+        color: "#EFEDEB",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(0.5)
@@ -748,7 +748,7 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(x + 40, y + 8, config.label, {
         fontSize: "11px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: "#ffffff",
         fontStyle: "700",
         resolution: 2,
@@ -758,7 +758,7 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(x + 40, y + 22, config.description, {
         fontSize: "8px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: "#777",
         resolution: 2,
         wordWrap: { width: w - 180 },
@@ -775,8 +775,8 @@ export class PlanningScene extends Phaser.Scene {
           `Ak najmeš: Δ obrat ${this.signed(sim.revDelta)}, Δ zisk ${this.signed(sim.profitDelta)}`,
           {
             fontSize: "8px",
-            fontFamily: "'Inter', system-ui, sans-serif",
-            color: "#555",
+            fontFamily: "'Inter Tight', system-ui, sans-serif",
+            color: "#7A736A",
             resolution: 2,
           },
         )
@@ -787,9 +787,9 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(x + w - 10, y + 8, `Fee ${formatMoney(config.cost)}`, {
         fontSize: "12px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: canAfford ? CSS_COLORS.general : "#555",
-        fontStyle: "800",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
+        color: canAfford ? CSS_COLORS.general : "#7A736A",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(1, 0)
@@ -798,7 +798,7 @@ export class PlanningScene extends Phaser.Scene {
     this.add
       .text(x + w - 10, y + 24, `${formatMoney(config.monthlyCost)}/mes`, {
         fontSize: "8px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: "#888",
         resolution: 2,
       })
@@ -819,9 +819,9 @@ export class PlanningScene extends Phaser.Scene {
       this.add
         .text(btnX + btnW / 2, btnY + btnH / 2, "NAJAŤ", {
           fontSize: "9px",
-          fontFamily: "'Inter', system-ui, sans-serif",
+          fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
           color: CSS_COLORS.general,
-          fontStyle: "800",
+          fontStyle: "600",
           resolution: 2,
         })
         .setOrigin(0.5);

@@ -66,7 +66,17 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
     : undefined;
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center px-6 py-12 gap-8">
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#EFEDEB",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "40px 24px",
+        gap: 24,
+      }}
+    >
       <ResultsCard
         profile={profile}
         waves={waves}
@@ -82,27 +92,62 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
 
       <ShareButtons profile={profile} waves={waves} score={score} />
 
-      <div className="max-w-md w-full bg-[#1a1a1a] border border-[#333] rounded-2xl p-8 text-center space-y-4">
-        <h3 className="text-xl font-bold text-white">
+      {/* CTA */}
+      <div
+        style={{
+          background: "#fff",
+          border: "1px solid #D4D4D1",
+          borderRadius: 22,
+          padding: "28px 26px",
+          maxWidth: 460,
+          width: "100%",
+        }}
+      >
+        <div className="me-eyebrow" style={{ color: "#9F2D6D" }}>
+          Ďalší krok
+        </div>
+        <h3
+          className="me-display"
+          style={{
+            fontSize: 22,
+            color: "#1B1C1E",
+            marginBottom: 10,
+            marginTop: 6,
+            lineHeight: 1.2,
+          }}
+        >
           Chceš reálne vybudovať firmu, ktorá funguje bez teba?
         </h3>
-        <p className="text-sm text-[#a3a3a3] leading-relaxed">
+        <p
+          style={{
+            fontSize: 14,
+            color: "#6b635a",
+            lineHeight: 1.55,
+            marginBottom: 18,
+          }}
+        >
           Miliónová Evolúcia — 5-fázový systém pre podnikateľov s obratom
-          €100k-€1M+
+          €100k–€1M+.
         </p>
         <a
           href="https://milionovaevolucia.sk"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block w-full py-3 bg-[#eab308] hover:bg-[#ca9a06] text-[#0a0a0a] font-bold rounded-lg transition-colors"
+          className="me-btn me-btn--primary"
+          style={{
+            display: "inline-block",
+            textAlign: "center",
+            textDecoration: "none",
+          }}
         >
-          Zisti viac
+          Zisti viac →
         </a>
       </div>
 
       <a
         href="/game"
-        className="inline-block px-8 py-3 border border-[#444] hover:border-[#666] text-[#e5e5e5] font-semibold rounded-lg transition-colors text-sm"
+        className="me-btn me-btn--ghost"
+        style={{ textDecoration: "none", textAlign: "center" }}
       >
         Hrať znova
       </a>

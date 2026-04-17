@@ -21,7 +21,7 @@ export class DamageSystem {
     this.label = scene.add
       .text(this.barX + this.barWidth + 8, this.barY + this.barHeight / 2, "0%", {
         fontSize: "9px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: "#888",
         fontStyle: "600",
         resolution: 2,

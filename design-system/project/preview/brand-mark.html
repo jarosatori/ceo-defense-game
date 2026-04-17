@@ -1,0 +1,106 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+  :root{--plum:#531E38;--magenta:#9F2D6D;--orange:#FF7404;--cream:#EFEDEB;--ink:#1B1C1E;--stone:#A69E92;--mist:#D4D4D1;--dim:#6b635a}
+  body{margin:0;padding:0;background:var(--cream);font-family:'Inter Tight',system-ui,sans-serif;color:var(--ink)}
+  .page{max-width:1080px;margin:0 auto;padding:44px 52px 64px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:20px;border-bottom:1px solid var(--mist);margin-bottom:36px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .mk{width:28px;height:28px;border-radius:8px;background:var(--plum);display:flex;align-items:center;justify-content:center}
+  .mk i{width:10px;height:10px;border-radius:2px;background:var(--orange)}
+  .bname{font-family:'IBM Plex Mono';font-weight:600;font-size:13px;letter-spacing:-.01em}
+  .meta{font-family:'IBM Plex Mono';font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
+  .hdr{font-family:'IBM Plex Mono';font-weight:600;font-size:52px;line-height:.92;letter-spacing:-.035em;color:var(--plum);margin:0 0 10px}
+  .hdr .o{color:var(--orange)}
+  .sub{font-family:'Inter Tight';font-size:17px;color:var(--dim);max-width:540px;margin:0 0 40px;line-height:1.45}
+
+  .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+  .tile{border-radius:18px;padding:40px;display:flex;align-items:center;justify-content:center;min-height:260px;position:relative}
+  .tile .tag{position:absolute;top:16px;left:18px;font-family:'IBM Plex Mono';font-weight:500;font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+  .t-cream{background:#fff;border:1px solid var(--mist)} .t-cream .tag{color:var(--stone)}
+  .t-plum{background:var(--plum)} .t-plum .tag{color:rgba(239,237,235,.55)}
+
+  .variants{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+  .vt{aspect-ratio:1;border-radius:14px;display:flex;align-items:center;justify-content:center;position:relative}
+  .vt .lbl{position:absolute;bottom:10px;left:12px;font-family:'IBM Plex Mono';font-weight:500;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
+  .vt.dark .lbl{color:rgba(239,237,235,.55)}
+
+  .cs{margin-top:44px;background:#fff;border:1px solid var(--mist);border-radius:18px;padding:28px 32px}
+  .cs-ey{font-family:'IBM Plex Mono';font-weight:500;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--stone);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+  .cs-ey::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--magenta)}
+  .cs-stage{position:relative;background:var(--cream);border-radius:12px;padding:52px;display:flex;align-items:center;justify-content:center}
+  .cs-stage::before,.cs-stage::after{content:"";position:absolute;border:1px dashed var(--orange);border-radius:10px;opacity:.5}
+  .cs-stage::before{inset:22px} .cs-stage::after{inset:38px}
+  .cs-notes{display:flex;justify-content:space-between;margin-top:14px;font-family:'IBM Plex Mono';font-weight:500;font-size:11px;color:var(--dim)}
+  .cs-notes b{color:var(--orange);font-weight:600}
+
+  .palette{display:flex;gap:10px;margin-top:44px}
+  .sw{flex:1;height:44px;border-radius:10px;display:flex;align-items:flex-end;padding:6px 10px;font-family:'IBM Plex Mono';font-weight:500;font-size:10px;letter-spacing:.08em;color:var(--cream)}
+  .sw.l{color:var(--ink)}
+
+  /* Inline mark renderers — three color variants */
+  .svg-cream{--bg:#531E38;--stroke:#EFEDEB;--inner:#9F2D6D;--dot:#FF7404}
+  .svg-ink{--bg:#1B1C1E;--stroke:#EFEDEB;--inner:#9F2D6D;--dot:#FF7404}
+  .svg-mag{--bg:#9F2D6D;--stroke:#EFEDEB;--inner:#531E38;--dot:#FF7404}
+  .svg-orange{--bg:#FF7404;--stroke:#531E38;--inner:#EFEDEB;--dot:#531E38}
+  .svg-mono{--bg:transparent;--stroke:#531E38;--inner:#531E38;--dot:#531E38}
+</style></head><body>
+  <div class="page">
+    <div class="topbar">
+      <div class="brand"><div class="mk"><i></i></div><div class="bname">Miliónová Evolúcia / Brand · Mark</div></div>
+      <div class="meta">C-arc monogram · orange bug</div>
+    </div>
+
+    <h1 class="hdr">Mark<span class="o">.</span></h1>
+    <p class="sub">Monogram postavený na otvorenej „C-arc“ (CEO) s oranžovou bodkou — tá istá bodka, ktorá uzatvára wordmark a všetky nadpisy. Žiadne heraldické štíty, len čistá geometria.</p>
+
+    <div class="hero">
+      <div class="tile t-cream"><div class="tag">Primary · on cream</div>
+        <img src="../assets/logo-mark.svg" width="200" height="200" alt="CEO Defense mark">
+      </div>
+      <div class="tile t-plum"><div class="tag">Reversed · on plum</div>
+        <svg class="svg-ink" width="150" height="150" viewBox="0 0 120 120"><rect width="120" height="120" rx="26" fill="#EFEDEB"/><path d="M86 36 A32 32 0 1 0 86 84" fill="none" stroke="#531E38" stroke-width="14" stroke-linecap="round"/><path d="M82 46 A22 22 0 1 0 82 74" fill="none" stroke="#9F2D6D" stroke-width="4" stroke-linecap="round" opacity=".7"/><circle cx="90" cy="88" r="10" fill="#FF7404"/></svg>
+      </div>
+    </div>
+
+    <div class="variants">
+      <div class="vt" style="background:#fff;border:1px solid var(--mist)">
+        <img src="../assets/logo-mark.svg" width="90" height="90">
+        <div class="lbl">Primary</div>
+      </div>
+      <div class="vt dark" style="background:var(--ink)">
+        <svg width="90" height="90" viewBox="0 0 120 120"><rect width="120" height="120" rx="26" fill="#1B1C1E"/><path d="M86 36 A32 32 0 1 0 86 84" fill="none" stroke="#EFEDEB" stroke-width="14" stroke-linecap="round"/><path d="M82 46 A22 22 0 1 0 82 74" fill="none" stroke="#9F2D6D" stroke-width="4" stroke-linecap="round" opacity=".7"/><circle cx="90" cy="88" r="10" fill="#FF7404"/></svg>
+        <div class="lbl">Ink</div>
+      </div>
+      <div class="vt dark" style="background:var(--magenta)">
+        <svg width="90" height="90" viewBox="0 0 120 120"><rect width="120" height="120" rx="26" fill="#9F2D6D"/><path d="M86 36 A32 32 0 1 0 86 84" fill="none" stroke="#EFEDEB" stroke-width="14" stroke-linecap="round"/><path d="M82 46 A22 22 0 1 0 82 74" fill="none" stroke="#531E38" stroke-width="4" stroke-linecap="round" opacity=".7"/><circle cx="90" cy="88" r="10" fill="#FF7404"/></svg>
+        <div class="lbl">Magenta</div>
+      </div>
+      <div class="vt" style="background:var(--orange)">
+        <svg width="90" height="90" viewBox="0 0 120 120"><rect width="120" height="120" rx="26" fill="#FF7404"/><path d="M86 36 A32 32 0 1 0 86 84" fill="none" stroke="#531E38" stroke-width="14" stroke-linecap="round"/><path d="M82 46 A22 22 0 1 0 82 74" fill="none" stroke="#EFEDEB" stroke-width="4" stroke-linecap="round" opacity=".7"/><circle cx="90" cy="88" r="10" fill="#531E38"/></svg>
+        <div class="lbl" style="color:rgba(255,255,255,.7)">Orange</div>
+      </div>
+    </div>
+
+    <div class="cs">
+      <div class="cs-ey">Clear space · min size</div>
+      <div class="cs-stage">
+        <img src="../assets/logo-mark.svg" width="140" height="140">
+      </div>
+      <div class="cs-notes">
+        <span>Clear space <b>= ¼ mark height</b></span>
+        <span>Min. size <b>24 px digital · 12 mm print</b></span>
+      </div>
+    </div>
+
+    <div class="palette">
+      <div class="sw" style="background:#531E38">#531E38</div>
+      <div class="sw" style="background:#9F2D6D">#9F2D6D</div>
+      <div class="sw" style="background:#FF7404">#FF7404</div>
+      <div class="sw l" style="background:#EFEDEB;border:1px solid var(--mist)">#EFEDEB</div>
+      <div class="sw" style="background:#1B1C1E">#1B1C1E</div>
+      <div class="sw l" style="background:#A69E92">#A69E92</div>
+      <div class="sw" style="background:#E81A1E">#E81A1E</div>
+      <div class="sw l" style="background:#D4D4D1">#D4D4D1</div>
+    </div>
+  </div>
+</body></html>

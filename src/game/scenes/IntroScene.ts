@@ -33,9 +33,9 @@ export class IntroScene extends Phaser.Scene {
     const title = this.add
       .text(centerX, centerY - 100, "CEO DEFENSE", {
         fontSize: "44px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
         color: "#ffffff",
-        fontStyle: "900",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(0.5)
@@ -54,8 +54,8 @@ export class IntroScene extends Phaser.Scene {
         "Dokážeš vybudovať firmu,\nktorá funguje bez teba?",
         {
           fontSize: "17px",
-          fontFamily: "'Inter', system-ui, sans-serif",
-          color: "#e5e5e5",
+          fontFamily: "'Inter Tight', system-ui, sans-serif",
+          color: "#EFEDEB",
           align: "center",
           lineSpacing: 6,
           resolution: 2,
@@ -70,9 +70,9 @@ export class IntroScene extends Phaser.Scene {
     const ceoLabel = this.add
       .text(centerX, centerY + 60, "CEO", {
         fontSize: "10px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#0a0a0a",
-        fontStyle: "800",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
+        color: "#EFEDEB",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(0.5)
@@ -82,8 +82,8 @@ export class IntroScene extends Phaser.Scene {
     const startHint = this.add
       .text(centerX, centerY + 120, "Ty si CEO. Všetko ide cez teba.", {
         fontSize: "13px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#a3a3a3",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#A69E92",
         fontStyle: "500",
         resolution: 2,
       })
@@ -93,8 +93,8 @@ export class IntroScene extends Phaser.Scene {
     const loadingLabel = this.add
       .text(centerX, height - 40, "10 levelov biznis problemov...", {
         fontSize: "11px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#555",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#7A736A",
         resolution: 2,
       })
       .setOrigin(0.5)

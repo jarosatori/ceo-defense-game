@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>CEO Defense — UI Kit</title>
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <style>
+    html,body{background:#EFEDEB;margin:0;min-height:100vh;font-family:'Inter Tight',system-ui,sans-serif}
+    #root{min-height:100vh}
+    *{box-sizing:border-box}
+
+    .me-btn{font-family:'Inter Tight';font-weight:600;font-size:14px;border:none;cursor:pointer;border-radius:999px;padding:13px 22px;letter-spacing:.01em;transition:background .15s,transform .1s}
+    .me-btn:active{transform:translateY(1px)}
+    .me-btn--primary{background:#FF7404;color:#EFEDEB;width:100%;padding:16px;border-radius:14px;font-size:15px;font-weight:700;letter-spacing:.04em}
+    .me-btn--primary:hover{background:#e06800}
+    .me-btn--ghost{background:transparent;color:#531E38;border:1px solid #531E38}
+    .me-btn--ghost:hover{background:rgba(83,30,56,.06)}
+    .me-btn--danger{background:rgba(232,26,30,.08);color:#E81A1E;border:1px solid rgba(232,26,30,.3);font-size:12px;padding:7px 12px}
+    .me-btn--hire{background:#FF7404;color:#EFEDEB;font-size:12px;padding:8px 14px;font-weight:600;letter-spacing:.02em}
+    .me-btn--hire:disabled{background:#D4D4D1;color:#A69E92;cursor:not-allowed}
+
+    .me-input{width:100%;padding:14px 16px;background:#fff;border:1px solid #D4D4D1;border-radius:10px;color:#1B1C1E;font-family:'Inter Tight';font-size:15px;outline:none;transition:border-color .15s,box-shadow .15s}
+    .me-input::placeholder{color:#A69E92}
+    .me-input:focus{border-color:#FF7404;box-shadow:0 0 0 3px rgba(255,116,4,.15)}
+
+    .me-eyebrow{font-family:'IBM Plex Mono';font-weight:500;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#A69E92;margin-bottom:10px}
+    .me-label{font-family:'IBM Plex Mono';font-weight:500;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#A69E92;margin-bottom:6px}
+    .me-display{font-family:'IBM Plex Mono';font-weight:600;letter-spacing:-.02em}
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" data-presets="react">
+const { useState } = React;
+
+const CAT = {
+  mkt:{ color:'#9F2D6D', tint:'rgba(159,45,109,.10)' },
+  fin:{ color:'#E81A1E', tint:'rgba(232,26,30,.08)' },
+  ops:{ color:'#FF7404', tint:'rgba(255,116,4,.10)' },
+  gen:{ color:'#A69E92', tint:'rgba(166,158,146,.15)' },
+};
+
+function WaveTracker({ current, total = 10 }) {
+  return (
+    <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+      {Array.from({length: total}, (_, i) => i + 1).map(w => {
+        const done = w < current, cur = w === current;
+        return (
+          <div key={w} className="me-display" style={{
+            width:32, height:32, borderRadius:8,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            fontSize:12, fontWeight:600,
+            background: done ? '#531E38' : cur ? '#FF7404' : '#fff',
+            color: done||cur ? '#EFEDEB' : '#A69E92',
+            border: done||cur ? 'none' : '1px solid #D4D4D1',
+            boxShadow: cur ? '0 0 0 3px rgba(255,116,4,.2)' : 'none'
+          }}>{w}</div>
+        );
+      })}
+    </div>
+  );
+}
+
+const ROLE_LABELS = { va:'VA', sales:'SAL', marketing:'MKT', product:'PRD', support:'SUP', accountant:'ACC', cfo:'CFO', hr:'HR', operations:'OPS', coo:'COO' };
+const ROLE_CAT = { va:'gen', sales:'mkt', marketing:'mkt', product:'mkt', support:'gen', accountant:'fin', cfo:'fin', hr:'gen', operations:'ops', coo:'ops' };
+
+function RoleToken({ role, level='junior', size }) {
+  const d = size || (level === 'senior' ? 44 : 36);
+  const cat = ROLE_CAT[role] || 'gen';
+  return (
+    <div className="me-display" style={{
+      width:d, height:d, borderRadius:'50%',
+      background: CAT[cat].color, color:'#EFEDEB',
+      display:'flex', alignItems:'center', justifyContent:'center',
+      fontSize:11, fontWeight:600, letterSpacing:'.03em', flexShrink:0
+    }}>{ROLE_LABELS[role]}</div>
+  );
+}
+
+function CeoDisc({ size = 36 }) {
+  return (
+    <div className="me-display" style={{
+      width:size, height:size, borderRadius:'50%', background:'#EFEDEB',
+      display:'flex', alignItems:'center', justifyContent:'center',
+      fontSize:11, fontWeight:600, color:'#531E38', flexShrink:0,
+      border:'2px solid #531E38'
+    }}>CEO</div>
+  );
+}
+
+function CategoryBar({ label, pct, cat }) {
+  const color = CAT[cat].color;
+  return (
+    <div style={{display:'grid', gridTemplateColumns:'110px 1fr 44px', gap:14, alignItems:'center', padding:'9px 0', borderBottom:'1px solid rgba(212,212,209,.6)'}}>
+      <div style={{fontFamily:'Inter Tight',fontWeight:500,fontSize:13,color:'#1B1C1E',display:'flex',alignItems:'center',gap:10}}>
+        <span style={{width:8,height:8,borderRadius:2,background:color,display:'inline-block'}}/>
+        {label}
+      </div>
+      <div style={{position:'relative',height:6,background:'#F2EEEA',borderRadius:999,overflow:'hidden'}}>
+        <div style={{position:'absolute',inset:0,width:`${pct}%`,background:color,borderRadius:999}}/>
+      </div>
+      <div className="me-display" style={{fontSize:13,color:'#1B1C1E',textAlign:'right'}}>{pct}%</div>
+    </div>
+  );
+}
+
+function Eyebrow({ children }) {
+  return <div className="me-eyebrow">{children}</div>;
+}
+
+/* ============ LANDING ============ */
+function OrbitTask({ x, y, cat, shape, delay, size=38 }) {
+  const c = CAT[cat].color;
+  const s = size;
+  let glyph;
+  if (shape === 'circle') glyph = <circle cx="16" cy="16" r="11" fill={c}/>;
+  else if (shape === 'triangle') glyph = <path d="M16 4l13 23H3z" fill={c}/>;
+  else if (shape === 'diamond') glyph = <rect x="8" y="8" width="16" height="16" fill={c} transform="rotate(45 16 16)"/>;
+  else if (shape === 'star') glyph = <path d="M16 4l3.5 8 8.5.8-6.5 5.7 2 8.5L16 22.5 8.5 27l2-8.5L4 12.8 12.5 12z" fill={c}/>;
+  else if (shape === 'hex') glyph = <path d="M16 3l11 6.5v13L16 29 5 22.5v-13z" fill={c}/>;
+  else glyph = <rect x="6" y="6" width="20" height="20" rx="4" fill={c}/>;
+  return (
+    <div style={{
+      position:'absolute', left:`calc(50% + ${x}px)`, top:`calc(50% + ${y}px)`,
+      transform:'translate(-50%,-50%)', width:s, height:s,
+      background:'#fff', borderRadius:12, border:'1px solid #D4D4D1',
+      display:'flex', alignItems:'center', justifyContent:'center',
+      boxShadow:'0 6px 20px -10px rgba(27,28,30,.2)',
+      animation:`me-float 6s ease-in-out ${delay}s infinite`
+    }}>
+      <svg width={s*0.58} height={s*0.58} viewBox="0 0 32 32">{glyph}</svg>
+    </div>
+  );
+}
+
+function LandingScreen({ onStart }) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+
+  return (
+    <main style={{minHeight:'100vh',background:'#EFEDEB',position:'relative',overflow:'hidden'}}>
+      <style>{`
+        @keyframes me-float { 0%,100%{transform:translate(-50%,-50%) translateY(0)} 50%{transform:translate(-50%,-50%) translateY(-8px)} }
+        @keyframes me-pulse { 0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.25} 50%{transform:translate(-50%,-50%) scale(1.06);opacity:.4} }
+        @keyframes me-marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+      `}</style>
+
+      {/* Ambient plum glow */}
+      <div style={{position:'absolute',left:'50%',top:'36%',width:620,height:620,background:'radial-gradient(circle,rgba(159,45,109,.22) 0%,rgba(159,45,109,0) 65%)',transform:'translate(-50%,-50%)',pointerEvents:'none'}}/>
+      <div style={{position:'absolute',right:-120,top:-100,width:360,height:360,background:'radial-gradient(circle,rgba(255,116,4,.18) 0%,rgba(255,116,4,0) 60%)',pointerEvents:'none'}}/>
+
+      {/* Top strip */}
+      <div style={{position:'absolute',top:0,left:0,right:0,padding:'22px 28px',display:'flex',justifyContent:'space-between',alignItems:'center',zIndex:5}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <div style={{width:28,height:28,borderRadius:8,background:'#531E38',display:'flex',alignItems:'center',justifyContent:'center'}}>
+            <div style={{width:10,height:10,borderRadius:2,background:'#FF7404'}}/>
+          </div>
+          <div className="me-display" style={{fontSize:13,color:'#1B1C1E',letterSpacing:'.02em'}}>Miliónová Evolúcia</div>
+        </div>
+        <div className="me-label" style={{margin:0,color:'#A69E92'}}>v1.0 · single-player</div>
+      </div>
+
+      <div style={{maxWidth:1100,margin:'0 auto',padding:'90px 28px 40px',display:'grid',gridTemplateColumns:'1.1fr .9fr',gap:48,alignItems:'center',position:'relative',zIndex:2}}>
+
+        {/* LEFT — copy + CTA */}
+        <div>
+          <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'6px 12px 6px 8px',background:'#fff',border:'1px solid #D4D4D1',borderRadius:999,marginBottom:24}}>
+            <span style={{width:18,height:18,borderRadius:'50%',background:'#FF7404',display:'flex',alignItems:'center',justifyContent:'center'}}><span style={{width:6,height:6,borderRadius:'50%',background:'#EFEDEB'}}/></span>
+            <span className="me-label" style={{margin:0,color:'#531E38'}}>New · Biznis simulátor</span>
+          </div>
+
+          <h1 className="me-display" style={{fontSize:82,color:'#531E38',lineHeight:.92,marginBottom:18,letterSpacing:'-.03em'}}>
+            CEO<br/>DEFENSE<span style={{color:'#FF7404'}}>.</span>
+          </h1>
+
+          <p style={{fontFamily:'Inter Tight',fontSize:20,color:'#1B1C1E',lineHeight:1.4,marginBottom:10,maxWidth:480}}>
+            Dokážeš vybudovať firmu, ktorá <em style={{color:'#9F2D6D',fontStyle:'normal',fontWeight:600}}>funguje bez teba</em>?
+          </p>
+          <p style={{fontFamily:'Inter Tight',fontSize:15,color:'#6b635a',lineHeight:1.55,marginBottom:28,maxWidth:440}}>
+            10 vĺn biznis problémov. Ty si CEO. Najmi správnych ľudí — alebo ťa to prevalcuje.
+          </p>
+
+          {/* Stats strip */}
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,auto)',gap:0,marginBottom:32,border:'1px solid #D4D4D1',borderRadius:14,overflow:'hidden',background:'#fff',width:'fit-content'}}>
+            {[
+              {k:'Trvanie',v:'10–15 min'},
+              {k:'Vlny',v:'10'},
+              {k:'Rolí v tíme',v:'7'},
+            ].map((s,i,a)=>(
+              <div key={s.k} style={{padding:'12px 20px',borderRight:i<a.length-1?'1px solid #D4D4D1':'none'}}>
+                <div className="me-label" style={{margin:0}}>{s.k}</div>
+                <div className="me-display" style={{fontSize:18,color:'#1B1C1E',marginTop:2}}>{s.v}</div>
+              </div>
+            ))}
+          </div>
+
+          <form onSubmit={(e)=>{e.preventDefault();onStart();}} style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,maxWidth:520}}>
+            <div><div className="me-label">Meno</div><input className="me-input" placeholder="Nepovinné" value={name} onChange={e=>setName(e.target.value)}/></div>
+            <div><div className="me-label">Email</div><input className="me-input" type="email" required placeholder="tvoj@email.sk" value={email} onChange={e=>setEmail(e.target.value)}/></div>
+            <button type="submit" className="me-btn me-btn--primary" style={{gridColumn:'1 / -1',marginTop:6}}>HRAŤ ZADARMO →</button>
+          </form>
+
+          <div style={{display:'flex',alignItems:'center',gap:14,marginTop:20,flexWrap:'wrap'}}>
+            <div style={{display:'flex'}}>
+              {['#531E38','#9F2D6D','#FF7404','#A69E92'].map((c,i)=>(
+                <div key={i} style={{width:28,height:28,borderRadius:'50%',background:c,border:'2px solid #EFEDEB',marginLeft:i?-8:0}}/>
+              ))}
+            </div>
+            <div style={{fontFamily:'Inter Tight',fontSize:13,color:'#6b635a'}}>
+              <span className="me-display" style={{color:'#1B1C1E',fontSize:13}}>1,240+</span> CEO-ov už hralo tento týždeň
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT — orbit mock */}
+        <div style={{position:'relative',height:560}}>
+          {/* pulse rings */}
+          <div style={{position:'absolute',left:'50%',top:'50%',width:380,height:380,borderRadius:'50%',border:'1px dashed rgba(83,30,56,.25)',transform:'translate(-50%,-50%)',animation:'me-pulse 5s ease-in-out infinite'}}/>
+          <div style={{position:'absolute',left:'50%',top:'50%',width:540,height:540,borderRadius:'50%',border:'1px dashed rgba(83,30,56,.15)',transform:'translate(-50%,-50%)'}}/>
+
+          {/* center CEO card */}
+          <div style={{position:'absolute',left:'50%',top:'50%',transform:'translate(-50%,-50%)',width:220,padding:'20px 22px',background:'#531E38',borderRadius:20,color:'#EFEDEB',boxShadow:'0 30px 60px -20px rgba(83,30,56,.6)'}}>
+            <div className="me-label" style={{color:'rgba(239,237,235,.55)',margin:0}}>Wave 04</div>
+            <div className="me-display" style={{fontSize:26,color:'#FF7404',marginTop:6,letterSpacing:'-.02em'}}>€127k</div>
+            <div style={{fontFamily:'Inter Tight',fontSize:12,color:'rgba(239,237,235,.75)',marginTop:2}}>obrat · +€42k zisk</div>
+            <div style={{height:1,background:'rgba(239,237,235,.12)',margin:'14px 0'}}/>
+            <div style={{display:'flex',gap:6,marginBottom:8}}>
+              <CeoDisc size={32}/>
+              <RoleToken role="marketing" size={32}/>
+              <RoleToken role="accountant" size={32}/>
+              <RoleToken role="operations" size={32}/>
+            </div>
+            <div style={{display:'flex',gap:4}}>
+              {[1,2,3,4,5,6,7,8,9,10].map(w=>(
+                <div key={w} style={{flex:1,height:5,borderRadius:2,background: w<=4?'#FF7404':'rgba(239,237,235,.18)'}}/>
+              ))}
+            </div>
+          </div>
+
+          {/* orbiting tasks */}
+          <OrbitTask x={-200} y={-150} cat="mkt" shape="star" delay={0}/>
+          <OrbitTask x={210} y={-130} cat="fin" shape="diamond" delay={0.8}/>
+          <OrbitTask x={-220} y={80}  cat="ops" shape="hex" delay={1.6}/>
+          <OrbitTask x={190} y={150}  cat="gen" shape="circle" delay={2.4} size={34}/>
+          <OrbitTask x={-80} y={-220} cat="fin" shape="triangle" delay={0.4} size={32}/>
+          <OrbitTask x={80} y={220}   cat="mkt" shape="circle" delay={1.2} size={30}/>
+          <OrbitTask x={250} y={20}   cat="ops" shape="square" delay={2.0} size={30}/>
+          <OrbitTask x={-260} y={-40} cat="mkt" shape="diamond" delay={1.8} size={30}/>
+        </div>
+      </div>
+
+      {/* Bottom marquee */}
+      <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'18px 0',background:'#531E38',color:'#EFEDEB',overflow:'hidden',borderTop:'1px solid rgba(239,237,235,.1)'}}>
+        <div style={{display:'flex',gap:48,whiteSpace:'nowrap',animation:'me-marquee 28s linear infinite',width:'200%'}}>
+          {Array.from({length:2}).map((_,rep)=>(
+            <React.Fragment key={rep}>
+              {['Marketing','Financie','Operácie','HR','Predaj','Logistika','Cashflow','Brand','Procesy','Zákazníci'].map(w=>(
+                <span key={w+rep} style={{fontFamily:'IBM Plex Mono',fontWeight:500,fontSize:12,letterSpacing:'.18em',textTransform:'uppercase',display:'inline-flex',alignItems:'center',gap:48}}>
+                  {w}<span style={{color:'#FF7404'}}>◆</span>
+                </span>
+              ))}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    </main>
+  );
+}
+
+/* ============ PLANNING ============ */
+const ROLE_CATALOG = [
+  { role:'va', label:'Virtuálna asistentka', desc:'Rieši všetko po troche — flexibilná.', cost:60,  monthly:30,  cat:'gen' },
+  { role:'sales', label:'Obchodník', desc:'Uzatvára dealy, prináša tržby.', cost:120, monthly:60, cat:'mkt' },
+  { role:'marketing', label:'Marketingový špecialista', desc:'Buduje značku, prináša zákazníkov.', cost:140, monthly:70, cat:'mkt' },
+  { role:'accountant', label:'Účtovník', desc:'Kontroluje faktúry, dane, cashflow.', cost:100, monthly:50, cat:'fin' },
+  { role:'cfo', label:'Finančný kontrolór', desc:'Strategické financie — optimalizuje zisk.', cost:200, monthly:100, cat:'fin' },
+  { role:'operations', label:'Operations Manager', desc:'Nastavuje procesy, rieši logistiku.', cost:160, monthly:80, cat:'ops' },
+  { role:'coo', label:'COO (Pravá ruka)', desc:'Operácie aj financie — škáluje kapacitu.', cost:300, monthly:150, cat:'ops' },
+];
+
+const FOCUS_OPTIONS = [
+  { id:'product',  label:'Vylepšiť produkt & marketing', desc:'Menej marketingových problémov, rýchlejší rast tržieb.', tag:'+30% obrat', cat:'ops' },
+  { id:'sales',    label:'Agresívny predaj',              desc:'Vyššie tržby, zraniteľnejší voči operačným problémom.', tag:'+20% obrat', cat:'mkt' },
+  { id:'optimize', label:'Optimalizovať procesy',         desc:'Tím zvládne viac práce s rovnakými nákladmi.',           tag:'+15% efektivita', cat:'ops' },
+  { id:'cashflow', label:'Stabilizovať financie',         desc:'Výrazne menej finančných problémov budúcu vlnu.',        tag:'+10% obrat', cat:'fin' },
+];
+
+function PnlSummary({ revenue, profit, teamCount, monthlyCosts }) {
+  const sign = profit >= 0 ? '+' : '-';
+  return (
+    <div style={{background:'#531E38',borderRadius:18,padding:'20px 22px',display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:2,color:'#EFEDEB'}}>
+      {[
+        {k:'Obrat', v:`€${revenue}k`, c:'#FF7404'},
+        {k:'Zisk',  v:`${sign}€${Math.abs(profit)}k`, c: profit>=0 ? '#FF9DC8':'#E81A1E'},
+        {k:'Tím',   v:teamCount, c:'#EFEDEB'},
+        {k:'Náklady',v:`€${monthlyCosts}k`, c:'rgba(239,237,235,.85)'}
+      ].map((c,i,a)=>(
+        <div key={i} style={{padding:'4px 12px',borderRight:i<a.length-1?'1px solid rgba(239,237,235,.12)':'none'}}>
+          <div className="me-display" style={{fontSize:10,fontWeight:500,letterSpacing:'.14em',textTransform:'uppercase',opacity:.6,marginBottom:6}}>{c.k}</div>
+          <div className="me-display" style={{fontSize:22,fontWeight:600,color:c.c,letterSpacing:'-.02em'}}>{c.v}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FocusOption({ focus, selected, onSelect }) {
+  const c = CAT[focus.cat];
+  return (
+    <div onClick={()=>onSelect(focus.id)} style={{
+      position:'relative',display:'grid',gridTemplateColumns:'1fr auto',alignItems:'center',gap:14,padding:'16px 20px',
+      background: selected ? '#531E38' : '#fff',
+      border:`1px solid ${selected ? '#531E38' : '#D4D4D1'}`,borderRadius:16,cursor:'pointer',
+      transition:'all .18s ease', overflow:'hidden',
+      boxShadow: selected ? '0 10px 34px -14px rgba(83,30,56,.55)' : 'none'
+    }}>
+      <div style={{position:'absolute',left:0,top:0,bottom:0,width:4,background: selected ? '#FF7404' : c.color,borderRadius:'16px 0 0 16px',opacity: selected ? 1 : .35}}/>
+      <div>
+        <div style={{fontFamily:'Inter Tight',fontWeight:600,fontSize:14,color: selected ? '#EFEDEB' : '#1B1C1E',display:'flex',alignItems:'center',gap:10}}>
+          {focus.label}
+          <span className="me-display" style={{fontSize:10,fontWeight:500,letterSpacing:'.1em',textTransform:'uppercase',padding:'3px 8px',borderRadius:999,background: selected?'rgba(255,116,4,.18)':c.tint,color: selected?'#FF7404':c.color}}>{focus.tag}</span>
+        </div>
+        <div style={{fontFamily:'Inter Tight',fontSize:12,color: selected ? 'rgba(239,237,235,.72)' : '#6b635a',marginTop:3,lineHeight:1.4}}>{focus.desc}</div>
+      </div>
+      <div style={{width:24,height:24,borderRadius:'50%',background:selected?'#FF7404':'#F6F3F0',border:`1.5px solid ${selected?'#FF7404':'#D4D4D1'}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
+        {selected && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EFEDEB" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5L20 7"/></svg>}
+      </div>
+    </div>
+  );
+}
+
+function HireRow({ r, canAfford, onHire }) {
+  const c = CAT[r.cat];
+  return (
+    <div style={{position:'relative',display:'flex',alignItems:'center',gap:14,background:'#fff',border:'1px solid #D4D4D1',borderRadius:14,padding:'12px 16px 12px 20px',opacity:canAfford?1:.55,overflow:'hidden'}}>
+      <div style={{position:'absolute',left:0,top:0,bottom:0,width:4,background:c.color}}/>
+      <RoleToken role={r.role} size={38}/>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{fontFamily:'Inter Tight',fontWeight:600,fontSize:14,color:'#1B1C1E'}}>{r.label}</div>
+        <div style={{fontFamily:'Inter Tight',fontSize:12,color:'#6b635a',marginTop:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.desc}</div>
+      </div>
+      <div style={{textAlign:'right'}}>
+        <div className="me-display" style={{fontSize:15,color:'#1B1C1E'}}>€{r.cost}</div>
+        <div style={{fontFamily:'Inter Tight',fontSize:10,color:'#A69E92',marginTop:2}}>+€{r.monthly}k/mes</div>
+      </div>
+      <button className="me-btn me-btn--hire" disabled={!canAfford} onClick={()=>canAfford && onHire(r)}>{canAfford?'Najať':'—'}</button>
+    </div>
+  );
+}
+
+function TeamMemberRow({ m, onFire }) {
+  return (
+    <div style={{display:'flex',alignItems:'center',gap:14,background:'#fff',border:'1px solid #D4D4D1',borderRadius:14,padding:'12px 16px'}}>
+      <RoleToken role={m.role} level={m.level} size={36}/>
+      <div style={{flex:1}}>
+        <div style={{fontFamily:'Inter Tight',fontWeight:600,fontSize:14,color:'#1B1C1E'}}>{m.label} <span style={{color:'#A69E92',fontWeight:400,fontSize:12}}>· {m.level==='senior'?'Senior':'Junior'}</span></div>
+        <div style={{fontFamily:'Inter Tight',fontSize:12,color:'#6b635a',marginTop:2}}>€{m.monthly}k/mes</div>
+      </div>
+      <button className="me-btn me-btn--danger" onClick={()=>onFire(m.id)}>Prepustiť</button>
+    </div>
+  );
+}
+
+function PlanningScreen({ state, onContinue, onHire, onFire, onSetFocus }) {
+  return (
+    <div style={{minHeight:'100vh',background:'#EFEDEB',padding:'28px 22px',maxWidth:500,margin:'0 auto'}}>
+      <div style={{textAlign:'center',marginBottom:22}}>
+        <div className="me-eyebrow" style={{color:'#9F2D6D',marginBottom:8}}>Vlna {state.wave} · prežil si</div>
+        <h1 className="me-display" style={{fontSize:34,color:'#1B1C1E'}}>Plánovacia fáza</h1>
+      </div>
+
+      <PnlSummary revenue={state.revenue} profit={state.profit} teamCount={state.team.length} monthlyCosts={state.monthlyCosts}/>
+
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',margin:'24px 4px 28px'}}>
+        <div>
+          <div className="me-label" style={{margin:0}}>K dispozícii</div>
+          <div className="me-display" style={{fontSize:28,color:'#FF7404'}}>€{state.budget}</div>
+        </div>
+        <div style={{textAlign:'right'}}>
+          <div className="me-label" style={{margin:0}}>Auto-start</div>
+          <div className="me-display" style={{fontSize:28,color:'#531E38'}}>{state.countdown}s</div>
+        </div>
+      </div>
+
+      <Eyebrow>Čo ťa zabilo</Eyebrow>
+      <div style={{background:'#fff',border:'1px solid #D4D4D1',borderRadius:14,padding:'6px 18px',marginBottom:26}}>
+        <CategoryBar label="Marketing" pct={state.missed.mkt} cat="mkt"/>
+        <CategoryBar label="Financie"  pct={state.missed.fin} cat="fin"/>
+        <CategoryBar label="Operácie"  pct={state.missed.ops} cat="ops"/>
+        <CategoryBar label="Ostatné"   pct={state.missed.gen} cat="gen"/>
+      </div>
+
+      <Eyebrow>Čo budeš riešiť</Eyebrow>
+      <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:26}}>
+        {FOCUS_OPTIONS.map(f => <FocusOption key={f.id} focus={f} selected={state.focus===f.id} onSelect={onSetFocus}/>)}
+      </div>
+
+      <Eyebrow>Najmi do tímu</Eyebrow>
+      <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:26}}>
+        {ROLE_CATALOG.map(r => <HireRow key={r.role} r={r} canAfford={state.budget >= r.cost} onHire={onHire}/>)}
+      </div>
+
+      {state.team.length > 0 && (
+        <>
+          <Eyebrow>Tvoj tím</Eyebrow>
+          <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:26}}>
+            {state.team.map(m => <TeamMemberRow key={m.id} m={m} onFire={onFire}/>)}
+          </div>
+        </>
+      )}
+
+      <button className="me-btn me-btn--primary" onClick={onContinue}>POKRAČOVAŤ →</button>
+    </div>
+  );
+}
+
+/* ============ RESULTS ============ */
+const PROFILE_DATA = {
+  'lone-wolf':       { label:'LONE WOLF',       desc:'Všetko si riešil sám. Tvoja firma stojí a padá s tebou.' },
+  'micromanager':    { label:'MICROMANAGER',    desc:'Máš tím, ale stále hasíš požiare sám. Nedôveruješ im.' },
+  'generalist-trap': { label:'GENERALIST TRAP', desc:'Máš ľudí, ale žiadnych špecialistov. Všetci robia všetko.' },
+  'delegator':       { label:'DELEGÁTOR',       desc:'Rozpoznal si, čo ťa brzdí, a najal si správnych ľudí.' },
+  'strategist':      { label:'STRATÉG',         desc:'Postavil si systém, ktorý funguje bez teba.' },
+};
+
+function milestone(r){if(r>=3000)return'Exit ready';if(r>=1500)return'Milionár';if(r>=800)return'Na ceste k miliónu';if(r>=400)return'Stredná firma';if(r>=150)return'Rastúci biznis';if(r>=50)return'Malý podnikateľ';return'Živnostník';}
+function fmtMoney(k){if(k>=1000)return`€${(k/1000).toFixed(1).replace('.',',')}M`;return`€${k.toLocaleString('sk-SK')}k`;}
+
+function ResultsScreen({ results, onReplay }) {
+  const p = PROFILE_DATA[results.profile] || PROFILE_DATA['lone-wolf'];
+  const positive = results.profit >= 0;
+  const sign = positive ? '+' : '-';
+
+  return (
+    <main style={{minHeight:'100vh',background:'#EFEDEB',display:'flex',flexDirection:'column',alignItems:'center',padding:'40px 24px',gap:24}}>
+      {/* Hero card — plum */}
+      <div style={{background:'#531E38',borderRadius:22,padding:'32px 30px',maxWidth:460,width:'100%',color:'#EFEDEB',boxShadow:'0 20px 60px -24px rgba(83,30,56,.5)'}}>
+        <div className="me-eyebrow" style={{color:'#FF9DC8',marginBottom:10}}>CEO Defense · výsledok</div>
+        <div className="me-display" style={{fontSize:44,lineHeight:.95,marginBottom:8}}>{p.label}</div>
+        <p style={{fontFamily:'Inter Tight',fontSize:14,color:'rgba(239,237,235,.8)',lineHeight:1.55,marginBottom:26}}>{p.desc}</p>
+
+        <div className="me-label" style={{color:'rgba(239,237,235,.55)',marginBottom:10}}>Prežil som</div>
+        <WaveTracker current={results.waves}/>
+        <div className="me-display" style={{fontSize:13,color:'rgba(239,237,235,.7)',marginTop:10}}>{results.waves} / 10 vĺn</div>
+
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18,marginTop:28,paddingTop:22,borderTop:'1px solid rgba(239,237,235,.12)'}}>
+          <div>
+            <div className="me-label" style={{color:'rgba(239,237,235,.55)'}}>Obrat</div>
+            <div className="me-display" style={{fontSize:28,color:'#FF7404'}}>{fmtMoney(results.revenue)}</div>
+            <div style={{fontFamily:'Inter Tight',fontSize:12,color:'rgba(239,237,235,.7)',marginTop:2}}>{milestone(results.revenue)}</div>
+          </div>
+          <div>
+            <div className="me-label" style={{color:'rgba(239,237,235,.55)'}}>Mesačný zisk</div>
+            <div className="me-display" style={{fontSize:28,color: positive ? '#FF9DC8' : '#E81A1E'}}>{sign}{fmtMoney(Math.abs(results.profit))}</div>
+            <div style={{fontFamily:'Inter Tight',fontSize:12,color:'rgba(239,237,235,.7)',marginTop:2}}>{positive?'v pluse':'v strate'}</div>
+          </div>
+        </div>
+
+        <div style={{marginTop:22,paddingTop:18,borderTop:'1px solid rgba(239,237,235,.12)'}}>
+          <div className="me-label" style={{color:'rgba(239,237,235,.55)'}}>Score</div>
+          <div className="me-display" style={{fontSize:22}}>{results.score.toLocaleString()}</div>
+        </div>
+
+        <div style={{marginTop:22,paddingTop:18,borderTop:'1px solid rgba(239,237,235,.12)'}}>
+          <div className="me-label" style={{color:'rgba(239,237,235,.55)'}}>Tvoj tím</div>
+          <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:4}}>
+            <CeoDisc size={36}/>
+            {results.team.map((m,i)=><RoleToken key={i} role={m.role} level={m.level}/>)}
+          </div>
+        </div>
+      </div>
+
+      {/* Share */}
+      <div style={{display:'flex',flexDirection:'column',gap:10,maxWidth:460,width:'100%'}}>
+        <button className="me-btn me-btn--primary">Zdieľať na LinkedIn</button>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          <button className="me-btn me-btn--ghost">Kopírovať odkaz</button>
+          <button className="me-btn me-btn--ghost">Stiahnuť kartičku</button>
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div style={{background:'#fff',border:'1px solid #D4D4D1',borderRadius:22,padding:'28px 26px',maxWidth:460,width:'100%'}}>
+        <div className="me-eyebrow" style={{color:'#9F2D6D'}}>Ďalší krok</div>
+        <h3 className="me-display" style={{fontSize:22,color:'#1B1C1E',marginBottom:10,marginTop:6,lineHeight:1.2}}>Chceš reálne vybudovať firmu, ktorá funguje bez teba?</h3>
+        <p style={{fontFamily:'Inter Tight',fontSize:14,color:'#6b635a',lineHeight:1.55,marginBottom:18}}>Miliónová Evolúcia — 5-fázový systém pre podnikateľov s obratom €100k–€1M+.</p>
+        <button className="me-btn me-btn--primary">Zisti viac →</button>
+      </div>
+
+      <button className="me-btn me-btn--ghost" onClick={onReplay}>Hrať znova</button>
+    </main>
+  );
+}
+
+/* ============ APP ============ */
+function App() {
+  const [screen, setScreen] = useState('landing');
+  const [state, setState] = useState({
+    wave:4, budget:280, countdown:24,
+    revenue:127, profit:42, monthlyCosts:85,
+    team:[{id:'va-1',role:'va',level:'junior',label:'Virtuálna asistentka',monthly:30,cat:'gen'},
+          {id:'mkt-1',role:'marketing',level:'junior',label:'Marketingový špecialista',monthly:70,cat:'mkt'}],
+    missed:{mkt:55,fin:20,ops:15,gen:10},
+    focus:'product'
+  });
+
+  function hire(r){if(state.budget<r.cost)return;setState(s=>({...s,budget:s.budget-r.cost,monthlyCosts:s.monthlyCosts+r.monthly,team:[...s.team,{id:`${r.role}-${Date.now()}`,role:r.role,level:'junior',label:r.label,monthly:r.monthly,cat:r.cat}]}));}
+  function fire(id){setState(s=>{const m=s.team.find(x=>x.id===id);if(!m)return s;return{...s,monthlyCosts:s.monthlyCosts-m.monthly,team:s.team.filter(x=>x.id!==id)};});}
+  const setFocus=focus=>setState(s=>({...s,focus}));
+
+  // Screen chooser ribbon at top-right
+  const Chooser = () => (
+    <div style={{position:'fixed',top:14,right:14,zIndex:50,display:'flex',gap:6,background:'#fff',border:'1px solid #D4D4D1',borderRadius:999,padding:5,boxShadow:'0 6px 20px -8px rgba(27,28,30,.15)'}}>
+      {['landing','planning','results'].map(s=>(
+        <button key={s} onClick={()=>setScreen(s)} style={{
+          fontFamily:'IBM Plex Mono',fontWeight:500,fontSize:10,letterSpacing:'.12em',textTransform:'uppercase',
+          border:'none',padding:'8px 14px',borderRadius:999,cursor:'pointer',
+          background: screen===s?'#531E38':'transparent',color: screen===s?'#EFEDEB':'#1B1C1E'
+        }}>{s}</button>
+      ))}
+    </div>
+  );
+
+  return (<>
+    <Chooser/>
+    {screen==='landing' && <LandingScreen onStart={()=>setScreen('planning')}/>}
+    {screen==='planning' && <PlanningScreen state={state} onContinue={()=>setScreen('results')} onHire={hire} onFire={fire} onSetFocus={setFocus}/>}
+    {screen==='results' && <ResultsScreen results={{profile:'delegator',waves:7,score:3247,revenue:127,profit:42,team:state.team}} onReplay={()=>setScreen('landing')}/>}
+  </>);
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>

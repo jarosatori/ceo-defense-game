@@ -39,9 +39,9 @@ export class BusinessTypeScene extends Phaser.Scene {
     this.add
       .text(centerX, 60, "AKÝ BIZNIS VEDIEŠ?", {
         fontSize: "28px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
         color: "#ffffff",
-        fontStyle: "900",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(0.5, 0);
@@ -53,8 +53,8 @@ export class BusinessTypeScene extends Phaser.Scene {
     this.add
       .text(centerX, 118, "Výber ovplyvní tvoju štartovú ekonomiku.", {
         fontSize: "13px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#a3a3a3",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#A69E92",
         fontStyle: "500",
         resolution: 2,
       })
@@ -84,8 +84,8 @@ export class BusinessTypeScene extends Phaser.Scene {
     this.add
       .text(centerX, cardsY + cardHeight + 24, "Klikni na kartu a začni hru.", {
         fontSize: "11px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#555",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#7A736A",
         resolution: 2,
       })
       .setOrigin(0.5, 0);
@@ -124,9 +124,9 @@ export class BusinessTypeScene extends Phaser.Scene {
     this.add
       .text(x + w / 2, y + 100, cfg.label, {
         fontSize: "22px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
         color: "#ffffff",
-        fontStyle: "900",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(0.5, 0);
@@ -135,8 +135,8 @@ export class BusinessTypeScene extends Phaser.Scene {
     this.add
       .text(x + 18, y + 140, cfg.description, {
         fontSize: "12px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#a3a3a3",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
+        color: "#A69E92",
         fontStyle: "500",
         resolution: 2,
         wordWrap: { width: w - 36 },
@@ -217,7 +217,7 @@ export class BusinessTypeScene extends Phaser.Scene {
     this.add
       .text(x, y, label, {
         fontSize: "11px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Tight', system-ui, sans-serif",
         color: "#888",
         resolution: 2,
       })
@@ -226,9 +226,9 @@ export class BusinessTypeScene extends Phaser.Scene {
     this.add
       .text(x + w, y, value, {
         fontSize: "13px",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
         color: valueColor,
-        fontStyle: "800",
+        fontStyle: "600",
         resolution: 2,
       })
       .setOrigin(1, 0);

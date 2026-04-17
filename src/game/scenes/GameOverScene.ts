@@ -1,20 +1,27 @@
 import * as Phaser from "phaser";
 import type { GameState } from "../types";
 import { calculateProfile } from "../utils/profileCalculator";
-import { formatRevenue, formatProfit } from "../utils/revenueCalculator";
+import {
+  formatMoney,
+  formatPercent,
+  getBusinessMilestone,
+} from "../utils/pnlCalculator";
+import { BUSINESS_TYPE_CONFIGS } from "../constants";
 import { playChord, playTone } from "../utils/audio";
 
 export class GameOverScene extends Phaser.Scene {
   private gameState!: GameState;
   private cashCrunch: boolean = false;
+  private survivedFlag: boolean | undefined;
 
   constructor() {
     super({ key: "GameOverScene" });
   }
 
-  init(data: { gameState: GameState; cashCrunch?: boolean }): void {
+  init(data: { gameState: GameState; cashCrunch?: boolean; survived?: boolean }): void {
     this.gameState = data.gameState;
     this.cashCrunch = data.cashCrunch ?? false;
+    this.survivedFlag = data.survived;
   }
 
   create(): void {
@@ -22,7 +29,6 @@ export class GameOverScene extends Phaser.Scene {
     const centerX = width / 2;
     const centerY = height / 2;
 
-    // Background
     const bg = this.add.graphics();
     bg.fillStyle(0x0a0a0a, 1);
     bg.fillRect(0, 0, width, height);
@@ -31,30 +37,39 @@ export class GameOverScene extends Phaser.Scene {
       bg.fillCircle(centerX, centerY, Math.max(width, height) * (1 - i * 0.14));
     }
 
-    const survived = this.gameState.damage < 100 && !this.cashCrunch;
+    const survived =
+      this.survivedFlag ?? (this.gameState.damage < 100 && !this.cashCrunch);
     const profile = calculateProfile(this.gameState);
+
+    const ebitdaRatio =
+      this.gameState.revenue > 0
+        ? this.gameState.profit / this.gameState.revenue
+        : 0;
+    const milestone = getBusinessMilestone(this.gameState.revenue, ebitdaRatio);
+
+    const bizCfg = BUSINESS_TYPE_CONFIGS[this.gameState.businessType];
 
     // Sound
     if (survived) {
-      playChord([523, 659, 784, 1046], 0.4); // C major chord ascending
+      playChord([523, 659, 784, 1046], 0.4);
     } else {
       playTone(180, 0.5, "sawtooth", 0.1);
       this.time.delayedCall(200, () => playTone(140, 0.6, "sawtooth", 0.1));
     }
 
-    // Splash text
+    // Splash
     let splashText: string;
     if (survived) {
-      splashText = "PREZIL SI";
+      splashText = "PREŽIL SI";
     } else if (this.cashCrunch) {
       splashText = "FIRMA JE V STRATE";
     } else {
-      splashText = "FIRMA SA ZRUTILA";
+      splashText = "FIRMA SA ZRÚTILA";
     }
     const splashColor = survived ? "#22c55e" : "#ef4444";
 
     const splash = this.add
-      .text(centerX, centerY - 40, splashText, {
+      .text(centerX, centerY - 80, splashText, {
         fontSize: "36px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: splashColor,
@@ -73,10 +88,9 @@ export class GameOverScene extends Phaser.Scene {
       ease: "Back.easeOut",
     });
 
-    // Cash crunch sub-message
     if (this.cashCrunch) {
       this.add
-        .text(centerX, centerY + 5, "Nemas na vyplaty.", {
+        .text(centerX, centerY - 40, "Nemáš na výplaty.", {
           fontSize: "14px",
           fontFamily: "'Inter', system-ui, sans-serif",
           color: "#ef4444",
@@ -88,15 +102,35 @@ export class GameOverScene extends Phaser.Scene {
         .setData("delayedShow", true);
     }
 
-    const subText = survived
-      ? `Vlna 10 zvladnuta • Score ${this.gameState.score}`
-      : `Vlna ${this.gameState.wave} • Score ${this.gameState.score}`;
-
-    const revenueText = `Obrat: ${formatRevenue(this.gameState.revenue)}`;
-    const profitText = `Zisk: ${formatProfit(this.gameState.profit)}`;
-
+    // Milestone
     this.add
-      .text(centerX, centerY + 45, revenueText, {
+      .text(centerX, centerY - 15, milestone.toUpperCase(), {
+        fontSize: "20px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: "#eab308",
+        fontStyle: "800",
+        resolution: 2,
+      })
+      .setOrigin(0.5)
+      .setAlpha(0)
+      .setData("delayedShow", true);
+
+    // Business type
+    this.add
+      .text(centerX, centerY + 10, `${bizCfg.emoji} ${bizCfg.label}`, {
+        fontSize: "12px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: "#a3a3a3",
+        fontStyle: "500",
+        resolution: 2,
+      })
+      .setOrigin(0.5)
+      .setAlpha(0)
+      .setData("delayedShow", true);
+
+    // Revenue
+    this.add
+      .text(centerX, centerY + 40, `Obrat: ${formatMoney(this.gameState.revenue)}`, {
         fontSize: "18px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#eab308",
@@ -107,22 +141,32 @@ export class GameOverScene extends Phaser.Scene {
       .setAlpha(0)
       .setData("delayedShow", true);
 
+    // Profit
     const profitColor = this.gameState.profit >= 0 ? "#22c55e" : "#ef4444";
     this.add
-      .text(centerX, centerY + 70, profitText, {
-        fontSize: "16px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: profitColor,
-        fontStyle: "700",
-        resolution: 2,
-      })
+      .text(
+        centerX,
+        centerY + 62,
+        `Zisk: ${formatMoney(this.gameState.profit)} (${formatPercent(ebitdaRatio)})`,
+        {
+          fontSize: "16px",
+          fontFamily: "'Inter', system-ui, sans-serif",
+          color: profitColor,
+          fontStyle: "700",
+          resolution: 2,
+        },
+      )
       .setOrigin(0.5)
       .setAlpha(0)
       .setData("delayedShow", true);
 
+    // Score + wave summary
+    const subText = survived
+      ? `Vlna 10 zvládnutá • Score ${this.gameState.score}`
+      : `Vlna ${this.gameState.wave} • Score ${this.gameState.score}`;
     this.add
-      .text(centerX, centerY + 20, subText, {
-        fontSize: "16px",
+      .text(centerX, centerY + 88, subText, {
+        fontSize: "12px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#a3a3a3",
         fontStyle: "500",
@@ -133,7 +177,7 @@ export class GameOverScene extends Phaser.Scene {
       .setData("delayedShow", true);
 
     this.add
-      .text(centerX, centerY + 100, "Nacitavam vysledky...", {
+      .text(centerX, centerY + 120, "Načítavam výsledky...", {
         fontSize: "11px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#555",
@@ -143,10 +187,9 @@ export class GameOverScene extends Phaser.Scene {
       .setAlpha(0)
       .setData("delayedShow", true);
 
-    // Fade in delayed elements
     this.tweens.add({
       targets: this.children.list.filter(
-        (c) => (c as Phaser.GameObjects.Text).getData?.("delayedShow")
+        (c) => (c as Phaser.GameObjects.Text).getData?.("delayedShow"),
       ),
       alpha: 1,
       duration: 600,
@@ -162,8 +205,13 @@ export class GameOverScene extends Phaser.Scene {
       profile,
       waves: String(survived ? 10 : this.gameState.wave),
       score: String(this.gameState.score),
-      revenue: String(this.gameState.revenue),
-      profit: String(this.gameState.profit),
+      revenue: String(Math.round(this.gameState.revenue * 100) / 100),
+      profit: String(Math.round(this.gameState.profit * 100) / 100),
+      grossMargin: String(this.gameState.baselineRatios.grossMargin),
+      marketingRatio: String(this.gameState.baselineRatios.marketingRatio),
+      ebitdaRatio: String(Math.round(ebitdaRatio * 1000) / 1000),
+      businessType: this.gameState.businessType,
+      milestone,
       team: teamString,
       caught: String(this.gameState.problemsCaught),
       missed: String(this.gameState.problemsMissed),
@@ -185,6 +233,10 @@ export class GameOverScene extends Phaser.Scene {
             profile,
             waves: survived ? 10 : this.gameState.wave,
             score: this.gameState.score,
+            revenue: this.gameState.revenue,
+            profit: this.gameState.profit,
+            businessType: this.gameState.businessType,
+            milestone,
           }),
         }).catch(() => {});
       }
@@ -192,7 +244,6 @@ export class GameOverScene extends Phaser.Scene {
       // sessionStorage unavailable
     }
 
-    // Redirect after 2.8s
     this.time.delayedCall(2800, () => {
       if (typeof window !== "undefined") {
         window.location.href = `/results?${params.toString()}`;

@@ -1,6 +1,6 @@
-import type { CEOProfile } from "@/game/types";
-import { CSS_COLORS } from "@/game/constants";
-import { formatRevenue, formatProfit, getRevenueMilestone } from "@/game/utils/revenueCalculator";
+import type { BusinessType, CEOProfile } from "@/game/types";
+import { BUSINESS_TYPE_CONFIGS, CSS_COLORS } from "@/game/constants";
+import { formatMoney, formatPercent } from "@/game/utils/pnlCalculator";
 
 const PROFILE_DATA: Record<
   CEOProfile,
@@ -8,26 +8,26 @@ const PROFILE_DATA: Record<
 > = {
   "lone-wolf": {
     label: "LONE WOLF",
-    description: "Vsetko si riesil sam. Tvoja firma stoji a pada s tebou.",
+    description: "Všetko si riešil sám. Tvoja firma stojí a padá s tebou.",
   },
   micromanager: {
     label: "MICROMANAGER",
-    description: "Mas tim, ale stale hasis poziare sam. Nedoverujes im.",
+    description: "Máš tím, ale stále hasíš požiare sám. Nedôveruješ im.",
   },
   "generalist-trap": {
     label: "GENERALIST TRAP",
     description:
-      "Mas ludi, ale ziadnych specialistov. Vsetci robia vsetko, nikto nic poriadne.",
+      "Máš ľudí, ale žiadnych špecialistov. Všetci robia všetko, nikto nič poriadne.",
   },
   delegator: {
-    label: "DELEGATOR",
+    label: "DELEGÁTOR",
     description:
-      "Rozpoznal si, co ta brzdi, a najal si spravnych ludi. Tvoja firma rastie.",
+      "Rozpoznal si, čo ťa brzdí, a najal si správnych ľudí. Tvoja firma rastie.",
   },
   strategist: {
-    label: "STRATEG",
+    label: "STRATÉG",
     description:
-      "Postavil si system, ktory funguje bez teba. Toto je skalovatelny biznis.",
+      "Postavil si systém, ktorý funguje bez teba. Toto je škálovateľný biznis.",
   },
 };
 
@@ -64,6 +64,10 @@ interface ResultsCardProps {
   revenue: number;
   profit: number;
   team: string;
+  businessType?: BusinessType;
+  milestone?: string;
+  grossMargin?: number;
+  ebitdaRatio?: number;
 }
 
 export default function ResultsCard({
@@ -73,14 +77,20 @@ export default function ResultsCard({
   revenue,
   profit,
   team,
+  businessType,
+  milestone,
+  grossMargin,
+  ebitdaRatio,
 }: ResultsCardProps) {
   const data = PROFILE_DATA[profile] || PROFILE_DATA["lone-wolf"];
   const teamMembers = team ? team.split(",") : [];
 
+  const bizCfg = businessType ? BUSINESS_TYPE_CONFIGS[businessType] : null;
+
   const profitCommentary =
     profit >= 0
-      ? `Tvoja firma zaraba ${formatProfit(profit)} mesacne`
-      : `Tvoja firma je v strate (${formatProfit(profit)})`;
+      ? `Tvoja firma zarobila ${formatMoney(profit)} (${formatPercent(ebitdaRatio ?? 0)} EBITDA)`
+      : `Tvoja firma je v strate (${formatMoney(profit)})`;
 
   return (
     <div className="bg-[#111] border border-[#333] rounded-2xl p-8 max-w-md w-full space-y-6">
@@ -88,8 +98,14 @@ export default function ResultsCard({
         CEO DEFENSE
       </h2>
 
+      {bizCfg && (
+        <p className="text-sm text-[#a3a3a3]">
+          <span className="text-lg">{bizCfg.emoji}</span> {bizCfg.label}
+        </p>
+      )}
+
       <div className="space-y-1">
-        <p className="text-sm text-[#a3a3a3]">Prezil som</p>
+        <p className="text-sm text-[#a3a3a3]">Prežil som</p>
         <div className="flex gap-1.5 flex-wrap">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((w) => (
             <div
@@ -104,7 +120,7 @@ export default function ResultsCard({
             </div>
           ))}
         </div>
-        <p className="text-xs text-[#666]">{waves}/10 vln</p>
+        <p className="text-xs text-[#666]">{waves}/10 vĺn</p>
       </div>
 
       <div className="space-y-2">
@@ -114,27 +130,64 @@ export default function ResultsCard({
         </p>
       </div>
 
-      <div className="space-y-1">
-        <p className="text-2xl font-bold text-[#eab308]">
-          {formatRevenue(revenue)}
-        </p>
-        <p className="text-xs text-[#a3a3a3]">{getRevenueMilestone(revenue)}</p>
-      </div>
+      {milestone && (
+        <div className="space-y-1">
+          <p className="text-2xl font-bold text-[#eab308]">{milestone}</p>
+          <p className="text-xs text-[#a3a3a3]">
+            Kumulatívny obrat: {formatMoney(revenue)}
+          </p>
+        </div>
+      )}
+
+      {!milestone && (
+        <div className="space-y-1">
+          <p className="text-2xl font-bold text-[#eab308]">
+            {formatMoney(revenue)}
+          </p>
+          <p className="text-xs text-[#a3a3a3]">Kumulatívny obrat</p>
+        </div>
+      )}
 
       <div className="space-y-1">
-        <p className={`text-lg font-bold ${profit >= 0 ? "text-[#22c55e]" : "text-[#ef4444]"}`}>
-          {formatProfit(profit)}
+        <p
+          className={`text-lg font-bold ${profit >= 0 ? "text-[#22c55e]" : "text-[#ef4444]"}`}
+        >
+          {formatMoney(profit)}
         </p>
         <p className="text-xs text-[#a3a3a3]">{profitCommentary}</p>
       </div>
 
+      {(grossMargin !== undefined || ebitdaRatio !== undefined) && (
+        <div className="grid grid-cols-2 gap-3 text-center">
+          {grossMargin !== undefined && (
+            <div className="bg-[#1a1a1a] rounded-lg p-3">
+              <p className="text-xs text-[#a3a3a3]">Hrubá marža</p>
+              <p className="text-base font-bold text-[#22c55e]">
+                {formatPercent(grossMargin)}
+              </p>
+            </div>
+          )}
+          {ebitdaRatio !== undefined && (
+            <div className="bg-[#1a1a1a] rounded-lg p-3">
+              <p className="text-xs text-[#a3a3a3]">EBITDA %</p>
+              <p
+                className={`text-base font-bold ${ebitdaRatio >= 0 ? "text-[#22c55e]" : "text-[#ef4444]"}`}
+              >
+                {formatPercent(ebitdaRatio)}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       <p className="text-lg text-[#e5e5e5]">
-        Score: <span className="font-bold text-white">{score.toLocaleString()}</span>
+        Score:{" "}
+        <span className="font-bold text-white">{score.toLocaleString()}</span>
       </p>
 
       {teamMembers.length > 0 && (
         <div className="space-y-2">
-          <p className="text-sm text-[#a3a3a3]">Tvoj tim:</p>
+          <p className="text-sm text-[#a3a3a3]">Tvoj tím:</p>
           <div className="flex gap-2 flex-wrap">
             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
               <span className="text-[8px] font-bold text-[#0a0a0a]">CEO</span>
@@ -142,7 +195,8 @@ export default function ResultsCard({
             {teamMembers.map((m, i) => {
               const [role, level] = m.split(":");
               const color = roleColorMap[role] || CSS_COLORS.general;
-              const label = roleShortLabels[role] || role.substring(0, 3).toUpperCase();
+              const label =
+                roleShortLabels[role] || role.substring(0, 3).toUpperCase();
               return (
                 <div
                   key={i}

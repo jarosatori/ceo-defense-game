@@ -1,19 +1,34 @@
 import * as Phaser from "phaser";
-import type { GameState, Role, Category, FocusActivity } from "../types";
+import type { GameState, MonthlyPnl, Priority, Role } from "../types";
 import {
-  COLORS,
+  BUSINESS_TYPE_CONFIGS,
   CSS_COLORS,
-  ROLE_CONFIGS,
   PLANNING_DURATION,
-  FOCUS_CONFIGS,
+  PRIORITY_CONFIGS,
+  ROLE_CONFIGS,
+  SENIOR_MULTIPLIER,
 } from "../constants";
 import { WAVES } from "../data/waves";
-import { formatRevenue, formatProfit, calculateWaveFinancials } from "../utils/revenueCalculator";
+import {
+  applyHireToBaseline,
+  formatMoney,
+  formatPercent,
+  ratioHealth,
+  simulatePnl,
+} from "../utils/pnlCalculator";
 import { playTone } from "../utils/audio";
 
 const ALL_ROLES: Role[] = [
-  "va", "sales", "marketing", "product", "support",
-  "accountant", "cfo", "hr", "operations", "coo",
+  "va",
+  "sales",
+  "marketing",
+  "product",
+  "support",
+  "accountant",
+  "cfo",
+  "hr",
+  "operations",
+  "coo",
 ];
 
 export class PlanningScene extends Phaser.Scene {
@@ -22,14 +37,20 @@ export class PlanningScene extends Phaser.Scene {
   private countdownLabel!: Phaser.GameObjects.Text;
   private countdownTimer!: Phaser.Time.TimerEvent;
   private budgetLabel!: Phaser.GameObjects.Text;
-  private selectedFocus: FocusActivity | null = null;
-  private projectionLabel!: Phaser.GameObjects.Text;
+
+  private continueBtnBg!: Phaser.GameObjects.Graphics;
+  private continueBtnText!: Phaser.GameObjects.Text;
+  private continueBtnX: number = 0;
+  private continueBtnY: number = 0;
+  private continueBtnW: number = 0;
+  private continueBtnH: number = 0;
 
   // Scrolling state
   private contentHeight: number = 0;
   private isDragging: boolean = false;
   private dragStartY: number = 0;
   private scrollStartY: number = 0;
+  private viewHeight: number = 0;
 
   constructor() {
     super({ key: "PlanningScene" });
@@ -39,27 +60,23 @@ export class PlanningScene extends Phaser.Scene {
     this.gameState = data.gameState;
     this.gameState.phase = "planning";
     this.countdown = PLANNING_DURATION;
-    // Preserve focus selection across scene restarts (hire/upgrade/fire)
-    this.selectedFocus = (data as { selectedFocus?: FocusActivity }).selectedFocus ?? null;
   }
 
   create(): void {
     const { width, height } = this.scale;
     const centerX = width / 2;
+    this.viewHeight = height;
 
-    // Layout boundaries
-    const contentWidth = Math.min(420, width - 40);
+    const contentWidth = Math.min(440, width - 40);
     const contentX = centerX - contentWidth / 2;
 
     let y = 24;
 
-    // Background — draw it large enough for scrolling
-    // We'll set camera bounds after we know total content height
-    this.drawBackground(width, 2400); // generous height, will clip
+    this.drawBackground(width, 2800);
 
     // Title
     this.add
-      .text(centerX, y, `VLNA ${this.gameState.wave} PREZITA`, {
+      .text(centerX, y, `VLNA ${this.gameState.wave} PREŽITÁ`, {
         fontSize: "13px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: CSS_COLORS.operations,
@@ -70,7 +87,7 @@ export class PlanningScene extends Phaser.Scene {
     y += 22;
 
     this.add
-      .text(centerX, y, "Planovacia faza", {
+      .text(centerX, y, "Plánovacia fáza", {
         fontSize: "26px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#ffffff",
@@ -80,13 +97,16 @@ export class PlanningScene extends Phaser.Scene {
       .setOrigin(0.5, 0);
     y += 44;
 
-    // P&L Summary bar
-    y = this.drawPnlSummary(contentX, y, contentWidth, centerX);
-    y += 16;
+    // P&L last month
+    const lastPnl = this.gameState.pnlHistory[this.gameState.pnlHistory.length - 1];
+    if (lastPnl) {
+      y = this.drawPnlBreakdown(contentX, y, contentWidth, lastPnl);
+      y += 16;
+    }
 
-    // Budget + Countdown side-by-side
+    // Budget + countdown
     this.budgetLabel = this.add
-      .text(contentX, y, `€${this.gameState.budget}`, {
+      .text(contentX, y, formatMoney(this.gameState.budget), {
         fontSize: "22px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: CSS_COLORS.general,
@@ -96,7 +116,7 @@ export class PlanningScene extends Phaser.Scene {
       .setOrigin(0, 0);
 
     this.add
-      .text(contentX, y + 26, "K dispozicii", {
+      .text(contentX, y + 26, "Budget", {
         fontSize: "10px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#666",
@@ -115,7 +135,7 @@ export class PlanningScene extends Phaser.Scene {
       .setOrigin(1, 0);
 
     this.add
-      .text(contentX + contentWidth, y + 26, "Auto-start", {
+      .text(contentX + contentWidth, y + 26, "Auto-štart", {
         fontSize: "10px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#666",
@@ -123,11 +143,11 @@ export class PlanningScene extends Phaser.Scene {
       })
       .setOrigin(1, 0);
 
-    y += 48;
+    y += 54;
 
-    // "Co ta zabilo" — bar chart
+    // PRIORITY selection
     this.add
-      .text(contentX, y, "CO TA ZABILO", {
+      .text(contentX, y, "PRIORITA TOHTO MESIACA (povinná)", {
         fontSize: "10px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#666",
@@ -137,96 +157,29 @@ export class PlanningScene extends Phaser.Scene {
       .setOrigin(0, 0);
     y += 18;
 
-    const categories: Category[] = [
-      "marketing",
-      "finance",
-      "operations",
-      "general",
-    ];
-    const catLabels: Record<Category, string> = {
-      marketing: "Marketing",
-      finance: "Financie",
-      operations: "Operacie",
-      general: "Ostatne",
-    };
+    for (const priorityCfg of PRIORITY_CONFIGS) {
+      const isSelected = this.gameState.selectedPriority === priorityCfg.id;
+      const priorityY = y;
 
-    const totalMissed = Object.values(this.gameState.missedByCategory).reduce(
-      (s, v) => s + v,
-      0
-    );
-
-    const barHeight = 8;
-    const barMaxWidth = contentWidth - 80;
-
-    for (const cat of categories) {
-      const missed = this.gameState.missedByCategory[cat];
-      const pct = totalMissed > 0 ? missed / totalMissed : 0;
-
-      // Label
-      this.add
-        .text(contentX, y + 1, catLabels[cat], {
-          fontSize: "11px",
-          fontFamily: "'Inter', system-ui, sans-serif",
-          color: "#ccc",
-          resolution: 2,
-        })
-        .setOrigin(0, 0);
-
-      // Bar background
       const bg = this.add.graphics();
-      bg.fillStyle(0x222222, 1);
-      bg.fillRoundedRect(contentX + 80, y + 2, barMaxWidth, barHeight, 4);
+      this.drawPriorityOption(
+        bg,
+        contentX,
+        priorityY,
+        contentWidth,
+        priorityCfg.color,
+        isSelected,
+      );
 
-      // Bar fill
-      if (pct > 0) {
-        const barWidth = Math.max(3, pct * barMaxWidth);
-        const fill = this.add.graphics();
-        fill.fillStyle(COLORS[cat], 0.95);
-        fill.fillRoundedRect(contentX + 80, y + 2, barWidth, barHeight, 4);
-      }
-
-      // Percentage
-      this.add
-        .text(contentX + contentWidth, y + 1, `${Math.round(pct * 100)}%`, {
-          fontSize: "10px",
-          fontFamily: "'Inter', system-ui, sans-serif",
-          color: "#888",
-          resolution: 2,
-        })
-        .setOrigin(1, 0);
-
-      y += 18;
-    }
-
-    y += 8;
-
-    // Focus activity selection
-    this.add
-      .text(contentX, y, "CO BUDES RIESIT", {
-        fontSize: "10px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#666",
-        fontStyle: "700",
-        resolution: 2,
-      })
-      .setOrigin(0, 0);
-    y += 18;
-
-    for (const focusCfg of FOCUS_CONFIGS) {
-      const isSelected = this.selectedFocus === focusCfg.id;
-      const focusY = y;
-
-      const focusBg = this.add.graphics();
-      this.drawFocusOption(focusBg, contentX, focusY, contentWidth, focusCfg.color, isSelected);
-
-      // Radio circle
-      const radioColor = Phaser.Display.Color.HexStringToColor(focusCfg.color).color;
-      const outerCircle = this.add.circle(contentX + 16, focusY + 16, 7, 0x000000, 0);
-      outerCircle.setStrokeStyle(2, isSelected ? radioColor : 0x555555);
-      this.add.circle(contentX + 16, focusY + 16, 4, radioColor, isSelected ? 1 : 0);
+      const radioColor = Phaser.Display.Color.HexStringToColor(
+        priorityCfg.color,
+      ).color;
+      const outer = this.add.circle(contentX + 16, priorityY + 18, 7, 0x000000, 0);
+      outer.setStrokeStyle(2, isSelected ? radioColor : 0x555555);
+      this.add.circle(contentX + 16, priorityY + 18, 4, radioColor, isSelected ? 1 : 0);
 
       this.add
-        .text(contentX + 30, focusY + 8, focusCfg.label, {
+        .text(contentX + 30, priorityY + 8, priorityCfg.label, {
           fontSize: "11px",
           fontFamily: "'Inter', system-ui, sans-serif",
           color: isSelected ? "#fff" : "#ccc",
@@ -236,96 +189,72 @@ export class PlanningScene extends Phaser.Scene {
         .setOrigin(0, 0);
 
       this.add
-        .text(contentX + 30, focusY + 22, focusCfg.description, {
+        .text(contentX + 30, priorityY + 22, priorityCfg.description, {
           fontSize: "9px",
           fontFamily: "'Inter', system-ui, sans-serif",
           color: isSelected ? "#aaa" : "#555",
           resolution: 2,
+          wordWrap: { width: contentWidth - 44 },
         })
         .setOrigin(0, 0);
 
-      const focusHit = this.add
-        .rectangle(contentX + contentWidth / 2, focusY + 16, contentWidth, 32, 0, 0)
+      const hit = this.add
+        .rectangle(contentX + contentWidth / 2, priorityY + 18, contentWidth, 36, 0, 0)
         .setInteractive({ useHandCursor: true });
 
-      focusHit.on("pointerdown", () => {
+      hit.on("pointerdown", () => {
         playTone(440, 0.06, "sine", 0.04);
-        this.selectedFocus = focusCfg.id;
+        this.gameState.selectedPriority = priorityCfg.id;
         this.countdownTimer.destroy();
-        this.scene.restart({ gameState: this.gameState, selectedFocus: this.selectedFocus });
+        this.scene.restart({ gameState: this.gameState });
       });
 
-      y += 36;
+      y += 40;
     }
 
-    y += 12;
-
-    // Revenue projection
-    this.projectionLabel = this.add
-      .text(centerX, y, "", {
-        fontSize: "11px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#888",
-        fontStyle: "600",
-        resolution: 2,
-      })
-      .setOrigin(0.5, 0);
-    this.updateProjection();
-    y += 24;
-
-    // HIRING SECTION — scrollable list of all 10 roles
-    this.add
-      .text(contentX, y, "NAJMI DO TIMU", {
-        fontSize: "10px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#666",
-        fontStyle: "700",
-        resolution: 2,
-      })
-      .setOrigin(0, 0);
-    y += 18;
-
-    const roleCardHeight = 54;
-    const roleCardGap = 6;
-
-    for (const role of ALL_ROLES) {
-      const config = ROLE_CONFIGS[role];
-      const canAfford = this.gameState.budget >= config.cost;
-      this.drawHireRow(contentX, y, contentWidth, roleCardHeight, role, config, canAfford);
-      y += roleCardHeight + roleCardGap;
-    }
-
-    y += 8;
+    y += 10;
 
     // YOUR TEAM section
     if (this.gameState.team.length > 0) {
+      const totalSalary = this.gameState.team.reduce((sum, m) => {
+        const cfg = ROLE_CONFIGS[m.role];
+        return (
+          sum +
+          (m.level === "senior"
+            ? cfg.monthlyCost * SENIOR_MULTIPLIER.monthlyCostFactor
+            : cfg.monthlyCost)
+        );
+      }, 0);
+
       this.add
-        .text(contentX, y, "TVOJ TIM", {
-          fontSize: "10px",
-          fontFamily: "'Inter', system-ui, sans-serif",
-          color: "#666",
-          fontStyle: "700",
-          resolution: 2,
-        })
+        .text(
+          contentX,
+          y,
+          `TVOJ TÍM (${this.gameState.team.length} ľudí, ${formatMoney(totalSalary)}/mes)`,
+          {
+            fontSize: "10px",
+            fontFamily: "'Inter', system-ui, sans-serif",
+            color: "#666",
+            fontStyle: "700",
+            resolution: 2,
+          },
+        )
         .setOrigin(0, 0);
       y += 18;
 
       for (const member of this.gameState.team) {
         const config = ROLE_CONFIGS[member.role];
         const color = Phaser.Display.Color.HexStringToColor(config.color).color;
-        const alpha = 1;
 
         const bg = this.add.graphics();
-        bg.fillStyle(0x1a1a1a, alpha);
+        bg.fillStyle(0x1a1a1a, 1);
         bg.fillRoundedRect(contentX, y, contentWidth, 42, 6);
         bg.lineStyle(1, 0x333333, 0.5);
         bg.strokeRoundedRect(contentX, y, contentWidth, 42, 6);
 
-        // Color accent
         bg.fillStyle(color, 0.15);
         bg.fillRoundedRect(contentX, y, 4, 42, { tl: 6, bl: 6, tr: 0, br: 0 });
 
-        // Role circle
         this.add.circle(contentX + 22, y + 21, 10, color);
         const labelShort = this.getRoleShortLabel(member.role);
         this.add
@@ -338,7 +267,6 @@ export class PlanningScene extends Phaser.Scene {
           })
           .setOrigin(0.5);
 
-        // Name + level badge
         const levelBadge = member.level === "senior" ? " [Senior]" : " [Junior]";
         this.add
           .text(contentX + 38, y + 10, config.label + levelBadge, {
@@ -350,9 +278,12 @@ export class PlanningScene extends Phaser.Scene {
           })
           .setOrigin(0, 0);
 
-        // Monthly cost
+        const monthlyCost =
+          member.level === "senior"
+            ? config.monthlyCost * SENIOR_MULTIPLIER.monthlyCostFactor
+            : config.monthlyCost;
         this.add
-          .text(contentX + 38, y + 24, `€${config.monthlyCost}k/mes`, {
+          .text(contentX + 38, y + 24, `${formatMoney(monthlyCost)}/mes`, {
             fontSize: "9px",
             fontFamily: "'Inter', system-ui, sans-serif",
             color: "#888",
@@ -360,11 +291,10 @@ export class PlanningScene extends Phaser.Scene {
           })
           .setOrigin(0, 0);
 
-        // Upgrade button (if junior)
         let btnEndX = contentX + contentWidth - 10;
         if (member.level === "junior") {
           const canUpgrade = this.gameState.budget >= config.upgradeCost;
-          const upgBtnW = 70;
+          const upgBtnW = 80;
           const upgBtnX = btnEndX - upgBtnW;
           const upgBtnY = y + 4;
           const upgBtnH = 16;
@@ -374,13 +304,18 @@ export class PlanningScene extends Phaser.Scene {
           upgBg.fillRoundedRect(upgBtnX, upgBtnY, upgBtnW, upgBtnH, 4);
 
           this.add
-            .text(upgBtnX + upgBtnW / 2, upgBtnY + upgBtnH / 2, `Upgrade €${config.upgradeCost}`, {
-              fontSize: "8px",
-              fontFamily: "'Inter', system-ui, sans-serif",
-              color: canUpgrade ? CSS_COLORS.general : "#555",
-              fontStyle: "700",
-              resolution: 2,
-            })
+            .text(
+              upgBtnX + upgBtnW / 2,
+              upgBtnY + upgBtnH / 2,
+              `Upgrade ${formatMoney(config.upgradeCost)}`,
+              {
+                fontSize: "8px",
+                fontFamily: "'Inter', system-ui, sans-serif",
+                color: canUpgrade ? CSS_COLORS.general : "#555",
+                fontStyle: "700",
+                resolution: 2,
+              },
+            )
             .setOrigin(0.5);
 
           if (canUpgrade) {
@@ -395,8 +330,7 @@ export class PlanningScene extends Phaser.Scene {
           btnEndX = upgBtnX - 6;
         }
 
-        // Fire button
-        const fireBtnW = 60;
+        const fireBtnW = 70;
         const fireBtnX = btnEndX - fireBtnW;
         const fireBtnY = y + 22;
         const fireBtnH = 16;
@@ -406,7 +340,7 @@ export class PlanningScene extends Phaser.Scene {
         fireBg.fillRoundedRect(fireBtnX, fireBtnY, fireBtnW, fireBtnH, 4);
 
         this.add
-          .text(fireBtnX + fireBtnW / 2, fireBtnY + fireBtnH / 2, "Prepustit", {
+          .text(fireBtnX + fireBtnW / 2, fireBtnY + fireBtnH / 2, "Prepustiť", {
             fontSize: "8px",
             fontFamily: "'Inter', system-ui, sans-serif",
             color: CSS_COLORS.finance,
@@ -429,18 +363,43 @@ export class PlanningScene extends Phaser.Scene {
       y += 8;
     }
 
-    // Big "Pokracovat" button
+    // HIRING section
+    this.add
+      .text(contentX, y, "NAJMI DO TÍMU", {
+        fontSize: "10px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: "#666",
+        fontStyle: "700",
+        resolution: 2,
+      })
+      .setOrigin(0, 0);
+    y += 18;
+
+    const roleCardHeight = 62;
+    const roleCardGap = 6;
+
+    for (const role of ALL_ROLES) {
+      const config = ROLE_CONFIGS[role];
+      const canAfford = this.gameState.budget >= config.cost;
+      this.drawHireRow(contentX, y, contentWidth, roleCardHeight, role, canAfford);
+      y += roleCardHeight + roleCardGap;
+    }
+
     y += 16;
+
+    // POKRACOVAT button
     const btnW = contentWidth;
     const btnH = 52;
     const btnX = contentX;
     const btnY = y;
-    const btnBg = this.add.graphics();
-    btnBg.fillStyle(0xeab308, 1);
-    btnBg.fillRoundedRect(btnX, btnY, btnW, btnH, 10);
+    this.continueBtnX = btnX;
+    this.continueBtnY = btnY;
+    this.continueBtnW = btnW;
+    this.continueBtnH = btnH;
 
-    const btnText = this.add
-      .text(centerX, btnY + btnH / 2, "POKRACOVAT ->", {
+    this.continueBtnBg = this.add.graphics();
+    this.continueBtnText = this.add
+      .text(centerX, btnY + btnH / 2, "POKRAČOVAŤ →", {
         fontSize: "16px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#0a0a0a",
@@ -449,72 +408,96 @@ export class PlanningScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
+    this.renderContinueButton();
+
     const btnHit = this.add
       .rectangle(centerX, btnY + btnH / 2, btnW, btnH, 0, 0)
       .setInteractive({ useHandCursor: true });
 
     btnHit.on("pointerover", () => {
-      btnBg.clear();
-      btnBg.fillStyle(0xfacc15, 1);
-      btnBg.fillRoundedRect(btnX, btnY, btnW, btnH, 10);
-      btnText.setScale(1.03);
+      if (this.gameState.selectedPriority !== null) {
+        this.renderContinueButton(true);
+      }
     });
     btnHit.on("pointerout", () => {
-      btnBg.clear();
-      btnBg.fillStyle(0xeab308, 1);
-      btnBg.fillRoundedRect(btnX, btnY, btnW, btnH, 10);
-      btnText.setScale(1);
+      this.renderContinueButton(false);
     });
     btnHit.on("pointerdown", () => {
+      if (this.gameState.selectedPriority === null) {
+        // feedback — shake
+        this.cameras.main.shake(120, 0.004);
+        playTone(150, 0.15, "sawtooth", 0.05);
+        return;
+      }
       playTone(660, 0.15, "sine", 0.05);
       this.startNextWave();
     });
 
-    y += btnH + 40; // padding at bottom
+    y += btnH + 40;
 
-    // Set total content height and camera bounds for scrolling
+    // Set content height + scroll setup
     this.contentHeight = y;
-    const viewHeight = height;
-
-    if (this.contentHeight > viewHeight) {
+    if (this.contentHeight > this.viewHeight) {
       this.cameras.main.setBounds(0, 0, width, this.contentHeight);
-      this.setupScrolling(viewHeight);
+      this.setupScrolling(this.viewHeight);
     }
 
-    // Start countdown timer
+    // Countdown timer
     this.countdownTimer = this.time.addEvent({
       delay: 1000,
       callback: () => {
         this.countdown--;
         this.countdownLabel.setText(`${this.countdown}s`);
         if (this.countdown <= 0) {
-          this.startNextWave();
+          // Auto-start only if priority is selected; otherwise keep waiting
+          if (this.gameState.selectedPriority !== null) {
+            this.startNextWave();
+          } else {
+            this.countdown = 5; // keep prompting
+            this.countdownLabel.setText(`${this.countdown}s`);
+          }
         }
       },
       loop: true,
     });
   }
 
-  private setupScrolling(viewHeight: number): void {
-    // Mouse wheel scrolling
-    this.input.on("wheel", (_pointer: Phaser.Input.Pointer, _gx: number[], _gy: number[], _gz: number[], _gw: number, _event: Event, dy: number) => {
-      // The 'wheel' event in Phaser passes (pointer, gameObjects, deltaX, deltaY, deltaZ, event)
-      // But the signature differs — let's use a simpler approach
-    });
+  private renderContinueButton(hover: boolean = false): void {
+    const enabled = this.gameState.selectedPriority !== null;
+    const bg = this.continueBtnBg;
+    bg.clear();
+    const color = enabled ? (hover ? 0xfacc15 : 0xeab308) : 0x2a2a2a;
+    bg.fillStyle(color, 1);
+    bg.fillRoundedRect(
+      this.continueBtnX,
+      this.continueBtnY,
+      this.continueBtnW,
+      this.continueBtnH,
+      10,
+    );
 
-    // Use the scene's input manager for wheel
+    this.continueBtnText.setColor(enabled ? "#0a0a0a" : "#666");
+    this.continueBtnText.setText(
+      enabled ? "POKRAČOVAŤ →" : "VYBER PRIORITU",
+    );
+    this.continueBtnText.setScale(hover && enabled ? 1.03 : 1);
+  }
+
+  private setupScrolling(viewHeight: number): void {
     if (this.input.mouse) {
-      this.input.on("wheel" as string, (_pointer: unknown, _objects: unknown, _dx: number, dy: number) => {
-        const cam = this.cameras.main;
-        cam.scrollY = Phaser.Math.Clamp(
-          cam.scrollY + dy * 0.5,
-          0,
-          Math.max(0, this.contentHeight - viewHeight)
-        );
-      });
+      this.input.on(
+        "wheel" as string,
+        (_pointer: unknown, _objects: unknown, _dx: number, dy: number) => {
+          const cam = this.cameras.main;
+          cam.scrollY = Phaser.Math.Clamp(
+            cam.scrollY + dy * 0.5,
+            0,
+            Math.max(0, this.contentHeight - viewHeight),
+          );
+        },
+      );
     }
 
-    // Pointer drag scrolling (touch + mouse)
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       this.isDragging = true;
       this.dragStartY = pointer.y;
@@ -531,7 +514,7 @@ export class PlanningScene extends Phaser.Scene {
       cam.scrollY = Phaser.Math.Clamp(
         this.scrollStartY + dy,
         0,
-        Math.max(0, this.contentHeight - viewHeight)
+        Math.max(0, this.contentHeight - viewHeight),
       );
     });
 
@@ -540,101 +523,187 @@ export class PlanningScene extends Phaser.Scene {
     });
   }
 
-  private drawPnlSummary(x: number, y: number, w: number, _centerX: number): number {
+  private drawPnlBreakdown(
+    x: number,
+    y: number,
+    w: number,
+    pnl: MonthlyPnl,
+  ): number {
+    const bizCfg = BUSINESS_TYPE_CONFIGS[this.gameState.businessType];
+
+    // Container
+    const height = 222;
     const bg = this.add.graphics();
     bg.fillStyle(0x111111, 1);
-    bg.fillRoundedRect(x, y, w, 48, 8);
+    bg.fillRoundedRect(x, y, w, height, 10);
     bg.lineStyle(1, 0x333333, 0.5);
-    bg.strokeRoundedRect(x, y, w, 48, 8);
+    bg.strokeRoundedRect(x, y, w, height, 10);
 
-    const colW = w / 4;
+    const padding = 14;
+    const lineH = 18;
+    let ly = y + 12;
 
-    // Obrat
     this.add
-      .text(x + colW * 0.5, y + 12, formatRevenue(this.gameState.revenue), {
-        fontSize: "14px",
+      .text(x + padding, ly, "P&L MINULÝ MESIAC", {
+        fontSize: "10px",
         fontFamily: "'Inter', system-ui, sans-serif",
-        color: CSS_COLORS.general,
+        color: "#666",
+        fontStyle: "700",
+        resolution: 2,
+      })
+      .setOrigin(0, 0);
+    ly += 22;
+
+    // Revenue
+    this.drawPnlLine(x + padding, ly, w - padding * 2, "Obrat", formatMoney(pnl.revenue), "#fff");
+    ly += lineH;
+
+    // COGS
+    this.drawPnlLine(
+      x + padding,
+      ly,
+      w - padding * 2,
+      "COGS",
+      `-${formatMoney(pnl.cogs)}`,
+      "#aaa",
+    );
+    ly += lineH;
+
+    // Gross margin (with ratio indicator)
+    const gmHealth = ratioHealth(pnl.grossMarginRatio, bizCfg.maxGrossMargin * 0.85);
+    this.drawPnlLine(
+      x + padding,
+      ly,
+      w - padding * 2,
+      `= Hrubá marža (${formatPercent(pnl.grossMarginRatio)})`,
+      formatMoney(pnl.grossMargin),
+      this.healthColor(gmHealth),
+      true,
+    );
+    ly += lineH;
+
+    // Marketing (lower is better → invert)
+    const mkHealth = ratioHealth(
+      pnl.marketingRatio,
+      Math.max(bizCfg.minMarketingRatio * 1.5, 0.12),
+      true,
+    );
+    this.drawPnlLine(
+      x + padding,
+      ly,
+      w - padding * 2,
+      `Marketing (${formatPercent(pnl.marketingRatio)})`,
+      `-${formatMoney(pnl.marketingCost)}`,
+      this.healthColor(mkHealth),
+    );
+    ly += lineH;
+
+    // CP3 (target 25%)
+    const cp3Health = ratioHealth(pnl.cp3Ratio, 0.25);
+    this.drawPnlLine(
+      x + padding,
+      ly,
+      w - padding * 2,
+      `= CP3 (${formatPercent(pnl.cp3Ratio)})`,
+      formatMoney(pnl.cp3),
+      this.healthColor(cp3Health),
+      true,
+    );
+    ly += lineH;
+
+    // Salaries
+    this.drawPnlLine(
+      x + padding,
+      ly,
+      w - padding * 2,
+      "Mzdy",
+      `-${formatMoney(pnl.salaries)}`,
+      "#aaa",
+    );
+    ly += lineH;
+
+    // EBITDA
+    const ebitdaHealth = ratioHealth(pnl.ebitdaRatio, 0.15);
+    this.drawPnlLine(
+      x + padding,
+      ly,
+      w - padding * 2,
+      `= EBITDA (${formatPercent(pnl.ebitdaRatio)})`,
+      formatMoney(pnl.ebitda),
+      this.healthColor(ebitdaHealth),
+      true,
+    );
+    ly += lineH + 6;
+
+    // Cumulative profit
+    const cumColor =
+      this.gameState.profit >= 0 ? CSS_COLORS.operations : CSS_COLORS.finance;
+    this.add
+      .text(x + padding, ly, "Kumulatívny zisk:", {
+        fontSize: "10px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: "#888",
+        resolution: 2,
+      })
+      .setOrigin(0, 0);
+    this.add
+      .text(x + w - padding, ly, formatMoney(this.gameState.profit), {
+        fontSize: "11px",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        color: cumColor,
         fontStyle: "800",
         resolution: 2,
       })
-      .setOrigin(0.5, 0);
-    this.add
-      .text(x + colW * 0.5, y + 30, "Obrat", {
-        fontSize: "9px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#666",
-        resolution: 2,
-      })
-      .setOrigin(0.5, 0);
+      .setOrigin(1, 0);
 
-    // Zisk
-    const profitColor = this.gameState.profit >= 0 ? CSS_COLORS.operations : CSS_COLORS.finance;
-    this.add
-      .text(x + colW * 1.5, y + 12, formatProfit(this.gameState.profit), {
-        fontSize: "14px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: profitColor,
-        fontStyle: "800",
-        resolution: 2,
-      })
-      .setOrigin(0.5, 0);
-    this.add
-      .text(x + colW * 1.5, y + 30, "Zisk", {
-        fontSize: "9px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#666",
-        resolution: 2,
-      })
-      .setOrigin(0.5, 0);
+    return y + height;
+  }
 
-    // Tim
+  private drawPnlLine(
+    x: number,
+    y: number,
+    w: number,
+    label: string,
+    value: string,
+    valueColor: string,
+    bold: boolean = false,
+  ): void {
     this.add
-      .text(x + colW * 2.5, y + 12, `${this.gameState.team.length}`, {
-        fontSize: "14px",
+      .text(x, y, label, {
+        fontSize: "10px",
         fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#fff",
-        fontStyle: "800",
+        color: "#bbb",
+        fontStyle: bold ? "700" : "400",
         resolution: 2,
       })
-      .setOrigin(0.5, 0);
-    this.add
-      .text(x + colW * 2.5, y + 30, "Tim", {
-        fontSize: "9px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#666",
-        resolution: 2,
-      })
-      .setOrigin(0.5, 0);
+      .setOrigin(0, 0);
 
-    // Naklady
     this.add
-      .text(x + colW * 3.5, y + 12, `€${this.gameState.monthlyCosts}k`, {
-        fontSize: "14px",
+      .text(x + w, y, value, {
+        fontSize: "11px",
         fontFamily: "'Inter', system-ui, sans-serif",
-        color: CSS_COLORS.finance,
-        fontStyle: "800",
+        color: valueColor,
+        fontStyle: bold ? "800" : "600",
         resolution: 2,
       })
-      .setOrigin(0.5, 0);
-    this.add
-      .text(x + colW * 3.5, y + 30, "Naklady/mes", {
-        fontSize: "9px",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: "#666",
-        resolution: 2,
-      })
-      .setOrigin(0.5, 0);
+      .setOrigin(1, 0);
+  }
 
-    return y + 48;
+  private healthColor(h: "good" | "warning" | "bad"): string {
+    switch (h) {
+      case "good":
+        return CSS_COLORS.operations;
+      case "warning":
+        return CSS_COLORS.accent;
+      case "bad":
+        return CSS_COLORS.finance;
+    }
   }
 
   private drawBackground(width: number, height: number): void {
     const bg = this.add.graphics();
     bg.fillStyle(0x0a0a0a, 1);
     bg.fillRect(0, 0, width, height);
-
-    // Subtle vertical gradient highlights
     for (let i = 0; i < 4; i++) {
       bg.fillStyle(0x1a1a2e, 0.05 + i * 0.02);
       bg.fillCircle(width / 2, height / 2, Math.max(width, height) * (0.8 - i * 0.15));
@@ -648,24 +717,21 @@ export class PlanningScene extends Phaser.Scene {
     w: number,
     h: number,
     role: Role,
-    config: (typeof ROLE_CONFIGS)[string],
-    canAfford: boolean
+    canAfford: boolean,
   ): void {
+    const config = ROLE_CONFIGS[role];
     const color = Phaser.Display.Color.HexStringToColor(config.color).color;
     const alpha = canAfford ? 1 : 0.35;
 
-    // Card background
     const bg = this.add.graphics();
     bg.fillStyle(0x1a1a1a, alpha);
     bg.fillRoundedRect(x, y, w, h, 6);
     bg.lineStyle(1, canAfford ? color : 0x333333, canAfford ? 0.4 : 0.2);
     bg.strokeRoundedRect(x, y, w, h, 6);
 
-    // Left color accent
     bg.fillStyle(color, canAfford ? 0.15 : 0.05);
     bg.fillRoundedRect(x, y, 4, h, { tl: 6, bl: 6, tr: 0, br: 0 });
 
-    // Role circle
     this.add.circle(x + 22, y + h / 2, 10, color).setAlpha(alpha);
     const labelShort = this.getRoleShortLabel(role);
     this.add
@@ -679,9 +745,8 @@ export class PlanningScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setAlpha(alpha);
 
-    // Role name
     this.add
-      .text(x + 40, y + 10, config.label, {
+      .text(x + 40, y + 8, config.label, {
         fontSize: "11px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#ffffff",
@@ -690,21 +755,38 @@ export class PlanningScene extends Phaser.Scene {
       })
       .setAlpha(alpha);
 
-    // Description
     this.add
-      .text(x + 40, y + 24, config.description, {
+      .text(x + 40, y + 22, config.description, {
         fontSize: "8px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#777",
         resolution: 2,
-        wordWrap: { width: w - 150 },
+        wordWrap: { width: w - 180 },
       })
       .setAlpha(alpha);
 
+    // Simulation of next month impact (hover hint)
+    const sim = this.simulateHire(role);
+    if (sim) {
+      this.add
+        .text(
+          x + 40,
+          y + h - 14,
+          `Ak najmeš: Δ obrat ${this.signed(sim.revDelta)}, Δ zisk ${this.signed(sim.profitDelta)}`,
+          {
+            fontSize: "8px",
+            fontFamily: "'Inter', system-ui, sans-serif",
+            color: "#555",
+            resolution: 2,
+          },
+        )
+        .setAlpha(alpha);
+    }
+
     // Hire cost + monthly cost on right side
     this.add
-      .text(x + w - 10, y + 12, `€${config.cost}`, {
-        fontSize: "13px",
+      .text(x + w - 10, y + 8, `Fee ${formatMoney(config.cost)}`, {
+        fontSize: "12px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: canAfford ? CSS_COLORS.general : "#555",
         fontStyle: "800",
@@ -714,7 +796,7 @@ export class PlanningScene extends Phaser.Scene {
       .setAlpha(alpha);
 
     this.add
-      .text(x + w - 10, y + 28, `+€${config.monthlyCost}k/mes`, {
+      .text(x + w - 10, y + 24, `${formatMoney(config.monthlyCost)}/mes`, {
         fontSize: "8px",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#888",
@@ -724,7 +806,7 @@ export class PlanningScene extends Phaser.Scene {
       .setAlpha(alpha);
 
     // NAJAT button
-    const btnW = 50;
+    const btnW = 56;
     const btnH = 18;
     const btnX = x + w - btnW - 8;
     const btnY = y + h - btnH - 5;
@@ -735,7 +817,7 @@ export class PlanningScene extends Phaser.Scene {
       btnBg.fillRoundedRect(btnX, btnY, btnW, btnH, 4);
 
       this.add
-        .text(btnX + btnW / 2, btnY + btnH / 2, "NAJAT", {
+        .text(btnX + btnW / 2, btnY + btnH / 2, "NAJAŤ", {
           fontSize: "9px",
           fontFamily: "'Inter', system-ui, sans-serif",
           color: CSS_COLORS.general,
@@ -764,19 +846,72 @@ export class PlanningScene extends Phaser.Scene {
     }
   }
 
+  private simulateHire(role: Role): { revDelta: number; profitDelta: number } | null {
+    const nextWaveConfig = WAVES[this.gameState.wave]; // next wave (0-indexed)
+    if (!nextWaveConfig) return null;
+
+    const priority = this.gameState.selectedPriority;
+
+    const baseline = simulatePnl(
+      this.gameState,
+      nextWaveConfig,
+      priority,
+      this.gameState.team,
+      this.gameState.baselineRatios,
+    );
+
+    const hypoTeam = [
+      ...this.gameState.team,
+      { role, level: "junior" as const, id: "sim" },
+    ];
+    const hypoRatios = applyHireToBaseline(
+      this.gameState.baselineRatios,
+      role,
+      this.gameState.businessType,
+    );
+    const withHire = simulatePnl(
+      this.gameState,
+      nextWaveConfig,
+      priority,
+      hypoTeam,
+      hypoRatios,
+    );
+
+    return {
+      revDelta: withHire.revenue - baseline.revenue,
+      profitDelta: withHire.ebitda - baseline.ebitda,
+    };
+  }
+
+  private signed(n: number): string {
+    const prefix = n >= 0 ? "+" : "";
+    return prefix + formatMoney(n);
+  }
+
   private getRoleShortLabel(role: Role): string {
     switch (role) {
-      case "va": return "VA";
-      case "sales": return "SAL";
-      case "marketing": return "MKT";
-      case "product": return "PRD";
-      case "support": return "SUP";
-      case "accountant": return "ACC";
-      case "cfo": return "CFO";
-      case "hr": return "HR";
-      case "operations": return "OPS";
-      case "coo": return "COO";
-      default: return "";
+      case "va":
+        return "VA";
+      case "sales":
+        return "SAL";
+      case "marketing":
+        return "MKT";
+      case "product":
+        return "PRD";
+      case "support":
+        return "SUP";
+      case "accountant":
+        return "ACC";
+      case "cfo":
+        return "CFO";
+      case "hr":
+        return "HR";
+      case "operations":
+        return "OPS";
+      case "coo":
+        return "COO";
+      default:
+        return "";
     }
   }
 
@@ -791,11 +926,17 @@ export class PlanningScene extends Phaser.Scene {
       id: `${role}-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
     });
 
-    // Recalculate monthly costs
+    // Apply one-time ratio improvements from hiring
+    this.gameState.baselineRatios = applyHireToBaseline(
+      this.gameState.baselineRatios,
+      role,
+      this.gameState.businessType,
+    );
+
     this.recalcMonthlyCosts();
 
     this.countdownTimer.destroy();
-    this.scene.restart({ gameState: this.gameState, selectedFocus: this.selectedFocus });
+    this.scene.restart({ gameState: this.gameState });
   }
 
   private upgrade(memberId: string): void {
@@ -808,8 +949,10 @@ export class PlanningScene extends Phaser.Scene {
     this.gameState.budget -= config.upgradeCost;
     member.level = "senior";
 
+    this.recalcMonthlyCosts();
+
     this.countdownTimer.destroy();
-    this.scene.restart({ gameState: this.gameState, selectedFocus: this.selectedFocus });
+    this.scene.restart({ gameState: this.gameState });
   }
 
   private fire(memberId: string): void {
@@ -818,57 +961,42 @@ export class PlanningScene extends Phaser.Scene {
 
     this.gameState.team.splice(index, 1);
 
-    // Recalculate monthly costs
     this.recalcMonthlyCosts();
 
     this.countdownTimer.destroy();
-    this.scene.restart({ gameState: this.gameState, selectedFocus: this.selectedFocus });
+    this.scene.restart({ gameState: this.gameState });
   }
 
   private recalcMonthlyCosts(): void {
     this.gameState.monthlyCosts = this.gameState.team.reduce((sum, m) => {
       const cfg = ROLE_CONFIGS[m.role];
-      return sum + cfg.monthlyCost;
+      const cost =
+        m.level === "senior"
+          ? cfg.monthlyCost * SENIOR_MULTIPLIER.monthlyCostFactor
+          : cfg.monthlyCost;
+      return sum + cost;
     }, 0);
   }
 
   private startNextWave(): void {
     this.countdownTimer.destroy();
-    if (this.selectedFocus) {
-      this.gameState.focusHistory.push(this.selectedFocus);
-    }
+    // selectedPriority is kept on gameState — ActionScene reads it after wave
     this.gameState.wave++;
     this.scene.start("ActionScene", { gameState: this.gameState });
   }
 
-  private drawFocusOption(
+  private drawPriorityOption(
     gfx: Phaser.GameObjects.Graphics,
     x: number,
     y: number,
     w: number,
     color: string,
-    selected: boolean
+    selected: boolean,
   ): void {
     const colorHex = Phaser.Display.Color.HexStringToColor(color).color;
     gfx.fillStyle(selected ? 0x1a1a1a : 0x111111, 1);
-    gfx.fillRoundedRect(x, y, w, 32, 6);
+    gfx.fillRoundedRect(x, y, w, 36, 6);
     gfx.lineStyle(1, selected ? colorHex : 0x222222, selected ? 0.6 : 0.3);
-    gfx.strokeRoundedRect(x, y, w, 32, 6);
-  }
-
-  private updateProjection(): void {
-    const nextWaveConfig = WAVES[this.gameState.wave]; // wave is 0-indexed after current
-    if (!nextWaveConfig) {
-      this.projectionLabel.setText("");
-      return;
-    }
-    const { revenueGain, profitGain } = calculateWaveFinancials(
-      this.gameState,
-      nextWaveConfig,
-      this.selectedFocus
-    );
-    this.projectionLabel.setText(
-      `Potencial dalsej vlny: +${formatRevenue(revenueGain)} obrat, ${formatProfit(profitGain)} zisk`
-    );
+    gfx.strokeRoundedRect(x, y, w, 36, 6);
   }
 }

@@ -4,13 +4,15 @@ import {
   COLORS,
   CSS_COLORS,
   BUDGET_PER_CATCH,
-  STARTING_BUDGET,
-  STARTING_REVENUE,
   COMBO_WINDOW_MS,
   COMBO_BONUS_MULTIPLIER,
   PROFIT_GAMEOVER_THRESHOLD,
 } from "../constants";
-import { calculateWaveFinancials, formatRevenue, formatProfit } from "../utils/revenueCalculator";
+import {
+  calculateMonthlyPnl,
+  applyPriorityToBaseline,
+  formatMoney,
+} from "../utils/pnlCalculator";
 import { WAVES } from "../data/waves";
 import { CEO } from "../entities/CEO";
 import { TeamMemberEntity } from "../entities/TeamMember";
@@ -49,28 +51,30 @@ export class ActionScene extends Phaser.Scene {
   }
 
   init(data?: { gameState: GameState }): void {
-    if (data?.gameState) {
-      this.gameState = data.gameState;
-    } else {
-      this.gameState = {
-        wave: 1,
-        score: 0,
-        budget: STARTING_BUDGET,
-        damage: 0,
-        revenue: STARTING_REVENUE,
-        profit: 0,
-        monthlyCosts: 0,
-        team: [],
-        problemsCaught: 0,
-        problemsMissed: 0,
-        caughtByCategory: { marketing: 0, finance: 0, operations: 0, general: 0 },
-        missedByCategory: { marketing: 0, finance: 0, operations: 0, general: 0 },
-        manualClicks: 0,
-        phase: "action",
-        focusHistory: [],
-      };
+    if (!data?.gameState) {
+      throw new Error(
+        "ActionScene requires a gameState from BusinessTypeScene/PlanningScene",
+      );
     }
+    this.gameState = data.gameState;
     this.gameState.phase = "action";
+
+    // Reset per-wave counters so performance/catchRate is measured on this month.
+    this.gameState.problemsCaught = 0;
+    this.gameState.problemsMissed = 0;
+    this.gameState.caughtByCategory = {
+      marketing: 0,
+      finance: 0,
+      operations: 0,
+      general: 0,
+    };
+    this.gameState.missedByCategory = {
+      marketing: 0,
+      finance: 0,
+      operations: 0,
+      general: 0,
+    };
+
     this.teamEntities = [];
     this.waveStarted = false;
     this.comboCount = 0;
@@ -156,7 +160,7 @@ export class ActionScene extends Phaser.Scene {
         member.level,
         member.id,
         index,
-        totalMembers
+        totalMembers,
       );
       entity.setDepth(22);
       this.teamEntities.push(entity);
@@ -182,7 +186,7 @@ export class ActionScene extends Phaser.Scene {
         this.ceo.y,
         pointer.worldX,
         pointer.worldY,
-        activeProblems
+        activeProblems,
       );
       if (caught) {
         this.gameState.manualClicks++;
@@ -196,13 +200,11 @@ export class ActionScene extends Phaser.Scene {
   }
 
   private drawBackground(width: number, height: number): void {
-    // Base dark
     const bg = this.add.graphics();
     bg.fillStyle(0x0a0a0a, 1);
     bg.fillRect(0, 0, width, height);
     bg.setDepth(-10);
 
-    // Radial gradient vignette via concentric circles
     const maxRadius = Math.max(width, height);
     for (let i = 0; i < 6; i++) {
       const r = maxRadius * (1 - i * 0.15);
@@ -211,7 +213,6 @@ export class ActionScene extends Phaser.Scene {
       bg.fillCircle(width / 2, height / 2, r);
     }
 
-    // Subtle grid dots (atmospheric)
     const dots = this.add.graphics();
     dots.fillStyle(0xffffff, 0.04);
     const spacing = 40;
@@ -224,7 +225,6 @@ export class ActionScene extends Phaser.Scene {
   }
 
   private drawTopBar(width: number): void {
-    // Top bar background
     const topBar = this.add.graphics();
     topBar.fillStyle(0x000000, 0.4);
     topBar.fillRect(0, 0, width, 30);
@@ -281,12 +281,14 @@ export class ActionScene extends Phaser.Scene {
 
     this.waveLabel.setText(`VLNA ${waveConfig.wave}/10`);
     this.scoreLabel.setText(`Skóre: ${this.gameState.score}`);
-    this.revenueLabel.setText(formatRevenue(this.gameState.revenue));
+    this.revenueLabel.setText(`Obrat: ${formatMoney(this.gameState.monthlyRevenue)}`);
     this.updateProfitLabel();
 
     // Wave name splash animation
     this.waveNameLabel.setText(waveConfig.name.toUpperCase());
-    this.waveNameSubLabel.setText(`Fáza ${waveConfig.wave} — ${waveConfig.problemCount} problémov`);
+    this.waveNameSubLabel.setText(
+      `Mesiac ${waveConfig.wave} — ${waveConfig.problemCount} problémov`,
+    );
 
     this.tweens.add({
       targets: [this.waveNameLabel, this.waveNameSubLabel],
@@ -304,7 +306,6 @@ export class ActionScene extends Phaser.Scene {
       ease: "Power2",
     });
 
-    // Delayed spawner start for wave name to show first
     this.time.delayedCall(700, () => {
       this.spawner.startWave(waveConfig);
       this.waveStarted = true;
@@ -312,14 +313,16 @@ export class ActionScene extends Phaser.Scene {
   }
 
   private updateProfitLabel(): void {
-    const profitText = formatProfit(this.gameState.profit);
-    const profitColor = this.gameState.profit >= 0 ? CSS_COLORS.operations : CSS_COLORS.finance;
+    const profitText = `Zisk/mes: ${formatMoney(this.gameState.monthlyProfit)}`;
+    const profitColor =
+      this.gameState.monthlyProfit >= 0
+        ? CSS_COLORS.operations
+        : CSS_COLORS.finance;
     this.profitLabel.setText(profitText);
     this.profitLabel.setColor(profitColor);
   }
 
   update(_time: number, delta: number): void {
-    // Always update team orbit (even during wave name splash)
     for (const member of this.teamEntities) {
       member.updateOrbitPosition(delta, this.centerX, this.centerY);
       member.updateCooldown(delta);
@@ -327,12 +330,8 @@ export class ActionScene extends Phaser.Scene {
 
     if (!this.waveStarted) return;
 
-    // Update score + revenue + profit labels
     this.scoreLabel.setText(`Skóre: ${this.gameState.score}`);
-    this.revenueLabel.setText(formatRevenue(this.gameState.revenue));
-    this.updateProfitLabel();
 
-    // Update active problems
     const activeProblems = this.spawner.getActiveProblems();
     for (const problem of activeProblems) {
       problem.update(delta);
@@ -341,7 +340,7 @@ export class ActionScene extends Phaser.Scene {
     // Team auto-catch
     const caughtByTeam = this.catchSystem.checkTeamCatches(
       this.teamEntities,
-      this.spawner.getActiveProblems()
+      this.spawner.getActiveProblems(),
     );
     for (const problem of caughtByTeam) {
       this.handleCatch(problem.category, problem.x, problem.y, false);
@@ -359,7 +358,7 @@ export class ActionScene extends Phaser.Scene {
       return;
     }
 
-    // Check game over (profit cash crunch)
+    // Check game over (profit cash crunch) — on cumulative profit
     if (this.gameState.profit < PROFIT_GAMEOVER_THRESHOLD) {
       this.endGame(false, true);
       return;
@@ -369,19 +368,35 @@ export class ActionScene extends Phaser.Scene {
     if (this.spawner.isWaveComplete()) {
       this.waveStarted = false;
 
-      // Calculate and add wave revenue + profit
       const waveConfig = WAVES[this.gameState.wave - 1];
       if (waveConfig) {
-        const currentFocus =
-          this.gameState.focusHistory[this.gameState.wave - 1] ?? null;
-        const { revenueGain, profitGain, monthlyCosts } = calculateWaveFinancials(
-          this.gameState,
-          waveConfig,
-          currentFocus
-        );
-        this.gameState.revenue += revenueGain;
-        this.gameState.profit += profitGain;
-        this.gameState.monthlyCosts = monthlyCosts;
+        // Use the priority chosen during the preceding planning phase
+        // (null on wave 1 — no planning has happened yet)
+        const priority = this.gameState.selectedPriority;
+
+        const pnl = calculateMonthlyPnl(this.gameState, waveConfig, priority);
+
+        // Apply to state
+        this.gameState.monthlyRevenue = pnl.revenue;
+        this.gameState.monthlyProfit = pnl.ebitda;
+        this.gameState.monthlyCosts = pnl.salaries;
+        this.gameState.revenue += pnl.revenue;
+        this.gameState.profit += pnl.ebitda;
+        this.gameState.pnlHistory.push(pnl);
+
+        // After computing PnL, lock in the priority's permanent effects
+        if (priority) {
+          this.gameState.baselineRatios = applyPriorityToBaseline(
+            this.gameState.baselineRatios,
+            priority,
+            this.gameState.businessType,
+          );
+          this.gameState.priorityHistory.push(priority);
+          this.gameState.selectedPriority = null;
+        }
+
+        this.revenueLabel.setText(`Obrat: ${formatMoney(this.gameState.monthlyRevenue)}`);
+        this.updateProfitLabel();
       }
 
       if (this.gameState.wave >= 10) {
@@ -392,10 +407,14 @@ export class ActionScene extends Phaser.Scene {
     }
   }
 
-  private handleCatch(category: Category, x: number, y: number, isManual: boolean): void {
+  private handleCatch(
+    category: Category,
+    x: number,
+    y: number,
+    isManual: boolean,
+  ): void {
     const now = this.time.now;
 
-    // Combo logic
     if (now - this.lastCatchTime < COMBO_WINDOW_MS) {
       this.comboCount++;
     } else {
@@ -406,28 +425,24 @@ export class ActionScene extends Phaser.Scene {
     const comboTier = Math.min(Math.floor(this.comboCount / 3), 4);
     const multiplier = 1 + comboTier * COMBO_BONUS_MULTIPLIER;
     const scoreGain = Math.round(10 * multiplier);
-    const budgetGain = Math.round(BUDGET_PER_CATCH * multiplier);
+    const budgetGain = BUDGET_PER_CATCH * multiplier;
 
     this.gameState.score += scoreGain;
     this.gameState.problemsCaught++;
     this.gameState.caughtByCategory[category]++;
     this.budgetSystem.earn(budgetGain);
 
-    // Visual feedback
     this.spawnCatchParticles(x, y, category);
     this.spawnScorePopup(x, y, `+${scoreGain}`, category);
 
-    // CEO celebrates if manual click
     if (isManual) {
       this.ceo.celebrateCatch();
     }
 
-    // Combo display
     if (comboTier > 0) {
       this.showCombo(this.comboCount, multiplier);
     }
 
-    // Audio
     const baseFreq = 440;
     const freq = baseFreq + comboTier * 80;
     playTone(freq, 0.08, "sine", 0.05);
@@ -474,7 +489,12 @@ export class ActionScene extends Phaser.Scene {
     }
   }
 
-  private spawnScorePopup(x: number, y: number, text: string, category: Category): void {
+  private spawnScorePopup(
+    x: number,
+    y: number,
+    text: string,
+    category: Category,
+  ): void {
     const cssColor = this.getCssColor(category);
     const popup = this.add
       .text(x, y - 10, text, {
@@ -521,7 +541,6 @@ export class ActionScene extends Phaser.Scene {
       ease: "Power2",
     });
 
-    // Camera shake
     this.cameras.main.shake(150, 0.003);
   }
 
@@ -541,7 +560,11 @@ export class ActionScene extends Phaser.Scene {
       this.gameState.phase = "results";
     }
     this.cleanup();
-    this.scene.start("GameOverScene", { gameState: this.gameState, cashCrunch });
+    this.scene.start("GameOverScene", {
+      gameState: this.gameState,
+      cashCrunch,
+      survived,
+    });
   }
 
   private cleanup(): void {

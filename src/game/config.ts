@@ -1,5 +1,6 @@
 import * as Phaser from "phaser";
 import { IntroScene } from "./scenes/IntroScene";
+import { BusinessTypeScene } from "./scenes/BusinessTypeScene";
 import { ActionScene } from "./scenes/ActionScene";
 import { PlanningScene } from "./scenes/PlanningScene";
 import { GameOverScene } from "./scenes/GameOverScene";
@@ -16,7 +17,7 @@ export function createGameConfig(
     width,
     height,
     backgroundColor: COLORS.background,
-    scene: [IntroScene, ActionScene, PlanningScene, GameOverScene],
+    scene: [IntroScene, BusinessTypeScene, ActionScene, PlanningScene, GameOverScene],
     physics: {
       default: "arcade",
       arcade: {

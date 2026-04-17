@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import type { CEOProfile } from "@/game/types";
+import type { BusinessType, CEOProfile } from "@/game/types";
 import ResultsCard from "@/components/ResultsCard";
 import ShareButtons from "@/components/ShareButtons";
 
@@ -11,6 +11,10 @@ interface ResultsPageProps {
     revenue?: string;
     profit?: string;
     team?: string;
+    businessType?: string;
+    milestone?: string;
+    grossMargin?: string;
+    ebitdaRatio?: string;
   }>;
 }
 
@@ -26,16 +30,16 @@ export async function generateMetadata({
 
   return {
     title: `CEO Defense — ${profile.toUpperCase()}`,
-    description: `Prezil som ${waves}/10 vln. Score: ${score}. A ty?`,
+    description: `Prežil som ${waves}/10 vĺn. Score: ${score}. A ty?`,
     openGraph: {
       title: `CEO Defense — ${profile.toUpperCase()}`,
-      description: `Prezil som ${waves}/10 vln. Score: ${score}. A ty?`,
+      description: `Prežil som ${waves}/10 vĺn. Score: ${score}. A ty?`,
       images: [{ url: ogUrl, width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",
       title: `CEO Defense — ${profile.toUpperCase()}`,
-      description: `Prezil som ${waves}/10 vln. Score: ${score}. A ty?`,
+      description: `Prežil som ${waves}/10 vĺn. Score: ${score}. A ty?`,
       images: [ogUrl],
     },
   };
@@ -46,22 +50,44 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const profile = (params.profile || "lone-wolf") as CEOProfile;
   const waves = parseInt(params.waves || "1", 10);
   const score = parseInt(params.score || "0", 10);
-  const revenue = parseInt(params.revenue || "0", 10);
-  const profit = parseInt(params.profit || "0", 10);
+  const revenue = parseFloat(params.revenue || "0");
+  const profit = parseFloat(params.profit || "0");
   const team = params.team || "";
+  const businessType =
+    params.businessType === "eshop" || params.businessType === "services"
+      ? (params.businessType as BusinessType)
+      : undefined;
+  const milestone = params.milestone;
+  const grossMargin = params.grossMargin
+    ? parseFloat(params.grossMargin)
+    : undefined;
+  const ebitdaRatio = params.ebitdaRatio
+    ? parseFloat(params.ebitdaRatio)
+    : undefined;
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center px-6 py-12 gap-8">
-      <ResultsCard profile={profile} waves={waves} score={score} revenue={revenue} profit={profit} team={team} />
+      <ResultsCard
+        profile={profile}
+        waves={waves}
+        score={score}
+        revenue={revenue}
+        profit={profit}
+        team={team}
+        businessType={businessType}
+        milestone={milestone}
+        grossMargin={grossMargin}
+        ebitdaRatio={ebitdaRatio}
+      />
 
       <ShareButtons profile={profile} waves={waves} score={score} />
 
       <div className="max-w-md w-full bg-[#1a1a1a] border border-[#333] rounded-2xl p-8 text-center space-y-4">
         <h3 className="text-xl font-bold text-white">
-          Chces realne vybudovat firmu, ktora funguje bez teba?
+          Chceš reálne vybudovať firmu, ktorá funguje bez teba?
         </h3>
         <p className="text-sm text-[#a3a3a3] leading-relaxed">
-          Milionova Evolucia — 5-fazovy system pre podnikatelov s obratom
+          Miliónová Evolúcia — 5-fázový systém pre podnikateľov s obratom
           €100k-€1M+
         </p>
         <a
@@ -78,7 +104,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         href="/game"
         className="inline-block px-8 py-3 border border-[#444] hover:border-[#666] text-[#e5e5e5] font-semibold rounded-lg transition-colors text-sm"
       >
-        Hrat znova
+        Hrať znova
       </a>
     </main>
   );

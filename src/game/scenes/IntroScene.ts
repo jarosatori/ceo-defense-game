@@ -161,12 +161,12 @@ export class IntroScene extends Phaser.Scene {
 
     // Skip on click
     this.input.once("pointerdown", () => {
-      this.scene.start("ActionScene");
+      this.scene.start("BusinessTypeScene");
     });
 
     // Transition to ActionScene after intro
     this.time.delayedCall(3500, () => {
-      this.scene.start("ActionScene");
+      this.scene.start("BusinessTypeScene");
     });
   }
 }

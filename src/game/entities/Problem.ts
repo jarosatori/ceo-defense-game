@@ -1,6 +1,7 @@
 import * as Phaser from "phaser";
 import type { Category } from "../types";
 import { PROBLEM_CONFIGS } from "../constants";
+import { randomTaskGlyph } from "../utils/spriteLoader";
 
 export class Problem extends Phaser.GameObjects.Container {
   category: Category;
@@ -8,7 +9,7 @@ export class Problem extends Phaser.GameObjects.Container {
   targetX: number;
   targetY: number;
   caught: boolean = false;
-  private shape!: Phaser.GameObjects.Graphics;
+  private icon!: Phaser.GameObjects.Image;
   private glow!: Phaser.GameObjects.Graphics;
   private size: number = 14;
 
@@ -19,7 +20,7 @@ export class Problem extends Phaser.GameObjects.Container {
     category: Category,
     speed: number,
     targetX: number,
-    targetY: number
+    targetY: number,
   ) {
     super(scene, x, y);
     this.category = category;
@@ -28,27 +29,29 @@ export class Problem extends Phaser.GameObjects.Container {
     this.targetY = targetY;
 
     this.drawGlow();
-    this.drawShape();
-    this.add([this.glow, this.shape]);
-    scene.add.existing(this);
 
-    // Gentle rotation for visual interest
-    if (category === "marketing" || category === "finance") {
-      scene.tweens.add({
-        targets: this.shape,
-        angle: 360,
-        duration: 4000,
-        repeat: -1,
-        ease: "Linear",
-      });
-    }
+    const key = randomTaskGlyph(this.category);
+    this.icon = scene.add.image(0, 0, key);
+
+    this.add([this.glow, this.icon]);
+    scene.add.existing(this);
 
     // Subtle breathing glow
     scene.tweens.add({
       targets: this.glow,
-      alpha: { from: 0.4, to: 0.65 },
-      scale: { from: 0.95, to: 1.1 },
-      duration: 800,
+      alpha: { from: 0.4, to: 0.7 },
+      scale: { from: 0.95, to: 1.12 },
+      duration: 900,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.easeInOut",
+    });
+
+    // Gentle idle float on icon
+    scene.tweens.add({
+      targets: this.icon,
+      scale: { from: 0.98, to: 1.04 },
+      duration: 1200,
       yoyo: true,
       repeat: -1,
       ease: "Sine.easeInOut",
@@ -60,57 +63,13 @@ export class Problem extends Phaser.GameObjects.Container {
     const color = Phaser.Display.Color.HexStringToColor(config.color).color;
     this.glow = this.scene.add.graphics();
 
-    // Layered soft glow
-    this.glow.fillStyle(color, 0.2);
-    this.glow.fillCircle(0, 0, this.size * 2.2);
-    this.glow.fillStyle(color, 0.35);
-    this.glow.fillCircle(0, 0, this.size * 1.5);
-  }
-
-  private drawShape(): void {
-    const config = PROBLEM_CONFIGS[this.category];
-    const color = Phaser.Display.Color.HexStringToColor(config.color).color;
-    this.shape = this.scene.add.graphics();
-    this.shape.fillStyle(color, 1);
-    this.shape.lineStyle(1.5, 0xffffff, 0.5);
-
-    const s = this.size;
-    switch (config.shape) {
-      case "triangle":
-        this.shape.fillTriangle(0, -s, -s, s * 0.85, s, s * 0.85);
-        this.shape.strokeTriangle(0, -s, -s, s * 0.85, s, s * 0.85);
-        break;
-      case "diamond":
-        this.shape.fillPoints(
-          [
-            new Phaser.Geom.Point(0, -s),
-            new Phaser.Geom.Point(s, 0),
-            new Phaser.Geom.Point(0, s),
-            new Phaser.Geom.Point(-s, 0),
-          ],
-          true
-        );
-        this.shape.strokePoints(
-          [
-            new Phaser.Geom.Point(0, -s),
-            new Phaser.Geom.Point(s, 0),
-            new Phaser.Geom.Point(0, s),
-            new Phaser.Geom.Point(-s, 0),
-            new Phaser.Geom.Point(0, -s),
-          ]
-        );
-        break;
-      case "square": {
-        const r = 3;
-        this.shape.fillRoundedRect(-s, -s, s * 2, s * 2, r);
-        this.shape.strokeRoundedRect(-s, -s, s * 2, s * 2, r);
-        break;
-      }
-      case "circle":
-        this.shape.fillCircle(0, 0, s);
-        this.shape.strokeCircle(0, 0, s);
-        break;
-    }
+    // Layered soft halo behind icon
+    this.glow.fillStyle(color, 0.18);
+    this.glow.fillCircle(0, 0, 30);
+    this.glow.fillStyle(color, 0.32);
+    this.glow.fillCircle(0, 0, 22);
+    this.glow.fillStyle(color, 0.45);
+    this.glow.fillCircle(0, 0, 16);
   }
 
   update(delta: number): void {
@@ -144,5 +103,10 @@ export class Problem extends Phaser.GameObjects.Container {
       ease: "Back.easeOut",
       onComplete: () => this.destroy(),
     });
+  }
+
+  // Preserve size accessor for any external callers
+  getSize(): number {
+    return this.size;
   }
 }

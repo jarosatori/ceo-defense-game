@@ -21,6 +21,7 @@ import { CatchSystem } from "../systems/CatchSystem";
 import { DamageSystem } from "../systems/DamageSystem";
 import { BudgetSystem } from "../systems/BudgetSystem";
 import { playTone } from "../utils/audio";
+import { preloadSprites } from "../utils/spriteLoader";
 
 export class ActionScene extends Phaser.Scene {
   private gameState!: GameState;
@@ -48,6 +49,10 @@ export class ActionScene extends Phaser.Scene {
 
   constructor() {
     super({ key: "ActionScene" });
+  }
+
+  preload(): void {
+    preloadSprites(this);
   }
 
   init(data?: { gameState: GameState }): void {
@@ -201,26 +206,25 @@ export class ActionScene extends Phaser.Scene {
 
   private drawBackground(width: number, height: number): void {
     const bg = this.add.graphics();
-    bg.fillStyle(0x0a0a0a, 1);
+    // Solid plum base
+    bg.fillStyle(0x531e38, 1);
     bg.fillRect(0, 0, width, height);
-    bg.setDepth(-10);
-
-    const maxRadius = Math.max(width, height);
-    for (let i = 0; i < 6; i++) {
-      const r = maxRadius * (1 - i * 0.15);
-      const alpha = 0.05 + i * 0.03;
-      bg.fillStyle(0x1a1a2e, alpha);
+    // Subtle magenta radial glow in center
+    for (let i = 0; i < 4; i++) {
+      const r = Math.max(width, height) * (0.7 - i * 0.12);
+      bg.fillStyle(0x9f2d6d, 0.04);
       bg.fillCircle(width / 2, height / 2, r);
     }
-
+    // Soft cream dot grid (subtle atmosphere)
     const dots = this.add.graphics();
-    dots.fillStyle(0xffffff, 0.04);
-    const spacing = 40;
+    dots.fillStyle(0xefedeb, 0.04);
+    const spacing = 44;
     for (let x = spacing; x < width; x += spacing) {
       for (let y = spacing; y < height; y += spacing) {
         dots.fillCircle(x, y, 1);
       }
     }
+    bg.setDepth(-10);
     dots.setDepth(-5);
   }
 

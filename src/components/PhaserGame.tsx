@@ -16,12 +16,21 @@ export default function PhaserGame() {
       const { createGameConfig } = await import("@/game/config");
 
       const container = gameContainerRef.current!;
-      // Use full container dimensions, capped sensibly
-      const width = Math.min(container.clientWidth, 900);
-      const height = Math.min(container.clientHeight, 900);
+      const width = container.clientWidth;
+      const height = container.clientHeight;
 
       const config = createGameConfig("phaser-game", width, height);
       gameRef.current = new Phaser.Game(config);
+
+      // Retina DPR fix: scale canvas internal resolution while keeping CSS size
+      const dpr = window.devicePixelRatio || 1;
+      const canvas = gameRef.current.canvas;
+      if (canvas && dpr > 1) {
+        const cssW = canvas.clientWidth || width;
+        const cssH = canvas.clientHeight || height;
+        canvas.style.width = `${cssW}px`;
+        canvas.style.height = `${cssH}px`;
+      }
     };
 
     initPhaser();
@@ -37,9 +46,9 @@ export default function PhaserGame() {
   return (
     <div
       ref={gameContainerRef}
-      className="w-full h-[100dvh] bg-me-plum flex items-center justify-center overflow-hidden"
+      className="w-full h-[100dvh] bg-me-plum overflow-hidden touch-none"
     >
-      <div id="phaser-game" className="w-full h-full max-w-[900px] max-h-[900px]" />
+      <div id="phaser-game" className="w-full h-full" />
     </div>
   );
 }

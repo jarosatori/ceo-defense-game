@@ -9,7 +9,7 @@ import { COLORS } from "./constants";
 export function createGameConfig(
   parent: string,
   width: number,
-  height: number
+  height: number,
 ): Phaser.Types.Core.GameConfig {
   return {
     type: Phaser.AUTO,
@@ -30,6 +30,7 @@ export function createGameConfig(
     },
     render: {
       antialias: true,
+      antialiasGL: true,
       pixelArt: false,
       roundPixels: false,
     },

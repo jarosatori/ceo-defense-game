@@ -7,10 +7,15 @@ import {
 } from "../constants";
 import { formatMoney, formatPercent } from "../utils/pnlCalculator";
 import { playTone } from "../utils/audio";
+import { preloadSprites } from "../utils/spriteLoader";
 
 export class BusinessTypeScene extends Phaser.Scene {
   constructor() {
     super({ key: "BusinessTypeScene" });
+  }
+
+  preload(): void {
+    preloadSprites(this);
   }
 
   create(): void {

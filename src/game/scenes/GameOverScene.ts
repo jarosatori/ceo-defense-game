@@ -8,6 +8,7 @@ import {
 } from "../utils/pnlCalculator";
 import { BUSINESS_TYPE_CONFIGS } from "../constants";
 import { playChord, playTone } from "../utils/audio";
+import { preloadSprites } from "../utils/spriteLoader";
 
 export class GameOverScene extends Phaser.Scene {
   private gameState!: GameState;
@@ -16,6 +17,10 @@ export class GameOverScene extends Phaser.Scene {
 
   constructor() {
     super({ key: "GameOverScene" });
+  }
+
+  preload(): void {
+    preloadSprites(this);
   }
 
   init(data: { gameState: GameState; cashCrunch?: boolean; survived?: boolean }): void {

@@ -6,6 +6,7 @@ import {
   TEAM_ORBIT_RADIUS,
   TEAM_ORBIT_SPEED,
 } from "../constants";
+import { roleTextureKey } from "../utils/spriteLoader";
 
 export class TeamMemberEntity extends Phaser.GameObjects.Container {
   role: Role;
@@ -15,9 +16,12 @@ export class TeamMemberEntity extends Phaser.GameObjects.Container {
   catchSpeed: number;
   catchRadius: number;
   private catchCooldown: number = 0;
-  private bodyCircle!: Phaser.GameObjects.Arc;
+  private backgroundCircle!: Phaser.GameObjects.Arc;
+  private icon!: Phaser.GameObjects.Image;
   private glow: Phaser.GameObjects.Arc;
   private radiusIndicator: Phaser.GameObjects.Arc;
+  private tierIndicator?: Phaser.GameObjects.Graphics;
+  private seniorDot?: Phaser.GameObjects.Arc;
   private orbitAngle: number;
   private orbitRadius: number;
   private orbitSpeed: number = TEAM_ORBIT_SPEED;
@@ -30,7 +34,7 @@ export class TeamMemberEntity extends Phaser.GameObjects.Container {
     level: Level,
     memberId: string,
     orbitIndex: number,
-    totalMembers: number = 6
+    totalMembers: number = 6,
   ) {
     super(scene, centerX, centerY);
     this.role = role;
@@ -49,57 +53,85 @@ export class TeamMemberEntity extends Phaser.GameObjects.Container {
         : config.catchRadius;
 
     const color = Phaser.Display.Color.HexStringToColor(config.color).color;
-    // Spread members evenly around CEO based on total count (max 6)
     const slots = Math.max(totalMembers, 4);
     this.orbitAngle = (Math.PI * 2 * orbitIndex) / slots - Math.PI / 2;
     this.orbitRadius = TEAM_ORBIT_RADIUS;
 
-    // Catch radius indicator (very subtle)
+    // Catch radius indicator (subtle)
     this.radiusIndicator = scene.add
       .circle(0, 0, this.catchRadius, color, 0.04)
       .setStrokeStyle(1, color, 0.12);
 
     // Outer glow
-    this.glow = scene.add.circle(0, 0, level === "senior" ? 22 : 18, color, 0.25);
+    this.glow = scene.add.circle(
+      0,
+      0,
+      level === "senior" ? 32 : 26,
+      color,
+      0.28,
+    );
 
-    // Body
-    const bodySize = level === "senior" ? 16 : 13;
-    this.bodyCircle = scene.add.circle(0, 0, bodySize, color);
-    this.bodyCircle.setStrokeStyle(1.5, 0xffffff, 0.4);
+    // Background circle (role color, filled)
+    const bgRadius = level === "senior" ? 22 : 18;
+    this.backgroundCircle = scene.add.circle(0, 0, bgRadius, color);
+    this.backgroundCircle.setStrokeStyle(1.5, 0xefedeb, 0.35);
 
-    // Label
-    const labelText = this.getLabelText(role);
-    const label = scene.add
-      .text(0, 0, labelText, {
-        fontSize: level === "senior" ? "9px" : "8px",
-        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
-        color: "#EFEDEB",
-        fontStyle: "600",
-        resolution: 2,
-      })
-      .setOrigin(0.5);
+    // Role icon centered on background circle
+    this.icon = scene.add.image(0, 0, roleTextureKey(role, level));
 
-    // Senior badge (star-like)
+    // Tier indicator
+    this.tierIndicator = scene.add.graphics();
     if (level === "senior") {
-      const badge = scene.add
-        .text(bodySize - 2, -bodySize + 2, "★", {
-          fontSize: "10px",
-          fontFamily: "system-ui, sans-serif",
-          color: "#ffffff",
-          resolution: 2,
-        })
-        .setOrigin(0.5);
-      this.add(badge);
+      // Senior: orange arc sweep around background circle
+      const arcRadius = bgRadius + 4;
+      this.tierIndicator.lineStyle(2.5, 0xff7404, 0.85);
+      this.tierIndicator.beginPath();
+      this.tierIndicator.arc(
+        0,
+        0,
+        arcRadius,
+        Phaser.Math.DegToRad(-120),
+        Phaser.Math.DegToRad(60),
+        false,
+      );
+      this.tierIndicator.strokePath();
+
+      // Senior notification dot (top-right)
+      const dotAngle = Phaser.Math.DegToRad(-30);
+      const dotX = Math.cos(dotAngle) * arcRadius;
+      const dotY = Math.sin(dotAngle) * arcRadius;
+      this.seniorDot = scene.add.circle(dotX, dotY, 3.5, 0xff7404, 1);
+      this.seniorDot.setStrokeStyle(1, 0xefedeb, 0.9);
+    } else {
+      // Junior: dashed outline ring
+      const ringRadius = bgRadius + 3;
+      const segments = 12;
+      this.tierIndicator.lineStyle(1.5, 0xefedeb, 0.35);
+      for (let i = 0; i < segments; i++) {
+        const start = (Math.PI * 2 * i) / segments;
+        const end = start + (Math.PI * 2) / segments / 2;
+        this.tierIndicator.beginPath();
+        this.tierIndicator.arc(0, 0, ringRadius, start, end, false);
+        this.tierIndicator.strokePath();
+      }
     }
 
-    this.add([this.radiusIndicator, this.glow, this.bodyCircle, label]);
+    const children: Phaser.GameObjects.GameObject[] = [
+      this.radiusIndicator,
+      this.glow,
+      this.backgroundCircle,
+      this.tierIndicator,
+      this.icon,
+    ];
+    if (this.seniorDot) children.push(this.seniorDot);
+    this.add(children);
     scene.add.existing(this);
 
     // Breathing glow
     scene.tweens.add({
       targets: this.glow,
-      alpha: { from: 0.15, to: 0.35 },
-      scale: { from: 0.9, to: 1.1 },
+      alpha: { from: 0.18, to: 0.4 },
+      scale: { from: 0.9, to: 1.12 },
       duration: 1500 + Math.random() * 500,
       yoyo: true,
       repeat: -1,
@@ -107,22 +139,6 @@ export class TeamMemberEntity extends Phaser.GameObjects.Container {
     });
 
     this.updateOrbitPosition(0);
-  }
-
-  private getLabelText(role: Role): string {
-    switch (role) {
-      case "va": return "VA";
-      case "sales": return "SAL";
-      case "marketing": return "MKT";
-      case "product": return "PRD";
-      case "support": return "SUP";
-      case "accountant": return "ACC";
-      case "cfo": return "CFO";
-      case "hr": return "HR";
-      case "operations": return "OPS";
-      case "coo": return "COO";
-      default: return "";
-    }
   }
 
   updateOrbitPosition(delta: number, centerX?: number, centerY?: number): void {
@@ -141,18 +157,16 @@ export class TeamMemberEntity extends Phaser.GameObjects.Container {
   performCatch(): void {
     this.catchCooldown = this.catchSpeed;
 
-    // Punchy catch feedback
     this.scene.tweens.add({
-      targets: this.bodyCircle,
+      targets: [this.backgroundCircle, this.icon],
       scale: { from: 1.45, to: 1 },
       duration: 180,
       ease: "Back.easeOut",
     });
 
-    // Glow burst
     this.scene.tweens.add({
       targets: this.glow,
-      alpha: { from: 0.8, to: 0.25 },
+      alpha: { from: 0.8, to: 0.28 },
       scale: { from: 1.6, to: 1 },
       duration: 400,
       ease: "Power2",

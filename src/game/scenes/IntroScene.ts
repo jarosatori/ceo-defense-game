@@ -1,9 +1,14 @@
 import * as Phaser from "phaser";
 import { COLORS, CSS_COLORS } from "../constants";
+import { preloadSprites } from "../utils/spriteLoader";
 
 export class IntroScene extends Phaser.Scene {
   constructor() {
     super({ key: "IntroScene" });
+  }
+
+  preload(): void {
+    preloadSprites(this);
   }
 
   create(): void {

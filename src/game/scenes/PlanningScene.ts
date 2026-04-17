@@ -17,6 +17,7 @@ import {
   simulatePnl,
 } from "../utils/pnlCalculator";
 import { playTone } from "../utils/audio";
+import { preloadSprites } from "../utils/spriteLoader";
 
 const ALL_ROLES: Role[] = [
   "va",
@@ -54,6 +55,10 @@ export class PlanningScene extends Phaser.Scene {
 
   constructor() {
     super({ key: "PlanningScene" });
+  }
+
+  preload(): void {
+    preloadSprites(this);
   }
 
   init(data: { gameState: GameState }): void {

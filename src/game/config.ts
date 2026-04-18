@@ -1,8 +1,13 @@
 import * as Phaser from "phaser";
-import { IntroScene } from "./scenes/IntroScene";
+import { BootScene } from "./scenes/BootScene";
 import { ActionScene } from "./scenes/ActionScene";
 import { COLORS } from "./constants";
 
+/**
+ * Phaser only handles the gameplay (ActionScene).
+ * Intro / BusinessType / Planning / GameOver are rendered as React overlays
+ * for full design-system fidelity.
+ */
 export function createGameConfig(
   parent: string,
   width: number,
@@ -14,9 +19,9 @@ export function createGameConfig(
     width,
     height,
     backgroundColor: COLORS.background,
-    // Menu scenes (BusinessType, Planning, GameOver) now live as React overlays.
-    // Only IntroScene + ActionScene remain inside Phaser.
-    scene: [IntroScene, ActionScene],
+    // BootScene auto-starts and preloads sprites, then sits idle.
+    // ActionScene is added but only started on demand by React via controller.startAction().
+    scene: [BootScene, ActionScene],
     physics: {
       default: "arcade",
       arcade: {

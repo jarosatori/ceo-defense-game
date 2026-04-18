@@ -57,9 +57,9 @@ export class ActionScene extends Phaser.Scene {
 
   init(data?: { gameState: GameState }): void {
     if (!data?.gameState) {
-      throw new Error(
-        "ActionScene requires a gameState from BusinessTypeScene/PlanningScene",
-      );
+      // No state yet — bail silently. create() will also bail.
+      // React will restart this scene with proper state via controller.startAction().
+      return;
     }
     this.gameState = data.gameState;
     this.gameState.phase = "action";
@@ -87,6 +87,10 @@ export class ActionScene extends Phaser.Scene {
   }
 
   create(): void {
+    // Guard: init() bailed because no gameState was passed (auto-start).
+    if (!this.gameState) {
+      return;
+    }
     const { width, height } = this.scale;
     this.centerX = width / 2;
     this.centerY = height / 2;

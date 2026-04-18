@@ -63,6 +63,26 @@ export default function GameCanvas({
     let cancelled = false;
     let localGame: PhaserType.Game | null = null;
 
+    const waitForSize = (): Promise<{ width: number; height: number }> =>
+      new Promise((resolve) => {
+        const check = () => {
+          if (cancelled) return;
+          const el = containerRef.current;
+          if (!el) {
+            requestAnimationFrame(check);
+            return;
+          }
+          const w = el.clientWidth;
+          const h = el.clientHeight;
+          if (w > 0 && h > 0) {
+            resolve({ width: w, height: h });
+          } else {
+            requestAnimationFrame(check);
+          }
+        };
+        check();
+      });
+
     const init = async () => {
       const Phaser = (await import("phaser")).default;
       const { createGameConfig } = await import("@/game/config");
@@ -72,14 +92,38 @@ export default function GameCanvas({
       // Don't double-create if a game already exists (defensive).
       if (gameRef.current) return;
 
-      const container = containerRef.current;
-      const width = container.clientWidth;
-      const height = container.clientHeight;
+      // Wait for container to have non-zero dimensions before booting Phaser.
+      // Otherwise the canvas inits at 0×0 and Scale.RESIZE doesn't recover.
+      const { width, height } = await waitForSize();
+      if (cancelled) return;
 
       const config = createGameConfig("phaser-game", width, height);
       const game = new Phaser.Game(config);
       localGame = game;
       gameRef.current = game;
+
+      // Force an immediate resize after boot so the canvas matches container.
+      game.events.once("ready", () => {
+        if (!cancelled && containerRef.current) {
+          game.scale.resize(
+            containerRef.current.clientWidth,
+            containerRef.current.clientHeight,
+          );
+        }
+      });
+
+      // Also handle window resizes
+      const handleResize = () => {
+        if (cancelled || !containerRef.current) return;
+        game.scale.resize(
+          containerRef.current.clientWidth,
+          containerRef.current.clientHeight,
+        );
+      };
+      window.addEventListener("resize", handleResize);
+      game.events.once("destroy", () => {
+        window.removeEventListener("resize", handleResize);
+      });
 
       // Bridge Phaser events → React callbacks
       game.events.on("intro-complete", () => {

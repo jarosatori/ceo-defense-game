@@ -26,10 +26,11 @@ const GameCanvas = dynamic(() => import("./GameCanvas"), {
   ),
 });
 
-type Phase = "intro" | "business-type" | "action" | "planning" | "results";
+type Phase = "business-type" | "action" | "planning" | "results";
 
 export default function GameClient() {
-  const [phase, setPhase] = useState<Phase>("intro");
+  // Skip Phaser intro — BusinessTypeOverlay IS the welcome screen.
+  const [phase, setPhase] = useState<Phase>("business-type");
   const [gameState, setGameState] = useState<GameState | null>(null);
   const controllerRef = useRef<GameController | null>(null);
 
@@ -37,8 +38,9 @@ export default function GameClient() {
     controllerRef.current = controller;
   }, []);
 
+  // Kept for backward-compat — Phaser may still emit it on idle scene boot.
   const handleIntroComplete = useCallback(() => {
-    setPhase("business-type");
+    // No-op: we don't use the intro phase anymore.
   }, []);
 
   const handleWaveComplete = useCallback((updated: GameState) => {
@@ -209,7 +211,7 @@ export default function GameClient() {
     });
   }, []);
 
-  const phaserVisible = phase === "intro" || phase === "action";
+  const phaserVisible = phase === "action";
 
   const overlay = useMemo(() => {
     if (phase === "business-type") {

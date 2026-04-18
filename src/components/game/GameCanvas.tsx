@@ -32,6 +32,9 @@ export interface GameController {
  * Thin wrapper around Phaser.
  * Phaser is always mounted; `visible` just toggles CSS display so React overlays
  * (BusinessType / Planning / Results) render on top without destroying the canvas.
+ *
+ * The init pattern below is React-strict-mode safe: each mount/unmount cycle
+ * properly creates and destroys the Phaser game instance.
  */
 export default function GameCanvas({
   visible,
@@ -42,7 +45,6 @@ export default function GameCanvas({
 }: GameCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<PhaserType.Game | null>(null);
-  const initRef = useRef(false);
 
   // Keep latest callbacks in refs so we don't re-run the init effect.
   const introCb = useRef(onIntroComplete);
@@ -56,16 +58,19 @@ export default function GameCanvas({
   readyCb.current = onReady;
 
   useEffect(() => {
-    if (initRef.current || !containerRef.current) return;
-    initRef.current = true;
+    if (!containerRef.current) return;
 
     let cancelled = false;
+    let localGame: PhaserType.Game | null = null;
 
     const init = async () => {
       const Phaser = (await import("phaser")).default;
       const { createGameConfig } = await import("@/game/config");
 
+      // After awaits — bail if the effect was cleaned up while we waited.
       if (cancelled || !containerRef.current) return;
+      // Don't double-create if a game already exists (defensive).
+      if (gameRef.current) return;
 
       const container = containerRef.current;
       const width = container.clientWidth;
@@ -73,16 +78,8 @@ export default function GameCanvas({
 
       const config = createGameConfig("phaser-game", width, height);
       const game = new Phaser.Game(config);
+      localGame = game;
       gameRef.current = game;
-
-      // Retina DPR fix
-      const canvas = game.canvas;
-      if (canvas) {
-        const cssW = canvas.clientWidth || width;
-        const cssH = canvas.clientHeight || height;
-        canvas.style.width = `${cssW}px`;
-        canvas.style.height = `${cssH}px`;
-      }
 
       // Bridge Phaser events → React callbacks
       game.events.on("intro-complete", () => {
@@ -97,17 +94,20 @@ export default function GameCanvas({
 
       const controller: GameController = {
         startAction: (gameState: GameState) => {
-          // Stop any currently-running scenes (Intro or prior Action), then start fresh ActionScene.
           const mgr = game.scene;
-          const intro = mgr.getScene("IntroScene");
-          if (intro && mgr.isActive("IntroScene")) {
+          // Stop any currently-running scenes (Intro or prior Action)
+          if (mgr.isActive("IntroScene")) {
             mgr.stop("IntroScene");
           }
-          const prev = mgr.getScene("ActionScene");
-          if (prev && mgr.isActive("ActionScene")) {
+          if (mgr.isActive("ActionScene")) {
             mgr.stop("ActionScene");
           }
-          mgr.start("ActionScene", { gameState });
+          // Brief delay to let stop() fully cycle before starting fresh
+          setTimeout(() => {
+            if (!cancelled && gameRef.current === game) {
+              mgr.start("ActionScene", { gameState });
+            }
+          }, 0);
         },
         destroy: () => {
           game.destroy(true);
@@ -117,10 +117,18 @@ export default function GameCanvas({
       readyCb.current(controller);
     };
 
-    init();
+    init().catch((err) => {
+      // Surface init errors so we don't fail silently
+      console.error("[GameCanvas] Phaser init failed:", err);
+    });
 
     return () => {
       cancelled = true;
+      // Destroy whichever game instance exists (covers strict-mode timing)
+      if (localGame) {
+        localGame.destroy(true);
+        localGame = null;
+      }
       if (gameRef.current) {
         gameRef.current.destroy(true);
         gameRef.current = null;

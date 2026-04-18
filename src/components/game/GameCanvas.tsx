@@ -180,11 +180,18 @@ export default function GameCanvas({
     };
   }, []);
 
+  // Canvas is ALWAYS sized (display: block) so Phaser can boot.
+  // When not visible, we hide it behind overlays via z-index + pointer-events
+  // (overlays have z-20). Using `display: none` here would zero-size the inner
+  // div and prevent Phaser from ever booting.
   return (
     <div
       ref={containerRef}
       className="absolute inset-0 w-full h-full bg-me-plum overflow-hidden touch-none"
-      style={{ display: visible ? "block" : "none" }}
+      style={{
+        zIndex: visible ? 10 : 0,
+        pointerEvents: visible ? "auto" : "none",
+      }}
     >
       <div id="phaser-game" className="w-full h-full" />
     </div>

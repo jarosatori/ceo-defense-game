@@ -1,9 +1,6 @@
 import * as Phaser from "phaser";
 import { IntroScene } from "./scenes/IntroScene";
-import { BusinessTypeScene } from "./scenes/BusinessTypeScene";
 import { ActionScene } from "./scenes/ActionScene";
-import { PlanningScene } from "./scenes/PlanningScene";
-import { GameOverScene } from "./scenes/GameOverScene";
 import { COLORS } from "./constants";
 
 export function createGameConfig(
@@ -17,7 +14,9 @@ export function createGameConfig(
     width,
     height,
     backgroundColor: COLORS.background,
-    scene: [IntroScene, BusinessTypeScene, ActionScene, PlanningScene, GameOverScene],
+    // Menu scenes (BusinessType, Planning, GameOver) now live as React overlays.
+    // Only IntroScene + ActionScene remain inside Phaser.
+    scene: [IntroScene, ActionScene],
     physics: {
       default: "arcade",
       arcade: {

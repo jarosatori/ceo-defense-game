@@ -552,7 +552,9 @@ export class ActionScene extends Phaser.Scene {
     this.gameState.budget = this.budgetSystem.budget;
     this.gameState.damage = this.damageSystem.damage;
     this.cleanup();
-    this.scene.start("PlanningScene", { gameState: this.gameState });
+    // Hand control back to React — PlanningOverlay takes over.
+    this.game.events.emit("wave-complete", { gameState: this.gameState });
+    this.scene.stop();
   }
 
   private endGame(survived: boolean, cashCrunch: boolean = false): void {
@@ -564,11 +566,13 @@ export class ActionScene extends Phaser.Scene {
       this.gameState.phase = "results";
     }
     this.cleanup();
-    this.scene.start("GameOverScene", {
+    // Emit game-over event — React navigates to /results
+    this.game.events.emit("game-over", {
       gameState: this.gameState,
       cashCrunch,
       survived,
     });
+    this.scene.stop();
   }
 
   private cleanup(): void {

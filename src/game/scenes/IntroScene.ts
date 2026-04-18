@@ -1,5 +1,5 @@
 import * as Phaser from "phaser";
-import { COLORS, CSS_COLORS } from "../constants";
+import { COLORS } from "../constants";
 import { preloadSprites } from "../utils/spriteLoader";
 
 export class IntroScene extends Phaser.Scene {
@@ -164,14 +164,17 @@ export class IntroScene extends Phaser.Scene {
       ease: "Sine.easeInOut",
     });
 
-    // Skip on click
-    this.input.once("pointerdown", () => {
-      this.scene.start("BusinessTypeScene");
-    });
+    const finish = () => {
+      if (this.scene.isActive("IntroScene")) {
+        this.game.events.emit("intro-complete");
+        this.scene.stop();
+      }
+    };
 
-    // Transition to ActionScene after intro
-    this.time.delayedCall(3500, () => {
-      this.scene.start("BusinessTypeScene");
-    });
+    // Skip on click
+    this.input.once("pointerdown", finish);
+
+    // Auto-advance after intro
+    this.time.delayedCall(3500, finish);
   }
 }

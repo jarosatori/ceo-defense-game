@@ -2,15 +2,15 @@
 
 import dynamic from "next/dynamic";
 
-const PhaserGame = dynamic(() => import("@/components/PhaserGame"), {
+const GameClient = dynamic(() => import("@/components/game/GameClient"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-screen bg-me-plum flex items-center justify-center">
-      <p className="text-me-cream text-lg">Načítavam hru...</p>
+    <div className="flex h-screen w-full items-center justify-center bg-me-plum">
+      <p className="text-lg text-me-cream">Načítavam hru...</p>
     </div>
   ),
 });
 
 export default function GamePage() {
-  return <PhaserGame />;
+  return <GameClient />;
 }

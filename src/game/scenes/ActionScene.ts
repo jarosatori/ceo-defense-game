@@ -7,6 +7,7 @@ import {
   COMBO_WINDOW_MS,
   COMBO_BONUS_MULTIPLIER,
   PROFIT_GAMEOVER_THRESHOLD,
+  ROLE_CONFIGS,
 } from "../constants";
 import {
   calculateMonthlyPnl,
@@ -48,6 +49,12 @@ export class ActionScene extends Phaser.Scene {
   private comboCount: number = 0;
   private lastCatchTime: number = 0;
 
+  // Live P&L ticker
+  private liveMonthlyRevenue: number = 0;
+  private displayedRevenue: number = 0;
+  private revenueTween?: Phaser.Tweens.Tween;
+  private lastShownComboMilestone: number = 0;
+
   constructor() {
     super({ key: "ActionScene" });
   }
@@ -85,6 +92,9 @@ export class ActionScene extends Phaser.Scene {
     this.waveStarted = false;
     this.comboCount = 0;
     this.lastCatchTime = 0;
+    this.liveMonthlyRevenue = 0;
+    this.displayedRevenue = 0;
+    this.lastShownComboMilestone = 0;
   }
 
   create(): void {
@@ -185,6 +195,12 @@ export class ActionScene extends Phaser.Scene {
       this.ceo.flashDamage();
       this.flashMissColor(problem.category);
       this.resetCombo();
+      // Money lost on miss
+      const penalty = 0.3;
+      this.liveMonthlyRevenue = Math.max(0, this.liveMonthlyRevenue - penalty);
+      this.spawnFloatingMoney(problem.x, problem.y, -penalty, problem.category, true);
+      this.tweenRevenueLabel();
+      this.chromaticAberration();
       playTone(120, 0.2, "sawtooth", 0.08);
     };
 
@@ -292,7 +308,9 @@ export class ActionScene extends Phaser.Scene {
 
     this.waveLabel.setText(`VLNA ${waveConfig.wave}/10`);
     this.scoreLabel.setText(`Skóre: ${this.gameState.score}`);
-    this.revenueLabel.setText(`Obrat: ${formatMoney(this.gameState.monthlyRevenue)}`);
+    this.displayedRevenue = this.gameState.monthlyRevenue;
+    this.liveMonthlyRevenue = 0;
+    this.revenueLabel.setText(`Obrat: ${formatMoney(this.displayedRevenue)}`);
     this.updateProfitLabel();
 
     // Wave name splash animation
@@ -353,9 +371,10 @@ export class ActionScene extends Phaser.Scene {
       this.teamEntities,
       this.spawner.getActiveProblems(),
     );
-    for (const problem of caughtByTeam) {
-      this.handleCatch(problem.category, problem.x, problem.y, false);
-      this.spawner.removeProblem(problem);
+    for (const evt of caughtByTeam) {
+      this.drawTeamBeam(evt.catcher.x, evt.catcher.y, evt.problem.x, evt.problem.y, evt.catcher.role);
+      this.handleCatch(evt.problem.category, evt.problem.x, evt.problem.y, false);
+      this.spawner.removeProblem(evt.problem);
     }
 
     // Expire combo if timed out
@@ -445,20 +464,249 @@ export class ActionScene extends Phaser.Scene {
     this.gameState.caughtByCategory[category]++;
     this.budgetSystem.earn(budgetGain);
 
+    // Revenue ticker: each catch contributes a small amount, scaled by combo + margin.
+    const baseAmount = 0.4 * (this.gameState.baselineRatios.grossMargin || 0.5);
+    const gain = baseAmount * multiplier;
+    const isHighValue = gain >= 2;
+    this.liveMonthlyRevenue += gain;
+    this.tweenRevenueLabel();
+
     this.spawnCatchParticles(x, y, category);
+    this.spawnFloatingMoney(x, y, gain, category, false);
     this.spawnScorePopup(x, y, `+${scoreGain}`, category);
 
     if (isManual) {
       this.ceo.celebrateCatch();
     }
 
+    // CEO scale-punch on every catch
+    this.tweens.add({
+      targets: this.ceo,
+      scale: { from: 1.05, to: 1 },
+      duration: 120,
+      ease: "Back.easeOut",
+    });
+
     if (comboTier > 0) {
       this.showCombo(this.comboCount, multiplier);
     }
 
-    const baseFreq = 440;
-    const freq = baseFreq + comboTier * 80;
+    // Combo milestones
+    if (
+      (this.comboCount === 3 ||
+        this.comboCount === 6 ||
+        this.comboCount === 10) &&
+      this.comboCount !== this.lastShownComboMilestone
+    ) {
+      this.lastShownComboMilestone = this.comboCount;
+      this.flashComboMilestone(this.comboCount);
+      this.ceoRipple();
+    }
+
+    // Pitch rises with combo (cap 880Hz)
+    const freq = Math.min(880, 440 + this.comboCount * 40);
     playTone(freq, 0.08, "sine", 0.05);
+
+    // High-value catch: slow-mo + color flash
+    if (isHighValue) {
+      this.highValueFlash(category);
+    }
+  }
+
+  // ──────────────────────────────────────────────
+  // Juice helpers
+  // ──────────────────────────────────────────────
+
+  private spawnFloatingMoney(
+    x: number,
+    y: number,
+    amount: number,
+    category: Category,
+    isLoss: boolean,
+  ): void {
+    const colorHex = isLoss ? CSS_COLORS.finance : this.getCssColor(category);
+    const sign = amount >= 0 ? "+" : "−";
+    const abs = Math.abs(amount);
+    const text = `${sign}€${abs >= 1 ? abs.toFixed(1) : (abs * 1000).toFixed(0) + ""}${abs >= 1 ? "k" : ""}`;
+    const fontSize = Math.min(26, 14 + Math.log2(1 + abs * 2) * 4);
+
+    const label = this.add
+      .text(x, y, text, {
+        fontSize: `${fontSize}px`,
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
+        color: colorHex,
+        fontStyle: "700",
+        resolution: 2,
+      })
+      .setOrigin(0.5)
+      .setDepth(36)
+      .setScale(0.6);
+
+    this.tweens.add({
+      targets: label,
+      scale: 1.1,
+      duration: 120,
+      ease: "Back.easeOut",
+      yoyo: false,
+    });
+
+    this.tweens.add({
+      targets: label,
+      y: y + (isLoss ? 40 : -50),
+      alpha: 0,
+      duration: 900,
+      delay: 120,
+      ease: "Cubic.easeOut",
+      onComplete: () => label.destroy(),
+    });
+  }
+
+  private tweenRevenueLabel(): void {
+    if (!this.revenueLabel) return;
+    const target = this.gameState.monthlyRevenue + this.liveMonthlyRevenue;
+    this.revenueTween?.stop();
+    const startVal = this.displayedRevenue;
+    const obj = { v: startVal };
+    this.revenueTween = this.tweens.add({
+      targets: obj,
+      v: target,
+      duration: 220,
+      ease: "Cubic.easeOut",
+      onUpdate: () => {
+        this.displayedRevenue = obj.v;
+        this.revenueLabel.setText(`Obrat: ${formatMoney(obj.v)}`);
+      },
+    });
+  }
+
+  private flashComboMilestone(count: number): void {
+    const label =
+      count >= 10 ? "x10 UNSTOPPABLE!" : count >= 6 ? `x${count}!` : `x${count} COMBO!`;
+    const splash = this.add
+      .text(this.centerX, this.centerY - 40, label, {
+        fontSize: "32px",
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
+        color: CSS_COLORS.accent,
+        fontStyle: "700",
+        resolution: 2,
+      })
+      .setOrigin(0.5)
+      .setDepth(60)
+      .setScale(0.5)
+      .setAlpha(0);
+
+    this.tweens.add({
+      targets: splash,
+      scale: 1.2,
+      alpha: 1,
+      duration: 200,
+      ease: "Back.easeOut",
+    });
+    this.tweens.add({
+      targets: splash,
+      alpha: 0,
+      y: "-=20",
+      duration: 600,
+      delay: 400,
+      ease: "Power2",
+      onComplete: () => splash.destroy(),
+    });
+
+    // Combo label scale pop
+    this.tweens.add({
+      targets: this.comboLabel,
+      scale: { from: 1.6, to: 1 },
+      duration: 280,
+      ease: "Back.easeOut",
+    });
+  }
+
+  private ceoRipple(): void {
+    const ring = this.add.circle(this.ceo.x, this.ceo.y, 20, 0xff7404, 0);
+    ring.setStrokeStyle(2, 0xff7404, 0.9);
+    ring.setDepth(18);
+    this.tweens.add({
+      targets: ring,
+      scale: 4,
+      alpha: { from: 0.9, to: 0 },
+      duration: 500,
+      ease: "Cubic.easeOut",
+      onComplete: () => ring.destroy(),
+    });
+  }
+
+  private highValueFlash(category: Category): void {
+    const colorHex = COLORS[category] ?? 0xff7404;
+    const { width, height } = this.scale;
+    const flash = this.add.rectangle(width / 2, height / 2, width, height, colorHex, 0.25);
+    flash.setDepth(80);
+    this.tweens.add({
+      targets: flash,
+      alpha: 0,
+      duration: 400,
+      ease: "Power2",
+      onComplete: () => flash.destroy(),
+    });
+    // Brief slow-mo
+    this.time.timeScale = 0.5;
+    this.tweens.timeScale = 0.5;
+    this.time.delayedCall(250, () => {
+      this.time.timeScale = 1;
+      this.tweens.timeScale = 1;
+    });
+  }
+
+  private chromaticAberration(): void {
+    const { width, height } = this.scale;
+    const red = this.add.rectangle(width / 2 - 3, height / 2, width, height, 0xff0000, 0.08);
+    const blue = this.add.rectangle(width / 2 + 3, height / 2, width, height, 0x00a8ff, 0.08);
+    red.setDepth(88);
+    blue.setDepth(88);
+    this.tweens.add({
+      targets: [red, blue],
+      alpha: 0,
+      duration: 180,
+      ease: "Power2",
+      onComplete: () => {
+        red.destroy();
+        blue.destroy();
+      },
+    });
+  }
+
+  private drawTeamBeam(
+    fromX: number,
+    fromY: number,
+    toX: number,
+    toY: number,
+    role: string,
+  ): void {
+    const cfg = (ROLE_CONFIGS as Record<string, { color: string }>)[role];
+    const colorStr = cfg?.color ?? CSS_COLORS.general;
+    const color = Phaser.Display.Color.HexStringToColor(colorStr).color;
+
+    // Wide translucent glow
+    const glow = this.add.line(0, 0, fromX, fromY, toX, toY, color, 0.35);
+    glow.setLineWidth(6);
+    glow.setOrigin(0, 0);
+    glow.setDepth(19);
+
+    // Narrow bright core
+    const core = this.add.line(0, 0, fromX, fromY, toX, toY, color, 0.9);
+    core.setLineWidth(2);
+    core.setOrigin(0, 0);
+    core.setDepth(20);
+
+    this.tweens.add({
+      targets: [glow, core],
+      alpha: 0,
+      duration: 220,
+      ease: "Cubic.easeOut",
+      onComplete: () => {
+        glow.destroy();
+        core.destroy();
+      },
+    });
   }
 
   private resetCombo(): void {

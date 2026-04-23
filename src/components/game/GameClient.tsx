@@ -8,6 +8,7 @@ import type {
   GameEvent,
   GameState,
   PolicyId,
+  Priority,
   Role,
 } from "@/game/types";
 import { ROLE_CONFIGS, SENIOR_MULTIPLIER } from "@/game/constants";
@@ -356,6 +357,13 @@ export default function GameClient() {
     });
   }, []);
 
+  const handleSelectPriority = useCallback((priority: Priority) => {
+    setGameState((prev) => {
+      if (!prev) return prev;
+      return { ...prev, selectedPriority: priority };
+    });
+  }, []);
+
   const handleUpgrade = useCallback((memberId: string) => {
     setGameState((prev) => {
       if (!prev) return prev;
@@ -403,6 +411,7 @@ export default function GameClient() {
           onHire={handleHire}
           onFire={handleFire}
           onUpgrade={handleUpgrade}
+          onSelectPriority={handleSelectPriority}
           onContinue={handleContinuePlanning}
         />
       );
@@ -426,6 +435,7 @@ export default function GameClient() {
     handleHire,
     handleFire,
     handleUpgrade,
+    handleSelectPriority,
     handleContinuePlanning,
   ]);
 

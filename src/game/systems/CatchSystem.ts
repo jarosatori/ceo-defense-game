@@ -2,12 +2,21 @@ import type { Problem } from "../entities/Problem";
 import type { TeamMemberEntity } from "../entities/TeamMember";
 import { CEO_CATCH_RADIUS } from "../constants";
 
+export interface TeamCatchEvent {
+  problem: Problem;
+  catcher: TeamMemberEntity;
+}
+
 export class CatchSystem {
+  /**
+   * Returns problems caught + which team member caught each.
+   * Used by ActionScene to draw team beams.
+   */
   checkTeamCatches(
     teamMembers: TeamMemberEntity[],
-    problems: Problem[]
-  ): Problem[] {
-    const caught: Problem[] = [];
+    problems: Problem[],
+  ): TeamCatchEvent[] {
+    const caught: TeamCatchEvent[] = [];
 
     for (const member of teamMembers) {
       for (const problem of problems) {
@@ -21,7 +30,7 @@ export class CatchSystem {
         if (dist <= member.catchRadius) {
           problem.catch();
           member.performCatch();
-          caught.push(problem);
+          caught.push({ problem, catcher: member });
           break;
         }
       }
@@ -35,7 +44,7 @@ export class CatchSystem {
     ceoY: number,
     clickX: number,
     clickY: number,
-    problems: Problem[]
+    problems: Problem[],
   ): Problem | null {
     let closest: Problem | null = null;
     let closestDist = Infinity;

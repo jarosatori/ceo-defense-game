@@ -4,12 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import type {
   Category,
   GameState,
+  Priority,
   Role,
   TeamMember,
 } from "@/game/types";
 import {
   BUSINESS_TYPE_CONFIGS,
   PLANNING_DURATION,
+  PRIORITY_CONFIGS,
   ROLE_CONFIGS,
   SENIOR_MULTIPLIER,
 } from "@/game/constants";
@@ -90,6 +92,7 @@ interface PlanningOverlayProps {
   onHire: (role: Role) => void;
   onFire: (memberId: string) => void;
   onUpgrade: (memberId: string) => void;
+  onSelectPriority: (priority: Priority) => void;
   onContinue: () => void;
 }
 
@@ -98,14 +101,20 @@ export default function PlanningOverlay({
   onHire,
   onFire,
   onUpgrade,
+  onSelectPriority,
   onContinue,
 }: PlanningOverlayProps) {
   const [countdown, setCountdown] = useState(PLANNING_DURATION);
+  const hasPriority = state.selectedPriority !== null;
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCountdown((c) => {
         if (c <= 1) {
+          // Auto-pick a default priority if nothing picked so we don't block.
+          if (!hasPriority) {
+            onSelectPriority("product");
+          }
           onContinue();
           return 0;
         }
@@ -113,7 +122,7 @@ export default function PlanningOverlay({
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [onContinue]);
+  }, [onContinue, onSelectPriority, hasPriority]);
 
   const lastPnl = state.pnlHistory[state.pnlHistory.length - 1];
   const bizCfg = BUSINESS_TYPE_CONFIGS[state.businessType];
@@ -324,14 +333,63 @@ export default function PlanningOverlay({
           </>
         )}
 
+        {/* Priority selector (mandatory) */}
+        <div className="me-eyebrow mb-2">Priority tohto mesiaca (povinná)</div>
+        <div className="mb-7 flex flex-col gap-2">
+          {PRIORITY_CONFIGS.map((p) => {
+            const isSelected = state.selectedPriority === p.id;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => onSelectPriority(p.id)}
+                className="flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors"
+                style={{
+                  borderColor: isSelected ? "#FF7404" : "#D4D4D1",
+                  background: isSelected ? "#531E38" : "#ffffff",
+                  color: isSelected ? "#EFEDEB" : "#1B1C1E",
+                }}
+              >
+                <span
+                  className="inline-block shrink-0 rounded-full"
+                  style={{
+                    width: 14,
+                    height: 14,
+                    background: isSelected ? "#FF7404" : "transparent",
+                    border: `2px solid ${isSelected ? "#FF7404" : "#A69E92"}`,
+                  }}
+                />
+                <span className="flex-1">
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>{p.label}</div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      opacity: 0.75,
+                      marginTop: 2,
+                    }}
+                  >
+                    {p.description}
+                  </div>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Continue button */}
         <button
           type="button"
-          onClick={onContinue}
+          onClick={hasPriority ? onContinue : undefined}
+          disabled={!hasPriority}
           className="me-btn me-btn--primary"
-          style={{ background: "#FF7404", color: "#EFEDEB" }}
+          style={{
+            background: hasPriority ? "#FF7404" : "#A69E92",
+            color: "#EFEDEB",
+            cursor: hasPriority ? "pointer" : "not-allowed",
+            opacity: hasPriority ? 1 : 0.6,
+          }}
         >
-          POKRAČOVAŤ →
+          {hasPriority ? "POKRAČOVAŤ →" : "VYBER PRIORITU"}
         </button>
 
         <div className="h-10" />

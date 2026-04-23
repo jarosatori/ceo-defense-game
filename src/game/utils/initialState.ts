@@ -11,6 +11,9 @@ export function createInitialGameState(businessType: BusinessType): GameState {
     wave: 1,
     score: 0,
     budget: STARTING_BUDGET,
+    cash: STARTING_BUDGET,
+    energy: 10,
+    reputation: 50,
     damage: 0,
     businessType,
     baselineRatios: {
@@ -31,8 +34,13 @@ export function createInitialGameState(businessType: BusinessType): GameState {
     caughtByCategory: { marketing: 0, finance: 0, operations: 0, general: 0 },
     missedByCategory: { marketing: 0, finance: 0, operations: 0, general: 0 },
     manualClicks: 0,
-    phase: "action",
+    phase: "policy-select",
     priorityHistory: [],
     selectedPriority: null,
+    activePolicies: [],
+    runStory: [],
+    pendingEvent: null,
+    pendingWaveModifiers: {},
+    consecutiveLossMonths: 0,
   };
 }

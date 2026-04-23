@@ -4,7 +4,7 @@ export type Role = "va" | "sales" | "marketing" | "product" | "support" | "accou
 
 export type Level = "junior" | "senior";
 
-export type Phase = "intro" | "business-type" | "action" | "planning" | "results" | "gameover";
+export type Phase = "intro" | "business-type" | "policy-select" | "event-decision" | "action" | "planning" | "results" | "gameover";
 
 export type CEOProfile =
   | "lone-wolf"
@@ -16,17 +16,135 @@ export type CEOProfile =
 /** Type of business the player runs — affects starting P&L ratios */
 export type BusinessType = "eshop" | "services";
 
-/** Strategic priority for each month (wave). MANDATORY — player must pick one. */
+/** Strategic priority (legacy — V9 replaces with policies, kept for type compat) */
 export type Priority =
-  | "product"           // Product development
-  | "marketing"         // Marketing & brand
-  | "sales"             // Aggressive sales push
-  | "processes"         // Systems & processes
-  | "finance"           // Financial discipline
-  | "team"              // Team development
-  | "unit-economics"    // Margin optimization
-  | "retention"         // Customer retention & LTV
-  | "self-dev";         // CEO self-development
+  | "product"
+  | "marketing"
+  | "sales"
+  | "processes"
+  | "finance"
+  | "team"
+  | "unit-economics"
+  | "retention"
+  | "self-dev";
+
+// ──────────────────────────────────────────────────────────
+// V9 POLICIES — permanent run-wide modifiers picked at start
+// ──────────────────────────────────────────────────────────
+
+export type PolicyId =
+  | "aggressive-growth"
+  | "profit-focus"
+  | "brand-first"
+  | "ops-excellence"
+  | "sustainable-pace"
+  | "cash-preservation"
+  | "product-market-focus"
+  | "experiment"
+  | "network-builder"
+  | "scorched-earth"
+  | "premium-positioning"
+  | "slow-steady";
+
+export interface PolicyModifiers {
+  revenueMultiplier?: number;         // applied to monthly revenue
+  problemDensityMultiplier?: number;  // applied to wave problemCount
+  grossMarginBoost?: number;          // permanent pp added at run-start
+  marketingRatioDelta?: number;       // pp added each month (negative = lowers CAC)
+  hireCostMultiplier?: number;        // applied to hire cost
+  opsRadiusBonus?: number;            // bonus to ops role catch radius (not implemented in MVP)
+  energyPerMonth?: number;            // extra energy restored each month
+  seniorsLocked?: boolean;            // block senior upgrades
+  conditionalMarginBoost?: {
+    ifRoles: Role[];
+    count: number;
+    boost: number;
+  };
+  bonusEventChance?: number;          // 0-1 chance of extra event
+  investorEventMultiplier?: number;   // weight multiplier for investor/angel events
+  reputationPerMonth?: number;        // ±rep each month
+  revenuePerCatchMultiplier?: number; // revenue boost per catch (MVP: fold into revenue)
+}
+
+export interface PolicyConfig {
+  id: PolicyId;
+  label: string;
+  description: string;
+  icon: string;
+  modifiers: PolicyModifiers;
+}
+
+// ──────────────────────────────────────────────────────────
+// V9 EVENTS — narrative decisions between months
+// ──────────────────────────────────────────────────────────
+
+export interface EventTrigger {
+  minMonth?: number;
+  maxMonth?: number;
+  minReputation?: number;
+  maxReputation?: number;
+  bossMonth?: number;
+}
+
+export interface EventConsequences {
+  cashDelta?: number;                     // €k change
+  reputationDelta?: number;               // -100..100
+  energyDelta?: number;
+  waveRevenueMultiplier?: number;         // applied to this month's revenue only
+  waveCategorySkew?: Category;            // bias problem distribution this wave
+  waveProblemDensity?: number;            // multiplier on problemCount
+  grossMarginPermanent?: number;          // pp permanent
+  revenueMultiplierPermanent?: number;    // applied to baselineRatios.revenueMultiplier
+  teamEffectivenessPermanent?: number;    // applied to baselineRatios.teamEffectiveness
+  temporaryMarginPenalty?: number;        // negative pp for N months
+  temporaryMarginDuration?: number;
+  narrativeTag: string;                   // the one-liner for run story
+  seedRoundReward?: number;               // bonus cash if cash-audit survived
+  auditCheck?: boolean;                   // special marker for boss cash audit
+  earlyExit?: boolean;                    // end-run marker
+  exitValue?: number;                     // €k
+  vcCheck?: {
+    marketingRatioBelow: number;
+    reward: number;
+    penaltyReputation: number;
+  };
+}
+
+export interface EventChoice {
+  id: string;
+  label: string;
+  description: string;
+  consequences: EventConsequences;
+}
+
+export interface GameEvent {
+  id: string;
+  isBoss?: boolean;
+  headline: string;
+  flavor: string;
+  trigger: EventTrigger;
+  choices: EventChoice[];
+}
+
+// ──────────────────────────────────────────────────────────
+// RUN STORY — records narrative beats for share card
+// ──────────────────────────────────────────────────────────
+
+export type RunStoryKind =
+  | "policy-picked"
+  | "event"
+  | "hire"
+  | "boss"
+  | "milestone"
+  | "outcome";
+
+export interface RunStoryEntry {
+  month: number;
+  kind: RunStoryKind;
+  text: string;
+}
+
+// ──────────────────────────────────────────────────────────
 
 export interface TeamMember {
   role: Role;
@@ -42,18 +160,13 @@ export interface RoleConfig {
   catchCategories: Category[];
   catchSpeed: number;
   catchRadius: number;
-  /** One-time hiring fee €k (recruitment, onboarding) */
   cost: number;
-  /** One-time upgrade to senior fee €k */
   upgradeCost: number;
-  /** Monthly salary cost €k (reduces profit every month) */
   monthlyCost: number;
-  /** Revenue boost ratio (+X% on monthly revenue) */
   revenueBoost: number;
-  /** One-time permanent ratio improvements when hired */
   ratioBoost?: {
-    grossMargin?: number;      // +X percentage points
-    marketingRatio?: number;   // -X percentage points (lowers marketing cost)
+    grossMargin?: number;
+    marketingRatio?: number;
     teamEffectiveness?: number;
   };
 }
@@ -67,7 +180,6 @@ export interface WaveConfig {
   distribution: Record<Category, number>;
   burstEnabled: boolean;
   burstSize: number;
-  /** Market potential revenue multiplier this month (how much the market can give you) */
   marketDemand: number;
 }
 
@@ -82,37 +194,31 @@ export interface PriorityConfig {
   label: string;
   description: string;
   color: string;
-  /** Short-term revenue multiplier (only this month) */
   revenueBoostThisMonth: number;
-  /** Permanent improvements applied each time priority is chosen */
   permanentBoosts: {
-    grossMargin?: number;       // +X percentage points
-    marketingRatio?: number;    // -X percentage points
-    revenueMultiplier?: number; // +X permanent multiplier
-    teamEffectiveness?: number; // +X permanent
+    grossMargin?: number;
+    marketingRatio?: number;
+    revenueMultiplier?: number;
+    teamEffectiveness?: number;
   };
-  /** Reduces problems of this category */
   reducesCategory?: Category;
-  /** Percentage reduction of that category's problems */
   reductionPercent?: number;
 }
 
-/** Business type config — starting baseline ratios */
 export interface BusinessTypeConfig {
   id: BusinessType;
   label: string;
   description: string;
   emoji: string;
-  startingRevenue: number;      // €k/month
-  startingGrossMargin: number;  // % (e.g., 0.45 = 45%)
-  startingMarketingRatio: number; // % of revenue (e.g., 0.25 = 25%)
-  maxGrossMargin: number;       // cap on margin improvement
-  minMarketingRatio: number;    // floor on marketing cost
+  startingRevenue: number;
+  startingGrossMargin: number;
+  startingMarketingRatio: number;
+  maxGrossMargin: number;
+  minMarketingRatio: number;
   characterColor: string;
-  characterLabel: string;       // displayed in-game
+  characterLabel: string;
 }
 
-/** Snapshot of one month's P&L */
 export interface MonthlyPnl {
   month: number;
   revenue: number;
@@ -122,34 +228,48 @@ export interface MonthlyPnl {
   cp3: number;
   salaries: number;
   ebitda: number;
-  // Ratios at end of month
   grossMarginRatio: number;
   marketingRatio: number;
   cp3Ratio: number;
   ebitdaRatio: number;
 }
 
-/** Baseline ratios that improve over time with decisions */
 export interface BaselineRatios {
-  grossMargin: number;       // 0-1
-  marketingRatio: number;    // 0-1 (as % of revenue)
-  revenueMultiplier: number; // 1.0 = baseline, grows with retention/brand
-  teamEffectiveness: number; // 1.0 = baseline, grows with team-dev priority
+  grossMargin: number;
+  marketingRatio: number;
+  revenueMultiplier: number;
+  teamEffectiveness: number;
+}
+
+/** Active event modifiers applied to the NEXT wave/PnL only. */
+export interface PendingWaveModifiers {
+  revenueMultiplier?: number;
+  problemDensity?: number;
+  categorySkew?: Category;
+  marginPenalty?: number;   // temp margin reduction active
+  marginPenaltyMonthsLeft?: number;
 }
 
 export interface GameState {
   wave: number;
   score: number;
+  /** Alias of `cash`. Kept for Phaser scene compat. */
   budget: number;
+  /** €k cash — preferred field going forward. */
+  cash: number;
+  /** 0-10 CEO mental capacity. */
+  energy: number;
+  /** 0-100 brand trust. */
+  reputation: number;
   damage: number;
   businessType: BusinessType;
   baselineRatios: BaselineRatios;
-  revenue: number;             // cumulative revenue €k
-  profit: number;              // cumulative EBITDA €k
-  monthlyRevenue: number;      // last month's revenue
-  monthlyProfit: number;       // last month's profit
-  monthlyCosts: number;        // current team salaries total
-  pnlHistory: MonthlyPnl[];    // all months so far
+  revenue: number;
+  profit: number;
+  monthlyRevenue: number;
+  monthlyProfit: number;
+  monthlyCosts: number;
+  pnlHistory: MonthlyPnl[];
   team: TeamMember[];
   problemsCaught: number;
   problemsMissed: number;
@@ -157,8 +277,16 @@ export interface GameState {
   missedByCategory: Record<Category, number>;
   manualClicks: number;
   phase: Phase;
-  priorityHistory: Priority[]; // one priority per completed wave
-  selectedPriority: Priority | null; // selected for current planning phase
+  priorityHistory: Priority[];
+  selectedPriority: Priority | null;
+
+  // V9 additions
+  activePolicies: PolicyId[];
+  runStory: RunStoryEntry[];
+  pendingEvent: GameEvent | null;
+  pendingWaveModifiers: PendingWaveModifiers;
+  consecutiveLossMonths: number;
+  earlyExit?: { month: number; value: number };
 }
 
 export interface GameResults {

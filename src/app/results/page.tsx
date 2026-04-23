@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import type { BusinessType, CEOProfile } from "@/game/types";
+import type { BusinessType, CEOProfile, PolicyId } from "@/game/types";
 import ResultsCard from "@/components/ResultsCard";
 import ShareButtons from "@/components/ShareButtons";
+import { parseRunStory } from "@/game/utils/runStoryGenerator";
 
 interface ResultsPageProps {
   searchParams: Promise<{
@@ -15,6 +16,9 @@ interface ResultsPageProps {
     milestone?: string;
     grossMargin?: string;
     ebitdaRatio?: string;
+    policies?: string;
+    story?: string;
+    earlyExit?: string;
   }>;
 }
 
@@ -65,6 +69,12 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
     ? parseFloat(params.ebitdaRatio)
     : undefined;
 
+  const policies = (params.policies || "")
+    .split(",")
+    .filter(Boolean) as PolicyId[];
+  const storyEntries = parseRunStory(params.story || "");
+  const earlyExit = params.earlyExit === "1";
+
   return (
     <main
       style={{
@@ -88,6 +98,9 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         milestone={milestone}
         grossMargin={grossMargin}
         ebitdaRatio={ebitdaRatio}
+        policies={policies}
+        storyEntries={storyEntries}
+        earlyExit={earlyExit}
       />
 
       <ShareButtons profile={profile} waves={waves} score={score} />

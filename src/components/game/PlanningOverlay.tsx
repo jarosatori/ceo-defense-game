@@ -4,17 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 import type {
   Category,
   GameState,
-  Priority,
   Role,
   TeamMember,
 } from "@/game/types";
 import {
   BUSINESS_TYPE_CONFIGS,
   PLANNING_DURATION,
-  PRIORITY_CONFIGS,
   ROLE_CONFIGS,
   SENIOR_MULTIPLIER,
 } from "@/game/constants";
+import { POLICY_BY_ID } from "@/game/data/policies";
 import { WAVES } from "@/game/data/waves";
 import {
   applyHireToBaseline,
@@ -59,7 +58,6 @@ const CAT_COLORS: Record<Category, { color: string; tint: string; label: string 
 
 function roleCategory(role: Role): Category {
   const cfg = ROLE_CONFIGS[role];
-  // First matching catch category drives the visual color.
   return cfg.catchCategories[0] ?? "general";
 }
 
@@ -70,12 +68,28 @@ function memberMonthly(member: TeamMember): number {
     : cfg.monthlyCost;
 }
 
+/** Compute effective hire cost with policy modifiers. */
+function effectiveHireCost(baseCost: number, state: GameState): number {
+  let mult = 1;
+  for (const id of state.activePolicies) {
+    const m = POLICY_BY_ID[id]?.modifiers.hireCostMultiplier;
+    if (m !== undefined) mult *= m;
+  }
+  return Math.round(baseCost * mult * 100) / 100;
+}
+
+function seniorsLocked(state: GameState): boolean {
+  for (const id of state.activePolicies) {
+    if (POLICY_BY_ID[id]?.modifiers.seniorsLocked) return true;
+  }
+  return false;
+}
+
 interface PlanningOverlayProps {
   state: GameState;
   onHire: (role: Role) => void;
   onFire: (memberId: string) => void;
   onUpgrade: (memberId: string) => void;
-  onSelectPriority: (priority: Priority) => void;
   onContinue: () => void;
 }
 
@@ -84,7 +98,6 @@ export default function PlanningOverlay({
   onHire,
   onFire,
   onUpgrade,
-  onSelectPriority,
   onContinue,
 }: PlanningOverlayProps) {
   const [countdown, setCountdown] = useState(PLANNING_DURATION);
@@ -93,23 +106,19 @@ export default function PlanningOverlay({
     const interval = setInterval(() => {
       setCountdown((c) => {
         if (c <= 1) {
-          // Auto-start only if priority is selected — otherwise keep waiting.
-          if (state.selectedPriority !== null) {
-            onContinue();
-            return 0;
-          }
-          return 5;
+          onContinue();
+          return 0;
         }
         return c - 1;
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [state.selectedPriority, onContinue]);
+  }, [onContinue]);
 
   const lastPnl = state.pnlHistory[state.pnlHistory.length - 1];
   const bizCfg = BUSINESS_TYPE_CONFIGS[state.businessType];
+  const lockSeniors = seniorsLocked(state);
 
-  // "Čo ťa zabilo" — percentage of misses per category (last wave)
   const missedPct = useMemo(() => {
     const total =
       state.missedByCategory.marketing +
@@ -126,15 +135,13 @@ export default function PlanningOverlay({
     };
   }, [state.missedByCategory]);
 
-  const priorityReady = state.selectedPriority !== null;
-
   return (
     <div className="absolute inset-0 z-20 overflow-y-auto bg-me-cream">
       <div className="mx-auto w-full max-w-[500px] px-5 py-7 sm:px-6 sm:py-9">
         {/* Header */}
         <div className="mb-5 text-center">
           <div className="me-eyebrow mb-2 text-me-magenta">
-            Vlna {state.wave} · prežil si
+            Mesiac {state.wave - 1} · prežil si
           </div>
           <h1
             className="me-display text-me-ink"
@@ -144,15 +151,51 @@ export default function PlanningOverlay({
           </h1>
         </div>
 
-        {/* P&L summary card — plum */}
-        <PnlSummary
-          revenue={state.monthlyRevenue}
-          profit={state.monthlyProfit}
-          teamCount={state.team.length}
-          monthlyCosts={state.monthlyCosts}
+        {/* Currencies — Cash / Energy / Reputation */}
+        <CurrencyBar
+          cash={state.cash}
+          energy={state.energy}
+          reputation={state.reputation}
         />
 
-        {/* Detailed P&L breakdown (last month) */}
+        {/* Active policies */}
+        {state.activePolicies.length > 0 && (
+          <div className="mt-4 rounded-2xl border border-me-mist bg-white p-4">
+            <div className="me-label mb-2 text-me-stone">Tvoje policies</div>
+            <div className="flex flex-wrap gap-2">
+              {state.activePolicies.map((pid) => {
+                const p = POLICY_BY_ID[pid];
+                if (!p) return null;
+                return (
+                  <div
+                    key={pid}
+                    className="me-display flex items-center gap-1 rounded-full px-3 py-1"
+                    style={{
+                      background: "rgba(83,30,56,0.08)",
+                      color: "#531E38",
+                      fontSize: 12,
+                      fontWeight: 600,
+                    }}
+                  >
+                    <span>{p.icon}</span>
+                    <span>{p.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* P&L summary card */}
+        <div className="mt-4">
+          <PnlSummary
+            revenue={state.monthlyRevenue}
+            profit={state.monthlyProfit}
+            teamCount={state.team.length}
+            monthlyCosts={state.monthlyCosts}
+          />
+        </div>
+
         {lastPnl && (
           <div className="mt-4 rounded-2xl border border-me-mist bg-white p-5">
             <div className="me-label mb-3 text-me-stone">
@@ -220,17 +263,8 @@ export default function PlanningOverlay({
           </div>
         )}
 
-        {/* Budget + Countdown */}
-        <div className="my-7 flex items-center justify-between px-1">
-          <div>
-            <div className="me-label text-me-stone">K dispozícii</div>
-            <div
-              className="me-display"
-              style={{ fontSize: 28, color: "#FF7404" }}
-            >
-              {formatMoney(state.budget)}
-            </div>
-          </div>
+        {/* Countdown */}
+        <div className="my-7 flex items-center justify-end px-1">
           <div className="text-right">
             <div className="me-label text-me-stone">Auto-start</div>
             <div
@@ -251,23 +285,6 @@ export default function PlanningOverlay({
           <CategoryBar label="Ostatné" pct={missedPct.general} cat="general" last />
         </div>
 
-        {/* Čo budeš riešiť — priorities */}
-        <div className="me-eyebrow mb-2">Čo budeš riešiť</div>
-        <div className="mb-7 flex flex-col gap-2">
-          {PRIORITY_CONFIGS.map((p) => (
-            <PriorityOption
-              key={p.id}
-              id={p.id}
-              label={p.label}
-              description={p.description}
-              tag={priorityTag(p.id)}
-              categoryColor={p.color}
-              selected={state.selectedPriority === p.id}
-              onSelect={onSelectPriority}
-            />
-          ))}
-        </div>
-
         {/* Najmi do tímu */}
         <div className="me-eyebrow mb-2">Najmi do tímu</div>
         <div className="mb-7 flex flex-col gap-2">
@@ -275,7 +292,6 @@ export default function PlanningOverlay({
             <HireRow
               key={role}
               role={role}
-              canAfford={state.budget >= ROLE_CONFIGS[role].cost}
               state={state}
               onHire={onHire}
             />
@@ -287,18 +303,23 @@ export default function PlanningOverlay({
           <>
             <div className="me-eyebrow mb-2">Tvoj tím</div>
             <div className="mb-7 flex flex-col gap-2">
-              {state.team.map((m) => (
-                <TeamMemberRow
-                  key={m.id}
-                  member={m}
-                  canUpgrade={
-                    m.level === "junior" &&
-                    state.budget >= ROLE_CONFIGS[m.role].upgradeCost
-                  }
-                  onFire={onFire}
-                  onUpgrade={onUpgrade}
-                />
-              ))}
+              {state.team.map((m) => {
+                const upgradeCost = ROLE_CONFIGS[m.role].upgradeCost;
+                const canUpgrade =
+                  !lockSeniors &&
+                  m.level === "junior" &&
+                  state.cash >= upgradeCost;
+                return (
+                  <TeamMemberRow
+                    key={m.id}
+                    member={m}
+                    canUpgrade={canUpgrade}
+                    lockedBySeniors={lockSeniors}
+                    onFire={onFire}
+                    onUpgrade={onUpgrade}
+                  />
+                );
+              })}
             </div>
           </>
         )}
@@ -306,15 +327,11 @@ export default function PlanningOverlay({
         {/* Continue button */}
         <button
           type="button"
-          disabled={!priorityReady}
           onClick={onContinue}
           className="me-btn me-btn--primary"
-          style={{
-            background: priorityReady ? "#FF7404" : "#D4D4D1",
-            color: priorityReady ? "#EFEDEB" : "#7A736A",
-          }}
+          style={{ background: "#FF7404", color: "#EFEDEB" }}
         >
-          {priorityReady ? "POKRAČOVAŤ →" : "VYBER PRIORITU"}
+          POKRAČOVAŤ →
         </button>
 
         <div className="h-10" />
@@ -327,31 +344,35 @@ export default function PlanningOverlay({
 // Sub-components
 // ────────────────────────────────────────────────────────────────
 
-function PnlSummary({
-  revenue,
-  profit,
-  teamCount,
-  monthlyCosts,
+function CurrencyBar({
+  cash,
+  energy,
+  reputation,
 }: {
-  revenue: number;
-  profit: number;
-  teamCount: number;
-  monthlyCosts: number;
+  cash: number;
+  energy: number;
+  reputation: number;
 }) {
-  const sign = profit >= 0 ? "+" : "-";
-  const cells: Array<{ k: string; v: string; c: string }> = [
-    { k: "Obrat", v: formatMoney(revenue), c: "#FF7404" },
+  const cells = [
     {
-      k: "Zisk",
-      v: `${sign}${formatMoney(Math.abs(profit))}`,
-      c: profit >= 0 ? "#FF9DC8" : "#E81A1E",
+      k: "Cash",
+      v: formatMoney(cash),
+      c: cash < 0 ? "#E81A1E" : "#FF7404",
     },
-    { k: "Tím", v: String(teamCount), c: "#EFEDEB" },
-    { k: "Náklady", v: formatMoney(monthlyCosts), c: "rgba(239,237,235,0.85)" },
+    {
+      k: "Energia",
+      v: `${energy}/10`,
+      c: energy <= 2 ? "#E81A1E" : "#FF9DC8",
+    },
+    {
+      k: "Reputácia",
+      v: `${Math.round(reputation)}`,
+      c: reputation < 30 ? "#E81A1E" : "#EFEDEB",
+    },
   ];
   return (
     <div
-      className="grid grid-cols-4 rounded-[18px] px-5 py-5 text-me-cream"
+      className="grid grid-cols-3 rounded-[18px] px-5 py-5 text-me-cream"
       style={{ background: "#531E38", gap: 2 }}
     >
       {cells.map((c, i) => (
@@ -380,7 +401,74 @@ function PnlSummary({
           <div
             className="me-display"
             style={{
-              fontSize: 20,
+              fontSize: 22,
+              fontWeight: 600,
+              color: c.c,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {c.v}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PnlSummary({
+  revenue,
+  profit,
+  teamCount,
+  monthlyCosts,
+}: {
+  revenue: number;
+  profit: number;
+  teamCount: number;
+  monthlyCosts: number;
+}) {
+  const sign = profit >= 0 ? "+" : "-";
+  const cells: Array<{ k: string; v: string; c: string }> = [
+    { k: "Obrat", v: formatMoney(revenue), c: "#FF7404" },
+    {
+      k: "Zisk",
+      v: `${sign}${formatMoney(Math.abs(profit))}`,
+      c: profit >= 0 ? "#FF9DC8" : "#E81A1E",
+    },
+    { k: "Tím", v: String(teamCount), c: "#EFEDEB" },
+    { k: "Náklady", v: formatMoney(monthlyCosts), c: "rgba(239,237,235,0.85)" },
+  ];
+  return (
+    <div
+      className="grid grid-cols-4 rounded-[18px] px-5 py-5 text-me-cream"
+      style={{ background: "#9F2D6D", gap: 2 }}
+    >
+      {cells.map((c, i) => (
+        <div
+          key={c.k}
+          className="px-3 py-1"
+          style={{
+            borderRight:
+              i < cells.length - 1
+                ? "1px solid rgba(239,237,235,0.12)"
+                : undefined,
+          }}
+        >
+          <div
+            className="me-display mb-1"
+            style={{
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              opacity: 0.7,
+            }}
+          >
+            {c.k}
+          </div>
+          <div
+            className="me-display"
+            style={{
+              fontSize: 18,
               fontWeight: 600,
               color: c.c,
               letterSpacing: "-0.02em",
@@ -458,11 +546,7 @@ function CategoryBar({
       >
         <span
           className="inline-block rounded-sm"
-          style={{
-            width: 8,
-            height: 8,
-            background: color,
-          }}
+          style={{ width: 8, height: 8, background: color }}
         />
         {label}
       </div>
@@ -485,160 +569,28 @@ function CategoryBar({
   );
 }
 
-function PriorityOption({
-  id,
-  label,
-  description,
-  tag,
-  categoryColor,
-  selected,
-  onSelect,
-}: {
-  id: Priority;
-  label: string;
-  description: string;
-  tag: string;
-  categoryColor: string;
-  selected: boolean;
-  onSelect: (p: Priority) => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onSelect(id)}
-      className="relative grid w-full cursor-pointer items-center gap-4 overflow-hidden rounded-2xl p-4 pl-5 text-left transition-all duration-200"
-      style={{
-        gridTemplateColumns: "1fr auto",
-        background: selected ? "#531E38" : "#ffffff",
-        border: `1px solid ${selected ? "#531E38" : "#D4D4D1"}`,
-        boxShadow: selected
-          ? "0 10px 34px -14px rgba(83,30,56,0.55)"
-          : undefined,
-      }}
-    >
-      <div
-        aria-hidden
-        className="absolute bottom-0 left-0 top-0"
-        style={{
-          width: 4,
-          background: selected ? "#FF7404" : categoryColor,
-          opacity: selected ? 1 : 0.35,
-          borderRadius: "16px 0 0 16px",
-        }}
-      />
-      <div>
-        <div
-          className="flex items-center gap-2"
-          style={{
-            fontWeight: 600,
-            fontSize: 14,
-            color: selected ? "#EFEDEB" : "#1B1C1E",
-          }}
-        >
-          {label}
-          <span
-            className="me-display"
-            style={{
-              fontSize: 10,
-              fontWeight: 500,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              padding: "3px 8px",
-              borderRadius: 999,
-              background: selected
-                ? "rgba(255,116,4,0.18)"
-                : `${categoryColor}20`,
-              color: selected ? "#FF7404" : categoryColor,
-            }}
-          >
-            {tag}
-          </span>
-        </div>
-        <div
-          style={{
-            fontSize: 12,
-            marginTop: 3,
-            lineHeight: 1.4,
-            color: selected ? "rgba(239,237,235,0.72)" : "#6b635a",
-          }}
-        >
-          {description}
-        </div>
-      </div>
-      <div
-        className="flex items-center justify-center rounded-full"
-        style={{
-          width: 24,
-          height: 24,
-          background: selected ? "#FF7404" : "#F6F3F0",
-          border: `1.5px solid ${selected ? "#FF7404" : "#D4D4D1"}`,
-        }}
-      >
-        {selected && (
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#EFEDEB"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M5 12l5 5L20 7" />
-          </svg>
-        )}
-      </div>
-    </button>
-  );
-}
-
-function priorityTag(id: Priority): string {
-  // Short human-friendly signal, kept in sync with PRIORITY_CONFIGS boosts.
-  switch (id) {
-    case "product":
-      return "+5% obrat";
-    case "marketing":
-      return "+8% obrat";
-    case "sales":
-      return "+25% obrat";
-    case "processes":
-      return "+3% efektivita";
-    case "finance":
-      return "+1pp marža";
-    case "team":
-      return "+5% tím";
-    case "unit-economics":
-      return "+1.5pp marža";
-    case "retention":
-      return "+8% obrat";
-    case "self-dev":
-      return "+2% obrat";
-  }
-}
-
 function HireRow({
   role,
-  canAfford,
   state,
   onHire,
 }: {
   role: Role;
-  canAfford: boolean;
   state: GameState;
   onHire: (role: Role) => void;
 }) {
   const cfg = ROLE_CONFIGS[role];
   const cat = roleCategory(role);
   const { color } = CAT_COLORS[cat];
+  const cost = effectiveHireCost(cfg.cost, state);
+  const canAfford = state.cash >= cost;
 
   const sim = useMemo(() => {
-    const nextWave = WAVES[state.wave]; // wave is 1-indexed; next-wave is at index wave
+    const nextWave = WAVES[state.wave - 1];
     if (!nextWave) return null;
     const baseline = simulatePnl(
       state,
       nextWave,
-      state.selectedPriority,
+      null,
       state.team,
       state.baselineRatios,
     );
@@ -651,7 +603,7 @@ function HireRow({
     const withHire = simulatePnl(
       state,
       nextWave,
-      state.selectedPriority,
+      null,
       hypoTeam,
       hypoRatios,
     );
@@ -676,13 +628,7 @@ function HireRow({
       />
       <RoleToken role={role} size={38} />
       <div className="min-w-0 flex-1">
-        <div
-          style={{
-            fontWeight: 600,
-            fontSize: 14,
-            color: "#1B1C1E",
-          }}
-        >
+        <div style={{ fontWeight: 600, fontSize: 14, color: "#1B1C1E" }}>
           {cfg.label}
         </div>
         <div
@@ -705,11 +651,9 @@ function HireRow({
       </div>
       <div className="text-right">
         <div className="me-display" style={{ fontSize: 15, color: "#1B1C1E" }}>
-          {formatMoney(cfg.cost)}
+          {formatMoney(cost)}
         </div>
-        <div
-          style={{ fontSize: 10, color: "#A69E92", marginTop: 2 }}
-        >
+        <div style={{ fontSize: 10, color: "#A69E92", marginTop: 2 }}>
           +{formatMoney(cfg.monthlyCost)}/mes
         </div>
       </div>
@@ -736,11 +680,13 @@ function HireRow({
 function TeamMemberRow({
   member,
   canUpgrade,
+  lockedBySeniors,
   onFire,
   onUpgrade,
 }: {
   member: TeamMember;
   canUpgrade: boolean;
+  lockedBySeniors: boolean;
   onFire: (id: string) => void;
   onUpgrade: (id: string) => void;
 }) {
@@ -752,21 +698,9 @@ function TeamMemberRow({
     >
       <RoleToken role={member.role} size={36} />
       <div className="flex-1">
-        <div
-          style={{
-            fontWeight: 600,
-            fontSize: 14,
-            color: "#1B1C1E",
-          }}
-        >
+        <div style={{ fontWeight: 600, fontSize: 14, color: "#1B1C1E" }}>
           {cfg.label}{" "}
-          <span
-            style={{
-              color: "#A69E92",
-              fontWeight: 400,
-              fontSize: 12,
-            }}
-          >
+          <span style={{ color: "#A69E92", fontWeight: 400, fontSize: 12 }}>
             · {member.level === "senior" ? "Senior" : "Junior"}
           </span>
         </div>
@@ -774,7 +708,7 @@ function TeamMemberRow({
           {formatMoney(memberMonthly(member))}/mes
         </div>
       </div>
-      {member.level === "junior" && (
+      {member.level === "junior" && !lockedBySeniors && (
         <button
           type="button"
           disabled={!canUpgrade}
@@ -790,6 +724,18 @@ function TeamMemberRow({
         >
           Upgrade {formatMoney(cfg.upgradeCost)}
         </button>
+      )}
+      {member.level === "junior" && lockedBySeniors && (
+        <div
+          style={{
+            fontSize: 10,
+            color: "#A69E92",
+            fontStyle: "italic",
+            padding: "4px 8px",
+          }}
+        >
+          Cash-preserve: seniors locked
+        </div>
       )}
       <button
         type="button"

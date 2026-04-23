@@ -7,6 +7,9 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
     wave: 5,
     score: 1000,
     budget: 0,
+    cash: 0,
+    energy: 10,
+    reputation: 50,
     damage: 50,
     businessType: "services",
     baselineRatios: {
@@ -30,6 +33,11 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
     phase: "results",
     priorityHistory: [],
     selectedPriority: null,
+    activePolicies: [],
+    runStory: [],
+    pendingEvent: null,
+    pendingWaveModifiers: {},
+    consecutiveLossMonths: 0,
     ...overrides,
   };
 }

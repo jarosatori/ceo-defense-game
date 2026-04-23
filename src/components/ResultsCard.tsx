@@ -1,5 +1,11 @@
-import type { BusinessType, CEOProfile } from "@/game/types";
+import type {
+  BusinessType,
+  CEOProfile,
+  PolicyId,
+  RunStoryEntry,
+} from "@/game/types";
 import { BUSINESS_TYPE_CONFIGS, CSS_COLORS } from "@/game/constants";
+import { POLICY_BY_ID } from "@/game/data/policies";
 import { formatMoney, formatPercent } from "@/game/utils/pnlCalculator";
 
 const PROFILE_DATA: Record<
@@ -68,6 +74,9 @@ interface ResultsCardProps {
   milestone?: string;
   grossMargin?: number;
   ebitdaRatio?: number;
+  policies?: PolicyId[];
+  storyEntries?: RunStoryEntry[];
+  earlyExit?: boolean;
 }
 
 export default function ResultsCard({
@@ -81,16 +90,20 @@ export default function ResultsCard({
   milestone,
   grossMargin,
   ebitdaRatio,
+  policies = [],
+  storyEntries = [],
+  earlyExit = false,
 }: ResultsCardProps) {
   const data = PROFILE_DATA[profile] || PROFILE_DATA["lone-wolf"];
   const teamMembers = team ? team.split(",") : [];
   const bizCfg = businessType ? BUSINESS_TYPE_CONFIGS[businessType] : null;
   const positive = profit >= 0;
   const sign = positive ? "+" : "-";
-
   const profitCommentary = positive
     ? `EBITDA ${formatPercent(ebitdaRatio ?? 0)} · v pluse`
     : "v strate";
+
+  const sortedStory = [...storyEntries].sort((a, b) => a.month - b.month);
 
   return (
     <div
@@ -98,7 +111,7 @@ export default function ResultsCard({
         background: "#531E38",
         borderRadius: 22,
         padding: "32px 30px",
-        maxWidth: 460,
+        maxWidth: 480,
         width: "100%",
         color: "#EFEDEB",
         boxShadow: "0 20px 60px -24px rgba(83,30,56,.5)",
@@ -108,12 +121,12 @@ export default function ResultsCard({
         className="me-eyebrow"
         style={{ color: "#FF9DC8", marginBottom: 10 }}
       >
-        CEO Defense · výsledok
+        CEO Defense · môj run
       </div>
 
       <div
         className="me-display"
-        style={{ fontSize: 44, lineHeight: 0.95, marginBottom: 8 }}
+        style={{ fontSize: 40, lineHeight: 0.95, marginBottom: 8 }}
       >
         {data.label}
       </div>
@@ -122,24 +135,147 @@ export default function ResultsCard({
           fontSize: 14,
           color: "rgba(239,237,235,.8)",
           lineHeight: 1.55,
-          marginBottom: 26,
+          marginBottom: 22,
         }}
       >
         {data.description}
       </p>
 
+      {/* Business type + milestone banner */}
       {bizCfg && (
-        <p
+        <div
           style={{
-            fontSize: 13,
-            color: "rgba(239,237,235,.7)",
+            fontSize: 14,
+            color: "rgba(239,237,235,.9)",
             marginBottom: 18,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
           }}
         >
-          <span style={{ fontSize: 16 }}>{bizCfg.emoji}</span> {bizCfg.label}
-        </p>
+          <span style={{ fontSize: 18 }}>{bizCfg.emoji}</span>
+          <span style={{ fontWeight: 600 }}>{bizCfg.label}</span>
+          {milestone && (
+            <span
+              style={{
+                marginLeft: "auto",
+                fontSize: 11,
+                padding: "4px 10px",
+                borderRadius: 999,
+                background: earlyExit ? "#FF7404" : "rgba(255,255,255,0.12)",
+                color: earlyExit ? "#531E38" : "#EFEDEB",
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+              }}
+            >
+              {milestone}
+            </span>
+          )}
+        </div>
       )}
 
+      {/* Policies */}
+      {policies.length > 0 && (
+        <div
+          style={{
+            marginBottom: 22,
+            paddingTop: 16,
+            borderTop: "1px solid rgba(239,237,235,.12)",
+          }}
+        >
+          <div
+            className="me-label"
+            style={{ color: "rgba(239,237,235,.55)", marginBottom: 8 }}
+          >
+            Policies
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {policies.map((pid) => {
+              const p = POLICY_BY_ID[pid];
+              return (
+                <span
+                  key={pid}
+                  style={{
+                    fontSize: 11,
+                    padding: "4px 10px",
+                    borderRadius: 999,
+                    background: "rgba(239,237,235,.12)",
+                    color: "#EFEDEB",
+                    fontWeight: 500,
+                  }}
+                >
+                  {p?.icon} {p?.label ?? pid}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Run story narrative */}
+      {sortedStory.length > 0 && (
+        <div
+          style={{
+            marginBottom: 22,
+            paddingTop: 16,
+            borderTop: "1px solid rgba(239,237,235,.12)",
+          }}
+        >
+          <div
+            className="me-label"
+            style={{ color: "rgba(239,237,235,.55)", marginBottom: 10 }}
+          >
+            Môj príbeh
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {sortedStory.map((entry, idx) => {
+              if (entry.kind === "policy-picked") return null;
+              const isBoss = entry.kind === "boss";
+              const text =
+                entry.kind === "event" && entry.text.includes("|")
+                  ? entry.text.split("|").slice(1).join("|")
+                  : entry.text;
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    alignItems: "baseline",
+                    fontSize: 13,
+                    lineHeight: 1.45,
+                    color: "rgba(239,237,235,.88)",
+                  }}
+                >
+                  <span
+                    className="me-display"
+                    style={{
+                      fontSize: 10,
+                      color: isBoss ? "#FF7404" : "rgba(239,237,235,.55)",
+                      minWidth: 52,
+                      fontWeight: 600,
+                    }}
+                  >
+                    M{entry.month}
+                  </span>
+                  <span
+                    style={{
+                      color: isBoss ? "#FF7404" : "rgba(239,237,235,.88)",
+                      fontWeight: isBoss ? 600 : 400,
+                    }}
+                  >
+                    {isBoss ? "⚡ " : "› "}
+                    {text}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Waves bar */}
       <div
         className="me-label"
         style={{ color: "rgba(239,237,235,.55)", marginBottom: 10 }}
@@ -155,8 +291,8 @@ export default function ResultsCard({
               key={w}
               className="me-display"
               style={{
-                width: 32,
-                height: 32,
+                width: 30,
+                height: 30,
                 borderRadius: 8,
                 display: "flex",
                 alignItems: "center",
@@ -175,22 +311,19 @@ export default function ResultsCard({
       </div>
       <div
         className="me-display"
-        style={{
-          fontSize: 13,
-          color: "rgba(239,237,235,.7)",
-          marginTop: 10,
-        }}
+        style={{ fontSize: 13, color: "rgba(239,237,235,.7)", marginTop: 10 }}
       >
-        {waves} / 10 vĺn
+        {waves} / 10 mesiacov
       </div>
 
+      {/* Revenue + Profit */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
           gap: 18,
-          marginTop: 28,
-          paddingTop: 22,
+          marginTop: 24,
+          paddingTop: 20,
           borderTop: "1px solid rgba(239,237,235,.12)",
         }}
       >
@@ -203,21 +336,10 @@ export default function ResultsCard({
           </div>
           <div
             className="me-display"
-            style={{ fontSize: 28, color: "#FF7404" }}
+            style={{ fontSize: 26, color: "#FF7404" }}
           >
             {formatMoney(revenue)}
           </div>
-          {milestone && (
-            <div
-              style={{
-                fontSize: 12,
-                color: "rgba(239,237,235,.7)",
-                marginTop: 2,
-              }}
-            >
-              {milestone}
-            </div>
-          )}
         </div>
         <div>
           <div
@@ -229,7 +351,7 @@ export default function ResultsCard({
           <div
             className="me-display"
             style={{
-              fontSize: 28,
+              fontSize: 26,
               color: positive ? "#FF9DC8" : "#E81A1E",
             }}
           >
@@ -248,77 +370,16 @@ export default function ResultsCard({
         </div>
       </div>
 
-      {grossMargin !== undefined && (
-        <div
-          style={{
-            marginTop: 22,
-            paddingTop: 18,
-            borderTop: "1px solid rgba(239,237,235,.12)",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 18,
-          }}
-        >
-          <div>
-            <div
-              className="me-label"
-              style={{ color: "rgba(239,237,235,.55)" }}
-            >
-              Hrubá marža
-            </div>
-            <div
-              className="me-display"
-              style={{ fontSize: 20, color: "#EFEDEB" }}
-            >
-              {formatPercent(grossMargin)}
-            </div>
-          </div>
-          {ebitdaRatio !== undefined && (
-            <div>
-              <div
-                className="me-label"
-                style={{ color: "rgba(239,237,235,.55)" }}
-              >
-                EBITDA %
-              </div>
-              <div
-                className="me-display"
-                style={{
-                  fontSize: 20,
-                  color: ebitdaRatio >= 0 ? "#FF9DC8" : "#E81A1E",
-                }}
-              >
-                {formatPercent(ebitdaRatio)}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
+      {/* Team */}
       <div
         style={{
-          marginTop: 22,
+          marginTop: 20,
           paddingTop: 18,
           borderTop: "1px solid rgba(239,237,235,.12)",
         }}
       >
         <div className="me-label" style={{ color: "rgba(239,237,235,.55)" }}>
-          Score
-        </div>
-        <div className="me-display" style={{ fontSize: 22 }}>
-          {score.toLocaleString()}
-        </div>
-      </div>
-
-      <div
-        style={{
-          marginTop: 22,
-          paddingTop: 18,
-          borderTop: "1px solid rgba(239,237,235,.12)",
-        }}
-      >
-        <div className="me-label" style={{ color: "rgba(239,237,235,.55)" }}>
-          Tvoj tím
+          Tvoj tím ({teamMembers.length} ľudí)
         </div>
         <div
           style={{
@@ -377,6 +438,67 @@ export default function ResultsCard({
           })}
         </div>
       </div>
+
+      {/* Ratios */}
+      {(grossMargin !== undefined || ebitdaRatio !== undefined) && (
+        <div
+          style={{
+            marginTop: 20,
+            paddingTop: 18,
+            borderTop: "1px solid rgba(239,237,235,.12)",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 14,
+          }}
+        >
+          {grossMargin !== undefined && (
+            <div>
+              <div
+                className="me-label"
+                style={{ color: "rgba(239,237,235,.55)" }}
+              >
+                Marža
+              </div>
+              <div
+                className="me-display"
+                style={{ fontSize: 18, color: "#EFEDEB" }}
+              >
+                {formatPercent(grossMargin)}
+              </div>
+            </div>
+          )}
+          {ebitdaRatio !== undefined && (
+            <div>
+              <div
+                className="me-label"
+                style={{ color: "rgba(239,237,235,.55)" }}
+              >
+                EBITDA %
+              </div>
+              <div
+                className="me-display"
+                style={{
+                  fontSize: 18,
+                  color: ebitdaRatio >= 0 ? "#FF9DC8" : "#E81A1E",
+                }}
+              >
+                {formatPercent(ebitdaRatio)}
+              </div>
+            </div>
+          )}
+          <div>
+            <div
+              className="me-label"
+              style={{ color: "rgba(239,237,235,.55)" }}
+            >
+              Score
+            </div>
+            <div className="me-display" style={{ fontSize: 18 }}>
+              {score.toLocaleString()}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

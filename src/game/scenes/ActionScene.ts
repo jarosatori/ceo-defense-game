@@ -11,6 +11,7 @@ import {
 import {
   calculateMonthlyPnl,
   applyPriorityToBaseline,
+  applyEventToWave,
   formatMoney,
 } from "../utils/pnlCalculator";
 import { WAVES } from "../data/waves";
@@ -284,8 +285,10 @@ export class ActionScene extends Phaser.Scene {
   }
 
   private startWave(): void {
-    const waveConfig = WAVES[this.gameState.wave - 1];
-    if (!waveConfig) return;
+    const rawWave = WAVES[this.gameState.wave - 1];
+    if (!rawWave) return;
+    // Apply V9 event/policy modifiers (density + category skew)
+    const waveConfig = applyEventToWave(rawWave, this.gameState);
 
     this.waveLabel.setText(`VLNA ${waveConfig.wave}/10`);
     this.scoreLabel.setText(`Skóre: ${this.gameState.score}`);
@@ -376,11 +379,13 @@ export class ActionScene extends Phaser.Scene {
     if (this.spawner.isWaveComplete()) {
       this.waveStarted = false;
 
-      const waveConfig = WAVES[this.gameState.wave - 1];
-      if (waveConfig) {
-        // Use the priority chosen during the preceding planning phase
-        // (null on wave 1 — no planning has happened yet)
+      const rawWaveCfg = WAVES[this.gameState.wave - 1];
+      if (rawWaveCfg) {
+        // V9: priorities removed. selectedPriority is always null now.
+        // Events apply their own revenue multipliers via pendingWaveModifiers
+        // (read in calculateMonthlyRevenue).
         const priority = this.gameState.selectedPriority;
+        const waveConfig = applyEventToWave(rawWaveCfg, this.gameState);
 
         const pnl = calculateMonthlyPnl(this.gameState, waveConfig, priority);
 
